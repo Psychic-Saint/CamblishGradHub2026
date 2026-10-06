@@ -412,6 +412,12 @@ nav.tabs .badge.green{background:var(--ok);color:#fff}
 .feed-item.mine{background:linear-gradient(90deg,#fffaf0,#fff)}
 #capSpin{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:radial-gradient(circle at 50% 40%,rgba(29,63,174,.92),rgba(8,26,69,.97));perspective:900px;transition:opacity .35s}
 #capSpin.out{opacity:0}
+.stsel{font-weight:700;border:2px solid var(--royal);border-radius:10px}
+.stpill{display:inline-block;background:#eef2fb;color:#1d3fae;border-radius:99px;padding:1px 8px;font-size:11px;font-weight:800;vertical-align:1px}
+.staff{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:6px;margin:0 0 10px}
+.stf{background:#f6f8fd;border-radius:10px;padding:6px 8px;border-left:4px solid #c9d3f2}.stf b{display:block;font-size:18px;color:var(--navy)}.stf b small{font-size:11px;color:var(--muted);font-weight:600}.stf span{display:block;font-size:10.5px;font-weight:700;line-height:1.2}
+.stf.part{border-left-color:var(--gold)}.stf.ok{border-left-color:#1e7b3a;background:#eef8f1}
+
 .annscreen input,.annscreen textarea,.annscreen .rform input{color:#0d1b3e!important;background:#fff!important;caret-color:#1d3fae}.annscreen input::placeholder{color:#7a849c}
 .catsel{width:auto;max-width:165px;flex:0 0 auto;border:2px solid var(--cc,#1d3fae);background:var(--cb,#fff);color:var(--cc,#1d3fae);font-weight:800;border-radius:10px;padding:0 10px;cursor:pointer}
 @media (max-width:600px){.anncompose .row{flex-wrap:wrap!important}.anncompose .catsel{flex:1;max-width:none}}
@@ -519,7 +525,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202610062246";
+const BUILD = "202610062308";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -568,6 +574,22 @@ ROLE_DEFAULT.manager = PERMS.map(p=>p[0]); ROLE_DEFAULT.admin = ROLE_DEFAULT.man
 function can(p){ if (S.user) return S.user.role === "admin" || (S.user.perms || ROLE_DEFAULT[S.user.role] || []).includes(p); return (ROLE_DEFAULT[S.role] || ROLE_DEFAULT.team).includes(p); }
 function permBoxes(id, selected, allowed){
   return `<div class="permgrid" id="${id}">${PERMS.map(([k,l,d]) => `<label><input type="checkbox" value="${k}" ${selected.includes(k)?"checked":""} ${allowed.includes(k)?"":"disabled"}><span>${l}${d?`<small>${d}</small>`:""}</span></label>`).join("")}</div>`;
+}
+/* stations: tick the right access for the job someone does on the day */
+const STATIONS = [
+  ["checkin","📋 Check-in desk", ["checkin","print_tags","tasks_update","comment"], 5],
+  ["robes","🎓 Robes table", ["robes","print_tags","tasks_update","comment"], 5],
+  ["stage","🎤 Stage caller", ["stage","print_tags","tasks_update","comment"], 2],
+  ["certs","📜 Certificates table", ["certs","tasks_update","comment"], 5],
+  ["floor","⭐ Floor team (every station)", ROLE_DEFAULT.team, 0]];
+const sameSet = (a, b) => a.length === b.length && a.every(x => b.includes(x));
+const stationOf = perms => (STATIONS.find(st => sameSet(st[2], perms || [])) || [])[0] || "";
+function stationSelect(id, cur){ return `<select id="${id}" class="stsel">${STATIONS.map(([k,l]) => `<option value="${k}" ${k === cur ? "selected" : ""}>${l}</option>`).join("")}<option value="" ${!cur ? "selected" : ""}>✏ Custom (tick below)</option></select>`; }
+function wireStation(sel, boxes){
+  const apply = () => { const st = STATIONS.find(x => x[0] === sel.value); if (!st) return; $$("input", boxes).forEach(i => { if (!i.disabled) i.checked = st[2].includes(i.value); }); };
+  sel.onchange = apply;
+  boxes.addEventListener("change", () => { sel.value = stationOf(pickedPerms(boxes)); });
+  return apply;
 }
 const pickedPerms = el => [...el.querySelectorAll("input:checked")].map(i => i.value);
 
@@ -2324,18 +2346,21 @@ async function viewUsers(){
         <label class="lbl">Full name</label><input type="text" id="un">
         <label class="lbl">Camblish email</label><input type="text" id="ue" placeholder="name@camblish.co.za">
         <label class="lbl">Role</label><select id="ur"><option value="team">Team member</option><option value="spectator">Spectator (view only)</option><option value="manager">Manager</option>${S.user.role==="admin"?`<option value="admin">Administrator (full access)</option>`:""}</select>
+        <div id="ustwrap"><label class="lbl">Station on the day</label>${stationSelect("ust", "checkin")}<p class="small muted" style="margin:4px 0 0">Picks the right access for the job. You can still tick or untick below.</p></div>
         <label class="lbl">What this person can do</label><div id="upwrap"></div>
         <button class="btn gold" id="uadd" style="margin-top:12px">Create account</button><div id="uout"></div></div>
       <div class="card"><h2>People with access<span class="spacer"></span><span class="small muted" id="ucount"></span></h2><div id="ulist"><p class="muted">Loading…</p></div></div></div>
       <div class="card"><h2>What each role can do</h2><p class="small muted" style="margin-top:-4px">Ticked items are switched on by default for that role. You can switch any of them on or off per person when you add them, or later with Change access.</p>${accessMatrix()}</div>`;
-    const drawPw = () => { const r = $("#ur").value; $("#upwrap").innerHTML = r === "admin" ? `<p class="small muted">Administrators can do everything.</p>` : r === "spectator" ? `<div class="okm" style="margin:4px 0">👁 Spectators can see every tab, the live progress and all announcements, but get no buttons: they can't check anyone in, issue robes or certificates, run the stage, edit tasks or post. You can give them access later with Change access.</div>` : permBoxes("upg", ROLE_DEFAULT[r].filter(p => myGrantable().includes(p)), myGrantable()); };
+    const drawPw = () => { const r = $("#ur").value; $("#upwrap").innerHTML = r === "admin" ? `<p class="small muted">Administrators can do everything.</p>` : r === "spectator" ? `<div class="okm" style="margin:4px 0">👁 Spectators can see every tab, the live progress and all announcements, but get no buttons: they can't check anyone in, issue robes or certificates, run the stage, edit tasks or post. You can give them access later with Change access.</div>` : permBoxes("upg", ROLE_DEFAULT[r].filter(p => myGrantable().includes(p)), myGrantable());
+      $("#ustwrap").style.display = r === "team" ? "" : "none";
+      if (r === "team" && $("#upg")){ const apply = wireStation($("#ust"), $("#upg")); apply(); } };
     $("#ur").onchange = drawPw; drawPw();
     $("#uadd").onclick = async () => {
       const em = $("#ue").value.trim();
       if (!/@camblish\.co\.za$/i.test(em)) return $("#uout").innerHTML = `<div class="err">Only @camblish.co.za email addresses can be added.</div>`;
       $("#uadd").disabled = true;
       try { const r = await rpc("hub_user_create", {p_token:S.pin, p_email:em, p_name:$("#un").value.trim(), p_role:$("#ur").value, p_perms: $("#upg") ? pickedPerms($("#upg")) : []});
-        $("#un").value = ""; $("#ue").value = ""; credCard($("#uout"), r, true); drawUsers(); autoMail(r, true); }
+        $("#un").value = ""; $("#ue").value = ""; $("#un").focus(); credCard($("#uout"), r, true); drawUsers(); autoMail(r, true); }
       catch(e){ $("#uout").innerHTML = `<div class="err">${esc(e.message)}</div>`; }
       $("#uadd").disabled = false;
     };
@@ -2346,8 +2371,10 @@ async function viewUsers(){
 async function drawUsers(){
   let list; try { list = await rpc("hub_users_list", {p_token:S.pin}); } catch(e){ $("#ulist").innerHTML = `<div class="err">${esc(e.message)}</div>`; return; }
   $("#ucount").textContent = `${list.filter(u=>u.active).length} active`;
-  $("#ulist").innerHTML = `<div class="list">${list.map(u => `<div class="lrow ${u.active?"":"absent"}"><div class="info">
-      <div class="nm">${esc(u.name)} <span class="rolepill ${u.viewer ? "spectator" : u.role}">${u.viewer ? "spectator" : u.role}</span>${u.active?"":` <span class="tag red">Deactivated</span>`}${u.must_change && u.active?` <span class="tag gold">Awaiting first sign-in</span>`:""}</div>
+  const act = list.filter(u => u.active && u.role === "team" && !u.viewer), cnt = k => act.filter(u => stationOf(u.perms) === k).length;
+  const staffing = `<div class="staff">${STATIONS.map(([k,l,,want]) => { const n = cnt(k); return `<div class="stf ${want && n >= want ? "ok" : want && n ? "part" : ""}"><b>${n}${want ? `<small>/${want}</small>` : ""}</b><span>${l}</span></div>`; }).join("")}</div>`;
+  $("#ulist").innerHTML = staffing + `<div class="list">${list.map(u => `<div class="lrow ${u.active?"":"absent"}"><div class="info">
+      <div class="nm">${esc(u.name)} <span class="rolepill ${u.viewer ? "spectator" : u.role}">${u.viewer ? "spectator" : u.role}</span>${u.role === "team" && !u.viewer && stationOf(u.perms) ? ` <span class="stpill">${STATIONS.find(x => x[0] === stationOf(u.perms))[1]}</span>` : ""}${u.active?"":` <span class="tag red">Deactivated</span>`}${u.must_change && u.active?` <span class="tag gold">Awaiting first sign-in</span>`:""}</div>
       <div class="small muted">${esc(u.email)} · ${u.last_login ? "last sign-in " + ago(u.last_login) : "never signed in"}${u.created_by ? " · added by " + esc(u.created_by) : ""}</div>
       <div class="acc">${u.active ? PERMS.filter(([k]) => (u.perms||[]).includes(k)).map(([k,l]) => `<span>${l}</span>`).join("") || `<span class="no">View only</span>` : `<span class="no">No access (deactivated)</span>`}${u.custom && u.role !== "admin" ? `<span style="background:#fff6dd;color:#8a6200">Custom access</span>` : ""}</div>${u.active && u.role !== "admin" && PERMS.some(([k]) => !(u.perms||[]).includes(k)) ? `<div class="noacc">Can't: ${PERMS.filter(([k]) => !(u.perms||[]).includes(k)).map(([k,l]) => l.toLowerCase()).join(", ")}</div>` : ""}</div>
       ${u.id === S.user.id ? `<span class="tag">You</span>` : `
@@ -2359,9 +2386,10 @@ async function drawUsers(){
   $$("[data-ureset]").forEach(b => b.onclick = async () => { if (!confirm("Create a new temporary password for this person? Their current password stops working.")) return;
     try { const r = await rpc("hub_user_reset", {p_token:S.pin, p_user:b.dataset.ureset}); credCard($("#uout"), r, false); drawUsers(); autoMail(r, false); } catch(e){ toast(e.message, "red"); } });
   $$("[data-uperm]").forEach(b => b.onclick = () => { const u = list.find(x => x.id === b.dataset.uperm);
-    modal(`<h3>Access for ${esc(u.name)}</h3><p class="small muted">Tick what ${esc(u.name.split(" ")[0])} can do. Changes apply within a minute, no need to sign out.</p>${permBoxes("epg", u.perms||[], myGrantable())}
+    modal(`<h3>Access for ${esc(u.name)}</h3><p class="small muted">Pick a station or tick what ${esc(u.name.split(" ")[0])} can do. Changes apply within a minute, no need to sign out.</p><label class="lbl">Station on the day</label>${stationSelect("est", stationOf(u.perms))}${permBoxes("epg", u.perms||[], myGrantable())}
       <div class="row" style="margin-top:8px"><button class="btn ghost sm" id="edef" type="button">Reset to ${u.role} defaults</button><span class="spacer"></span><button class="btn ghost" id="mc">Cancel</button><button class="btn" id="mo">Save access</button></div><div id="me"></div>`,
       (m, close) => { $("#mc",m).onclick = close;
+        wireStation($("#est",m), $("#epg",m));
         $("#edef",m).onclick = () => $$("#epg input", m).forEach(i => { if (!i.disabled) i.checked = ROLE_DEFAULT[u.role].includes(i.value); });
         $("#mo",m).onclick = async () => { try { await rpc("hub_user_perms", {p_token:S.pin, p_user:u.id, p_perms:pickedPerms($("#epg",m))}); close(); toast("Access updated for " + u.name, "green"); drawUsers(); } catch(e){ $("#me",m).innerHTML = `<div class="err">${esc(e.message)}</div>`; } }; }); });
   $$("[data-urm]").forEach(b => b.onclick = async () => { const u = list.find(x => x.id === b.dataset.urm);
