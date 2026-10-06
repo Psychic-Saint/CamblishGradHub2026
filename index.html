@@ -1323,10 +1323,11 @@ function drawCerts(){
 function viewGrads(){
   if (!$("#grView")){
     main.innerHTML = `<div id="bn"></div><div class="card" id="grView"><div id="flow" class="flowwrap"></div>
-      <h2>Graduates 🎓<span class="spacer"></span><button class="btn ghost sm" id="grCsv">⬇ Graduates list</button><button class="btn gold sm" id="grRep">📄 Graduation report</button></h2>
+      <h2>Graduates 🎓<span class="spacer"></span><button class="btn ghost sm" id="grCsv">⬇ Excel (CSV)</button><button class="btn sm" id="grPdf">⬇ Graduate list (PDF)</button><button class="btn gold sm" id="grRep">📄 Graduation report</button></h2>
       <div id="grHero"></div>${filterBar()}<div id="grlist"></div></div>`;
     wireFilterBar(drawGrads);
     $("#grRep").onclick = reportDialog;
+    $("#grPdf").onclick = async () => { const b = $("#grPdf"); b.disabled = true; b.textContent = "Building…"; await reportPdf(`Graduate list ${S.data.event.name} ${new Date().toISOString().slice(0,10)}.pdf`.replace(/[\\/:*?"<>|]/g, ""), buildReport("list")); b.disabled = false; b.textContent = "⬇ Graduate list (PDF)"; };
     $("#grCsv").onclick = () => {
       const G = applyF(S.data.learners.filter(l => l.cert_issued)).sort((a,b) => progKey(a).localeCompare(progKey(b)) || new Date(a.cert_at) - new Date(b.cert_at));
       const head = ["Programme","NQF","Position","First name","Middle name","Surname","Client","Project manager","Seat","Arrived","Robe","Crossed the stage","Certificate issued","Certificate by"];
@@ -1542,8 +1543,8 @@ function reportDialog(){
         const w = window.open(URL.createObjectURL(new Blob([html], {type:"text/html"})), "_blank"); if (!w) saveFile(base + ".html", html); };
     });
 }
-async function reportPdf(name){
-  const html = buildReport();
+async function reportPdf(name, htmlIn){
+  const html = htmlIn || buildReport();
   try {
     if (DESKTOP() && DESKTOP().save_pdf){
       const r = await DESKTOP().save_pdf(name, html);
@@ -1561,7 +1562,7 @@ async function reportPdf(name){
       f.srcdoc = html.replace("</body>", `<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>
         <script>window.addEventListener("load", () => setTimeout(() => { try { html2pdf().set({ margin:[6,6,8,6], filename:${JSON.stringify(name)}, image:{type:"jpeg", quality:0.95},
           html2canvas:{scale:2, useCORS:true, windowWidth:1100, backgroundColor:"#ffffff"}, jsPDF:{unit:"mm", format:"a4", orientation:"landscape"},
-          pagebreak:{mode:["css","legacy"], avoid:[".pb",".fr","tr",".kp",".rings",".ann",".story",".cover"]} }).from(document.querySelector(".page")).save()
+          pagebreak:{mode:["css","legacy"], avoid:[".pb",".fr","tr",".kp",".rings",".ann",".story",".cover",".glr",".glh"]} }).from(document.querySelector(".page")).save()
           .then(() => parent.postMessage({pdf:"done"}, "*")).catch(() => parent.postMessage({pdf:"fail"}, "*")); } catch(e){ parent.postMessage({pdf:"fail"}, "*"); } }, 600));<\/script></body>`);
       document.body.appendChild(f);
     });
@@ -1572,7 +1573,27 @@ async function saveFile(name, content, open){
   const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([content], {type: name.endsWith(".csv") ? "text/csv" : "text/html"})); a.download = name; document.body.appendChild(a); a.click(); a.remove();
   toast("Downloaded: " + name, "green");
 }
-function buildReport(){
+function gradListHTML(L){
+  const G = L.filter(l => l.cert_issued), g = {};
+  G.forEach(l => (g[progKey(l)] = g[progKey(l)] || []).push(l));
+  const keys = Object.keys(g).sort();
+  if (!keys.length) return `<p class="muted" style="font-size:13px">No graduates yet. Names appear here once certificates are issued.</p>`;
+  return keys.map(k => { const [nq, prog] = k.split("|"); const items = g[k].sort((a,b) => new Date(a.cert_at||0) - new Date(b.cert_at||0));
+    const tot = L.filter(l => progKey(l) === k).length;
+    return `<section class="gl"><div class="glh"><span class="gln">${esc(prog)}</span><span class="glq">NQF ${nq === "099" ? "?" : +nq}</span><span class="sp"></span><span class="glc">${items.length} graduated<small> of ${tot}</small></span></div>
+      <div class="glg">${(() => { const cards = items.map((l, i) => `<div class="gli"><span class="gnum">${i+1}</span><div><b>${esc(fullName(l))}</b><small>${esc([l.client, l.seat ? "Seat " + l.seat : "", "🎓 " + fmtTime(l.cert_at)].filter(Boolean).join(" · "))}</small></div></div>`);
+        const rows = []; for (let r = 0; r < cards.length; r += 3) rows.push(`<div class="glr">${cards.slice(r, r + 3).join("")}${"<div></div>".repeat(Math.max(0, 3 - cards.slice(r, r + 3).length))}</div>`); return rows.join(""); })()}</div></section>`; }).join("");
+}
+const GL_CSS = `.gl{margin:14px 0 18px;break-inside:auto}.glh{display:flex;align-items:center;gap:10px;background:linear-gradient(90deg,#081a45,#1d3fae);color:#fff;border-radius:12px 12px 0 0;padding:10px 14px;break-after:avoid;page-break-after:avoid}
+    .glh .gln{font-weight:800;font-size:15px}.glh .glq{background:rgba(255,255,255,.16);border-radius:99px;padding:2px 9px;font-size:11px;font-weight:700}.glh .sp{flex:1}
+    .glh .glc{background:linear-gradient(180deg,#f3d27a,#d4af37);color:#081a45;border-radius:99px;padding:3px 11px;font-weight:800;font-size:12px}.glh .glc small{font-weight:600;opacity:.75}
+    .glr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:6px;break-inside:avoid;page-break-inside:avoid}.glr:last-child{margin-bottom:0}
+    .glg{border:1px solid #e3e8f3;border-top:0;border-radius:0 0 12px 12px;padding:10px;background:#fbfcff}
+    .gli{display:flex;gap:8px;align-items:center;background:#fff;border:1px solid #e9edf6;border-left:3px solid #d4af37;border-radius:8px;padding:6px 8px;break-inside:avoid;page-break-inside:avoid}
+    .gli b{display:block;font-size:12.5px;line-height:1.25}.gli small{display:block;font-size:10px;color:#5b6785;margin-top:1px}
+    .gnum{flex:0 0 auto;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#eef2fb;color:#1d3fae;font-weight:800;font-size:11px}`;
+function buildReport(mode){
+  const listOnly = mode === "list";
   const d = S.data, L = applyF(d.learners), J = journey(L), P = L.filter(l => l.status === "present");
   const fmt = ts => ts ? new Date(ts).toLocaleTimeString("en-ZA",{hour:"2-digit",minute:"2-digit"}) : "–";
   const pct = (a,b) => b ? Math.round(100*a/b) : 0;
@@ -1612,12 +1633,15 @@ function buildReport(){
     .kp{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}.kp div{background:#f6f8fd;border-radius:12px;padding:12px}.kp b{display:block;font-size:22px}.kp span{font-size:11px;color:#5b6785}
     .ann{padding:8px 0;border-bottom:1px solid #e6eaf3;font-size:13px}.ann small{color:#5b6785}
     .foot{text-align:center;color:#8a93a8;font-size:11px;margin-top:30px}.foot .c{font-size:5px;opacity:.25}
+    ${GL_CSS}
     @media print{body{background:#fff}.page{box-shadow:none;max-width:none}h2{break-after:avoid}.pb,.fr,tr,.kp,.rings,.ann{break-inside:avoid}.newpage{break-before:page}}`;
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Graduation report · ${esc(d.event.name)}</title>
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${listOnly ? "Graduate list" : "Graduation report"} · ${esc(d.event.name)}</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=swap" rel="stylesheet"><style>${css}</style></head><body><div class="page">
-    <div class="cover"><img src="${document.querySelector('.top img').src}" alt="Camblish crest"><div class="tag">Graduation day report</div><h1>${esc(d.event.name)}</h1>
+    <div class="cover"><img src="${document.querySelector('.top img').src}" alt="Camblish crest"><div class="tag">${listOnly ? "Graduate list" : "Graduation day report"}</div><h1>${esc(d.event.name)}</h1>
       <p>${esc([dateTxt, d.event.venue].filter(Boolean).join(" · "))}</p><p style="font-size:12px">Prepared ${new Date().toLocaleString("en-ZA",{day:"numeric",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"})} by ${esc(S.me)}${fActive() ? " · filtered view" : ""}</p></div>
-    <div class="in">
+    <div class="in">${listOnly ? `
+      <div class="story">${J.cert} graduate${J.cert === 1 ? "" : "s"} received their certificates${J.total ? ` (${Math.round(100*J.cert/J.total)}% of the ${J.total} expected)` : ""}, listed by programme in the order they were capped.</div>
+      ${gradListHTML(L)}` : `
       <div class="story">${story} ${peak}</div>
       <div class="rings">${ring(J.arrived, J.total, "Present", RAMP.arr, `${J.absent} absent`)}${ring(J.robed, J.arrived, "Robes issued", RAMP.robe, "of those present")}${ring(J.crossed, J.arrived, "Crossed the stage", RAMP.crossed, "of those present")}${ring(J.cert, J.arrived, "Certificates", RAMP.cert, "of those present")}</div>
       <div class="two"><div><h2>The journey through the day</h2>${funnel(J)}</div><div><h2>Arrivals at registration</h2>${arrivalsChart(L, 520, 170)}</div></div>
@@ -1627,6 +1651,7 @@ function buildReport(){
       <h2 class="newpage">Team and tasks</h2><div class="kp"><div><b>${tDone}/${T.length}</b><span>Tasks completed</span></div><div><b>${roads}</b><span>Roadblocks raised</span></div><div><b>${anns.length}</b><span>Announcements</span></div><div><b>${new Set(d.feed.map(f => f.actor)).size}</b><span>Team members active</span></div></div>
       ${T.filter(t => t.status !== "Completed").length ? `<p style="font-size:13px"><b>Still open:</b> ${T.filter(t => t.status !== "Completed").map(t => esc(t.title) + ` (${esc(t.status)})`).join("; ")}</p>` : ""}
       ${anns.length ? `<h2>Announcements</h2>${anns.map(a => `<div class="ann"><small>${fmt(a.created_at)} · ${esc(a.actor)}</small><br>${esc(a.text)}</div>`).join("")}` : ""}
+      <h2 class="newpage">Graduate list</h2>${gradListHTML(L)}`}
       <div class="foot">Camblish Training Institute · Taking the Lead, Shaping the Future<br><span class="c">Designed and developed by Eddie Bila</span></div>
     </div></div></body></html>`;
 }
@@ -1947,9 +1972,13 @@ function credCard(el, r, isNew){
   const m = credMail(r, isNew);
   el.innerHTML = `<div class="cred"><div style="font-weight:700;margin-bottom:6px">${isNew ? "Account created" : "Password reset"} for ${esc(r.name)}</div>
     <div class="small" style="color:#c9d3f2">Email: ${esc(r.email)}</div>
-    <div style="margin:8px 0">Temporary password: <code>${esc(r.temp_password)}</code></div>
-    <div class="row"><button class="btn gold sm" id="cmail">✉ Email login details</button><button class="btn ghost sm" id="ccopy">Copy message</button></div>
-    <div class="small" style="color:#c9d3f2;margin-top:8px">The password is shown only once. Send it now.</div></div>`;
+    <div style="margin:8px 0" class="row">Temporary password: <code id="cpw" aria-label="Temporary password, hidden">••••••••••••</code><button class="btn ghost sm" id="cshow" type="button">👁 Show</button><button class="btn ghost sm" id="cpcopy" type="button">Copy password</button></div>
+    <div class="row"><button class="btn gold sm" id="cmail">✉ Email login details again</button><button class="btn ghost sm" id="ccopy">Copy message</button></div>
+    <div class="small" style="color:#c9d3f2;margin-top:8px">The login details have been emailed to ${esc(r.email)}. This card clears itself in 2 minutes and the password can't be shown again.</div></div>`;
+  let shown = false;
+  $("#cshow").onclick = () => { shown = !shown; $("#cpw").textContent = shown ? r.temp_password : "••••••••••••"; $("#cshow").textContent = shown ? "🙈 Hide" : "👁 Show"; if (shown) setTimeout(() => { if (shown) $("#cshow").click(); }, 10000); };
+  $("#cpcopy").onclick = async () => { try { await navigator.clipboard.writeText(r.temp_password); toast("Password copied", "green"); } catch { toast("Copy not available", "red"); } };
+  clearTimeout(window._credTimer); window._credTimer = setTimeout(() => { if (el.querySelector(".cred")) el.innerHTML = `<div class="okm">Login details for ${esc(r.name)} were sent. The temporary password is no longer shown.</div>`; }, 120000);
   $("#ccopy").onclick = async () => { try { await navigator.clipboard.writeText(m.body); toast("Message copied", "green"); } catch { toast("Copy not available", "red"); } };
   $("#cmail").onclick = async () => {
     if (DESKTOP() && DESKTOP().send_email){
