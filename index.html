@@ -412,6 +412,10 @@ nav.tabs .badge.green{background:var(--ok);color:#fff}
 .feed-item.mine{background:linear-gradient(90deg,#fffaf0,#fff)}
 #capSpin{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:radial-gradient(circle at 50% 40%,rgba(29,63,174,.92),rgba(8,26,69,.97));perspective:900px;transition:opacity .35s}
 #capSpin.out{opacity:0}
+.hbtn.pres{background:rgba(255,255,255,.12);font-weight:700;white-space:nowrap}
+.pd{display:inline-block;width:8px;height:8px;border-radius:50%;margin:0 3px 0 5px;vertical-align:0}.pd.on{background:#22c55e;box-shadow:0 0 0 2px rgba(34,197,94,.3)}.pd.aw{background:#f3c94a}.pd.of{background:#94a3b8}
+@media (max-width:700px){.hbtn.pres .pl{display:none}}
+.prg{margin:10px 0}.prh{font-weight:800;margin-bottom:4px}.prr{display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--line)}.prr .pd{margin-top:6px}
 .stsel{font-weight:700;border:2px solid var(--royal);border-radius:10px}
 .stpill{display:inline-block;background:#eef2fb;color:#1d3fae;border-radius:99px;padding:1px 8px;font-size:11px;font-weight:800;vertical-align:1px}
 .staff{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:6px;margin:0 0 10px}
@@ -525,7 +529,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202610062331";
+const BUILD = "202610070004";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -859,10 +863,51 @@ function liveBadge(){
   const role = S.user.role === "admin" ? "Admin" : S.user.role === "manager" ? "Manager" : "Team";
   w.innerHTML = `<div><b>${esc(S.me)}</b> <span class="rolepill ${S.user.role}">${role}</span></div>
     <div class="live" style="justify-content:flex-end">${S.data ? `<span class="dot ${S.ok?"":"off"}"></span>${S.ok ? (RT && RT.status === "SUBSCRIBED" ? "Live ⚡" : "Live") + (secs!==null && secs>8 ? ` · ${secs}s ago` : "") : "Reconnecting…"}` : ""}</div>
-    <div class="acts"><button class="hbtn" id="hEv">⇄ Events</button>${S.data ? `<button class="hbtn" id="hRf" title="Reload everything from the server">⟳ Refresh</button>` : ""}<button class="hbtn out" id="hOut">⏻ Log out</button></div>`;
+    <div class="acts">${S.user.role === "admin" ? `<button class="hbtn pres" id="hPres" title="Who is online">${presPill()}</button>` : ""}<button class="hbtn" id="hEv">⇄ Events</button>${S.data ? `<button class="hbtn" id="hRf" title="Reload everything from the server">⟳ Refresh</button>` : ""}<button class="hbtn out" id="hOut">⏻ Log out</button></div>`;
   $("#hOut").onclick = () => logout();
   $("#hEv").onclick = () => { clearInterval(timer); eventsView(); };
   const rf = $("#hRf"); if (rf) rf.onclick = hardRefresh;
+  const hp = $("#hPres"); if (hp) hp.onclick = presDialog;
+}
+/* ---------- presence: everyone pings; only the admin sees who is online ---------- */
+const PRES = { list:null, timer:null, ping:null };
+const presKind = u => u.secs != null && u.secs <= 150 ? (u.state === "away" ? "away" : "active") : "off";
+function presPill(){
+  if (!PRES.list) return `<span class="pd on"></span>…`;
+  const c = {active:0, away:0, off:0}; PRES.list.forEach(u => c[presKind(u)]++);
+  return `<span class="pd on"></span>${c.active}<span class="pl"> active</span> <span class="pd aw"></span>${c.away}<span class="pl"> away</span> <span class="pd of"></span>${c.off}<span class="pl"> offline</span>`;
+}
+async function presLoad(){
+  if (!S.user || S.user.role !== "admin") return;
+  try { PRES.list = await rpc("hub_presence", {p_token:S.pin}); } catch { return; }
+  const hp = $("#hPres"); if (hp) hp.innerHTML = presPill();
+  const m = $("#presBody"); if (m) m.innerHTML = presListHTML();
+}
+function presPing(){
+  if (!S.user || !S.pin || !/^hub_/.test(S.pin)) return;
+  const st = document.hidden || !document.hasFocus() ? "away" : "active";
+  const dev = DESKTOP() ? "desktop app" : /Mobi|Android|iPhone/i.test(navigator.userAgent) ? "phone" : "browser";
+  rpc("hub_ping", {p_token:S.pin, p_state:st, p_tab:S.data ? S.tab : "events", p_device:dev}).catch(() => {});
+}
+function presStart(){
+  clearInterval(PRES.ping); clearInterval(PRES.timer);
+  presPing(); PRES.ping = setInterval(presPing, 25000);
+  if (S.user && S.user.role === "admin"){ presLoad(); PRES.timer = setInterval(presLoad, 20000); }
+}
+["visibilitychange","focus","blur"].forEach(ev => (ev === "visibilitychange" ? document : window).addEventListener(ev, () => { clearTimeout(PRES.vt); PRES.vt = setTimeout(presPing, 400); }));
+const TAB_NAME = {overview:"Overview", tasks:"Tasks", checkin:"Check-in", robes:"Robes", stage:"Stage", certs:"Certificates", grads:"Graduates", feed:"Updates", settings:"Settings", events:"Events"};
+function presListHTML(){
+  if (!PRES.list) return `<p class="muted">Loading…</p>`;
+  const groups = [["active","🟢 Active now","Using the Alumni Hub right now"],["away","🟡 Online, away","App open in the background"],["off","⚫ Offline","Not connected"]];
+  const ago2 = u => !u.last_seen ? (u.last_login ? "last signed in " + ago(u.last_login) : "never signed in") : u.secs < 60 ? "just now" : "seen " + ago(u.last_seen);
+  return groups.map(([k, t, sub]) => { const L = PRES.list.filter(u => presKind(u) === k);
+    return `<section class="prg"><div class="prh">${t} <b>${L.length}</b><span class="small muted"> · ${sub}</span></div>${L.length ? `<div class="list">${L.map(u => { const st = u.role === "team" ? stationOf(u.perms) : "";
+      return `<div class="prr"><span class="pd ${k === "active" ? "on" : k === "away" ? "aw" : "of"}"></span><div style="flex:1;min-width:0"><b>${esc(u.name)}</b> <span class="rolepill ${u.role}">${u.role}</span>${st ? ` <span class="stpill">${STATIONS.find(x => x[0] === st)[1]}</span>` : ""}
+        <div class="small muted">${k !== "off" && u.tab ? "On " + (TAB_NAME[u.tab] || u.tab) + " · " : ""}${u.device ? esc(u.device) + " · " : ""}${ago2(u)}</div></div></div>`; }).join("")}</div>` : `<p class="small muted" style="margin:4px 0 8px">Nobody.</p>`}</section>`; }).join("");
+}
+function presDialog(){
+  modal(`<h3>Who's online</h3><p class="small muted">Only you can see this. Updates every 20 seconds.</p><div id="presBody">${presListHTML()}</div><div class="row" style="margin-top:10px"><span class="spacer"></span><button class="btn ghost" id="mc">Close</button></div>`, (m, close) => { $("#mc", m).onclick = close; });
+  presLoad();
 }
 async function hardRefresh(){
   const rf = $("#hRf"); if (rf){ rf.disabled = true; rf.classList.add("spinning"); }
@@ -966,7 +1011,7 @@ function afterAuth(tok, r){
   openEvent();
 }
 async function logout(expired){
-  clearInterval(timer);
+  clearInterval(timer); clearInterval(PRES.ping); clearInterval(PRES.timer); PRES.list = null;
   try { if (S.pin && !expired) await rpc("hub_logout", {p_token:S.pin}); } catch {}
   store.del(TOKEN_KEY); S.pin = null; S.user = null; S.data = null;
   $("#who").innerHTML = "";
@@ -1014,7 +1059,7 @@ async function enterApp(){
   if (S.celebrate) S.tab = "overview";
   liveBadge();
   main.innerHTML = `<div class="card"><p class="muted">Connecting…</p></div>`;
-  await pull(true); startSync();
+  await pull(true); startSync(); presStart();
   if (S.celebrate){ S.celebrate = false; capSpin(false); if (S.tab !== "overview") setTab("overview"); try { history.replaceState(null, "", "?e=" + CODE + "#overview"); } catch {} celebrate(); }
 }
 
