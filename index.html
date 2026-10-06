@@ -412,6 +412,7 @@ nav.tabs .badge.green{background:var(--ok);color:#fff}
 .feed-item.mine{background:linear-gradient(90deg,#fffaf0,#fff)}
 #capSpin{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:radial-gradient(circle at 50% 40%,rgba(29,63,174,.92),rgba(8,26,69,.97));perspective:900px;transition:opacity .35s}
 #capSpin.out{opacity:0}
+.annscreen input,.annscreen textarea,.annscreen .rform input{color:#0d1b3e!important;background:#fff!important;caret-color:#1d3fae}.annscreen input::placeholder{color:#7a849c}
 .catsel{width:auto;max-width:165px;flex:0 0 auto;border:2px solid var(--cc,#1d3fae);background:var(--cb,#fff);color:var(--cc,#1d3fae);font-weight:800;border-radius:10px;padding:0 10px;cursor:pointer}
 @media (max-width:600px){.anncompose .row{flex-wrap:wrap!important}.anncompose .catsel{flex:1;max-width:none}}
 .stiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:6px 0 12px}
@@ -518,7 +519,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202610062231";
+const BUILD = "202610062246";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
