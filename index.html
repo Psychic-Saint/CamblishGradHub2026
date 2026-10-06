@@ -412,6 +412,12 @@ nav.tabs .badge.green{background:var(--ok);color:#fff}
 .feed-item.mine{background:linear-gradient(90deg,#fffaf0,#fff)}
 #capSpin{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:radial-gradient(circle at 50% 40%,rgba(29,63,174,.92),rgba(8,26,69,.97));perspective:900px;transition:opacity .35s}
 #capSpin.out{opacity:0}
+mark.hl{background:#fde68a;color:inherit;border-radius:3px;padding:0 1px;box-shadow:0 0 0 1px #f3d27a}
+.bestm{border:2px solid #d4af37;border-radius:14px;background:linear-gradient(180deg,#fffaf0,#fff);padding:8px 10px 4px;margin:6px 0 14px;box-shadow:0 10px 24px -18px rgba(212,175,55,.9);animation:bmin .18s ease-out}
+.bestm .bmh{display:flex;align-items:center;gap:8px;font-weight:800;color:#081a45;font-size:14px;padding:2px 4px 6px;flex-wrap:wrap}.bestm .bmh .small{font-weight:600;color:#8a6510}
+.bestm .lrow:first-child{background:#fff7dc}
+@keyframes bmin{from{opacity:.4;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.lrow.jump{animation:jumpf 1.2s ease-out}@keyframes jumpf{0%,30%{box-shadow:0 0 0 3px #d4af37;background:#fff3c4}100%{box-shadow:none}}
 .thr{margin-top:8px;border-left:2px solid #e3e8f3;padding-left:10px}.thr.dk{border-left-color:rgba(29,63,174,.25)}
 .thr .rp{display:flex;gap:8px;align-items:flex-start;padding:5px 0;font-size:13px}.thr .rp .w{font-size:11px;color:var(--muted)}
 .thr .rpa{flex:0 0 auto;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#eef2fb;color:#1d3fae;font-weight:800;font-size:11px}.thr .rp.mine .rpa{background:#fdf3d6;color:#8a6510}
@@ -494,7 +500,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202610062059";
+const BUILD = "202610062106";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -1291,6 +1297,14 @@ function filterBar(extra=""){
     <button class="btn ghost sm ${fActive()?"":"hidden"}" data-fclear type="button">Clear filters</button>${extra}</div>`;
 }
 function wireFilterBar(onChange){
+  const qi = $(".fbar [data-fk=q]");
+  if (qi) qi.onkeydown = e => {
+    if (e.key === "Escape" && qi.value){ qi.value = ""; S.f.L.q = ""; onChange(); return; }
+    if (e.key !== "Enter") return; e.preventDefault();
+    const row = $(".bestm .lrow") || $("#stList .lrow"); if (!row) return;
+    row.scrollIntoView({block:"center", behavior:"smooth"}); row.classList.remove("jump"); void row.offsetWidth; row.classList.add("jump");
+    const b = row.querySelector("button:not([disabled])"); if (b) setTimeout(() => b.focus({preventScroll:true}), 250);
+  };
   $$(".fbar [data-fk]").forEach(el => { const k = el.dataset.fk; const h = () => { S.f.L[k] = el.value; const c = $(".fbar [data-fclear]"); if (c) c.classList.toggle("hidden", !fActive()); onChange(); }; if (k === "q") el.oninput = h; else el.onchange = h; });
   const c = $(".fbar [data-fclear]"); if (c) c.onclick = () => { S.f.L = F0(); main.innerHTML = ""; render(); };
   const sp = $(".fbar [data-seatmap]"); if (sp) sp.onclick = () => seatMap();
@@ -1300,11 +1314,28 @@ function applyF(list){
   return list.filter(l => (!F.prog || l.programme === F.prog) && (!F.nqf || String(l.nqf) === String(F.nqf)) && (!F.pm || l.pm === F.pm) && (!F.client || l.client === F.client)
     && words.every(w => [l.first_name, l.middle_name, l.surname, l.programme, l.client, l.learner_ref, l.pm, l.region, l.seat, l._code].join(" ").toLowerCase().includes(w)));
 }
+/* ---------- search: ranking + highlighting ---------- */
+const qWords = () => (S.f.L.q || "").toLowerCase().split(/\s+/).filter(Boolean);
+function hl(str){
+  const t = esc(str), ws = qWords().map(w => esc(w).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).filter(Boolean);
+  if (!ws.length || !t) return t;
+  return t.replace(new RegExp("(" + ws.sort((a,b) => b.length - a.length).join("|") + ")(?![^&;]*;)", "gi"), '<mark class="hl">$1</mark>');
+}
+function matchScore(l){
+  const ws = qWords(); if (!ws.length) return 0;
+  const name = fullName(l).toLowerCase(), toks = name.split(/\s+/), q = ws.join(" ");
+  let sc = 0;
+  if (name.startsWith(q)) sc += 12; else if (name.includes(q)) sc += 6;
+  if ((l.surname || "").toLowerCase().startsWith(q)) sc += 8;
+  if ([l.learner_ref, l.seat, l._code].some(v => v && String(v).toLowerCase() === q)) sc += 20;
+  ws.forEach(w => { if (toks.includes(w)) sc += 5; else if (toks.some(t => t.startsWith(w))) sc += 4; else if (name.includes(w)) sc += 2; else sc += .2; });
+  return sc;
+}
 function chipsHTML(id, opts, cur){ return `<div class="chips" id="${id}" style="margin:10px 0">${opts.map(([k,label,n]) => `<button class="chip ${cur===k?"on":""}" data-c="${k}">${label} (${n})</button>`).join("")}</div>`; }
-const seatTag = l => l.seat ? `<span class="seat" title="Seat">💺 ${esc(l.seat)}</span>` : "";
+const seatTag = l => l.seat ? `<span class="seat" title="Seat">💺 ${hl(l.seat)}</span>` : "";
 function lInfo(l, extra=""){
-  return `<div class="info"><div class="nm">${esc(fullName(l))} ${seatTag(l)}</div>
-    <div class="small muted">NQF ${esc(l.nqf ?? "?")} · ${esc(l.programme||"")}${l.client?" · "+esc(l.client):""}${l.pm?" · PM: "+esc(l.pm):""}</div>${extra}</div>`;
+  return `<div class="info"><div class="nm">${hl(fullName(l))} ${seatTag(l)}</div>
+    <div class="small muted">NQF ${esc(l.nqf ?? "?")} · ${hl(l.programme||"")}${l.client?" · "+hl(l.client):""}${l.pm?" · PM: "+hl(l.pm):""}${l.learner_ref && qWords().some(w => String(l.learner_ref).toLowerCase().includes(w)) ? " · ID " + hl(l.learner_ref) : ""}</div>${extra}</div>`;
 }
 function listOut(el, list, rowFn, empty){
   const shown = list.slice(0, 150);
@@ -1330,14 +1361,22 @@ const byArrival = (a, b) => new Date(a.arrived_at || 0) - new Date(b.arrived_at 
 const byName = (a, b) => (a.surname||"").localeCompare(b.surname||"") || (a.first_name||"").localeCompare(b.first_name||"");
 const ord = n => n + (["th","st","nd","rd"][((n % 100) - 20) % 10] || ["th","st","nd","rd"][n % 100] || "th");
 function groupedOut(el, list, rowFn, empty, tab, sortIn, redraw, numbered=true){
-  if (!list.length){ el.innerHTML = `<div class="empty">${empty}</div>`; return; }
+  if (!list.length){ el.innerHTML = qWords().length ? `<div class="empty">No one here matches “${esc(S.f.L.q)}”. Check the spelling, or look on another tab.</div>` : `<div class="empty">${empty}</div>`; return; }
+  let best = "";
+  if (qWords().length){
+    const ranked = list.map(l => [matchScore(l), l]).sort((a,b) => b[0] - a[0] || byName(a[1], b[1]));
+    const top = ranked.slice(0, list.length <= 12 ? list.length : 6).map(x => x[1]);
+    best = `<section class="bestm"><div class="bmh">🔎 Best match${top.length === 1 ? "" : "es"} for “${esc(S.f.L.q)}”<span class="spacer"></span><span class="small">${list.length} found${list.length > top.length ? ` · ${list.length - top.length} more below` : ""} · press Enter to jump to the first</span></div><div class="list">${top.map(l => rowFn(l, 0, l.programme || "")).join("")}</div></section>`;
+    const ids = new Set(top.map(l => l.id)); list = list.filter(l => !ids.has(l.id));
+    if (!list.length){ el.innerHTML = best; return; }
+  }
   const totals = {}; S.data.learners.forEach(l => { const k = progKey(l); totals[k] = (totals[k] || 0) + 1; });
   const g = {}; list.forEach(l => (g[progKey(l)] = g[progKey(l)] || []).push(l));
   const keys = Object.keys(g).sort();
   const col = S.f.collapsed[tab] = S.f.collapsed[tab] || new Set();
-  el.innerHTML = `<div class="grp-tools small"><span class="muted">${keys.length} programme${keys.length === 1 ? "" : "s"} · ${list.length} graduate${list.length === 1 ? "" : "s"}</span><span class="spacer"></span><button class="lnk" data-gall="open" type="button">Expand all</button><button class="lnk" data-gall="close" type="button">Collapse all</button></div>` +
+  el.innerHTML = best + `<div class="grp-tools small"><span class="muted">${keys.length} programme${keys.length === 1 ? "" : "s"} · ${list.length} graduate${list.length === 1 ? "" : "s"}</span><span class="spacer"></span><button class="lnk" data-gall="open" type="button">Expand all</button><button class="lnk" data-gall="close" type="button">Collapse all</button></div>` +
     keys.map(k => {
-      const items = g[k].sort(sortIn), [nq, prog] = k.split("|"), closed = col.has(k), lim = S.f.showAll.has(tab + k) ? items.length : 60;
+      const items = g[k].sort(sortIn), [nq, prog] = k.split("|"), closed = col.has(k) && !best, lim = S.f.showAll.has(tab + k) ? items.length : 60;
       return `<section class="pgrp ${closed ? "closed" : ""}"><button class="pgh" data-gk="${esc(k)}" aria-expanded="${!closed}" type="button"><span class="chev" aria-hidden="true">▾</span><span class="pgn">${esc(prog)}</span><span class="pgq">NQF ${nq === "099" ? "?" : +nq}</span><span class="spacer"></span><span class="pgc" title="${items.length} here of ${totals[k] || items.length} in this programme">${items.length}<small> / ${totals[k] || items.length}</small></span></button>
         ${closed ? "" : `<div class="list">${items.slice(0, lim).map((l, i) => rowFn(l, numbered ? i + 1 : 0, prog)).join("")}</div>${items.length > lim ? `<button class="lnk more" data-gmore="${esc(k)}" type="button">Show all ${items.length}</button>` : ""}`}</section>`;
     }).join("");
@@ -2018,7 +2057,7 @@ function viewStage(){
       const gg = l._late ? "Late arrivals (end of ceremony)" : groupOf(l);
       if (gg !== g){ g = gg; const inG = P.filter(x=>(x._late ? "Late arrivals (end of ceremony)" : groupOf(x))===gg); html += `<div class="group-h">${esc(gg)}<span class="spacer"></span><span class="tag">${inG.length} present</span>${notYetBy[gg]?`<span class="tag">${notYetBy[gg]} not yet arrived</span>`:""}</div>`; }
       html += `<div class="lrow ${l.stage_status}"><span class="seq" style="width:auto;min-width:38px;padding:0 6px;border-radius:19px">${l.stage_status==="done"?"✓ "+l._code:l._code}</span>
-        <div class="info"><div class="nm">${esc(fullName(l))} ${seatTag(l)}</div><div class="small muted">${l._late?esc(l.programme||"")+" · ":""}${esc(l.client||"")}${l.cohort?" · "+esc(l.cohort):""} · arrived ${fmtTime(l.arrived_at)}</div></div>
+        <div class="info"><div class="nm">${hl(fullName(l))} ${seatTag(l)}</div><div class="small muted">${l._late?esc(l.programme||"")+" · ":""}${esc(l.client||"")}${l.cohort?" · "+esc(l.cohort):""} · arrived ${fmtTime(l.arrived_at)}</div></div>
         ${l._late?`<span class="tag red">Late arrival</span>`:""}
         ${l.stage_status==="called"?`<span class="tag gold">On stage</span>`:""}
         <span class="noprint pacts">${tagBtn(l)}${l.stage_status==="waiting"?`<button class="sbtn p" data-sg="${l.id}" data-s="called">Call</button>`:""}
