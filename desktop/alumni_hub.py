@@ -8,7 +8,7 @@ own window, and adds silent name-tag printing to label printers and sending logi
 import base64
 import io
 import json
-import os
+import os, time
 import sys
 import re
 import threading
@@ -401,14 +401,14 @@ def main():
     try:
         import urllib.request
         urllib.request.urlopen(HUB_URL, timeout=5)
-        url = HUB_URL          # always the latest version from GitHub
+        url = HUB_URL + "?v=" + str(int(time.time()))   # always the latest version from GitHub, never a cached copy
     except Exception:
         pass                   # offline: use the copy bundled with the app
     w, h = window_size()
     # Opens centred at a comfortable size; Maximise fills the screen and the edges can be dragged to any size.
     webview.create_window(APP_TITLE, url=url, js_api=Bridge(), width=w, height=h,
                           min_size=(860, 600), resizable=True, background_color="#081a45", text_select=True)
-    webview.start(http_server=url != HUB_URL, private_mode=False, storage_path=storage)
+    webview.start(http_server=not url.startswith(HUB_URL), private_mode=False, storage_path=storage)
 
 
 if __name__ == "__main__":
