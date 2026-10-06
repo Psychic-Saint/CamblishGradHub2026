@@ -258,7 +258,14 @@ body.auth .stick,body.auth .foot{display:none}
 body.auth{background:radial-gradient(900px 600px at 15% 10%,rgba(53,97,232,.65),transparent 60%),radial-gradient(800px 500px at 90% 90%,rgba(212,175,55,.35),transparent 60%),linear-gradient(160deg,#050f2c,#0b1f4d 45%,#132f80);min-height:100vh}
 body.auth main{max-width:none;padding:0}
 .scene{min-height:100vh;display:grid;grid-template-columns:1.1fr 1fr;align-items:center;gap:30px;padding:30px 6vw;perspective:1400px;position:relative;overflow:hidden}
-@media (max-width:860px){.scene{grid-template-columns:1fr;padding:24px 16px}.hero{display:none}}
+@media (max-width:860px){.scene{grid-template-columns:1fr;padding:22px 16px 40px;align-content:center;gap:18px}
+  .hero{text-align:center;display:flex;flex-direction:column;align-items:center}
+  .scene .hero .coin{width:96px;height:96px;margin:0 0 10px}
+  .hero .coin .face.back img.capico{border-radius:20%}
+  .scene .hero h1{font-size:clamp(20px,6.4vw,28px);white-space:nowrap;text-shadow:0 3px 0 rgba(0,0,0,.25)}
+  .scene .hero h1 .ver{font-size:10px}
+  .hero h1 br{display:none}.hero h1 span{margin-left:6px}
+  .hero p{display:none}}
 .beam{position:absolute;width:140%;height:3px;left:-20%;background:linear-gradient(90deg,transparent,rgba(243,210,122,.9),transparent);transform:rotate(-24deg);opacity:.5;animation:sweep 7s linear infinite}
 .beam.b2{top:70%;animation-delay:-3.5s;opacity:.3}
 @keyframes sweep{0%{transform:translateY(-200px) rotate(-24deg)}100%{transform:translateY(600px) rotate(-24deg)}}
