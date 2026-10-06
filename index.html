@@ -412,6 +412,11 @@ nav.tabs .badge.green{background:var(--ok);color:#fff}
 .feed-item.mine{background:linear-gradient(90deg,#fffaf0,#fff)}
 #capSpin{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:radial-gradient(circle at 50% 40%,rgba(29,63,174,.92),rgba(8,26,69,.97));perspective:900px;transition:opacity .35s}
 #capSpin.out{opacity:0}
+.stiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:8px 0 14px}
+.stile{text-align:left;background:#fff;border:1px solid var(--line);border-top:4px solid var(--royal);border-radius:14px;padding:10px 12px;cursor:pointer;font:inherit;color:var(--ink);box-shadow:0 6px 16px -14px rgba(8,26,69,.6);transition:transform .12s}
+.stile:hover{transform:translateY(-2px)}.stile b{display:block;font-size:26px;line-height:1.1;color:var(--navy)}.stile span{display:block;font-weight:800;font-size:12.5px}.stile small{display:block;font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stile.hot{border-top-color:var(--gold);background:linear-gradient(180deg,#fff8e1,#fff)}.stile.hot b{color:#8a6510}
+@media (max-width:860px){.stiles{grid-template-columns:repeat(2,minmax(0,1fr))}.stiles .stile:nth-child(3){grid-column:1/-1}}
 .fdgrid{display:flex;flex-direction:column}.fdgrid .annscreen{order:-1}
 .actscreen .feed-item{gap:8px;padding:6px 4px}.actscreen .feed-item .ic{width:24px;height:24px;font-size:12px}
 .actscreen .feed-item .t{font-size:13px;line-height:1.35}.actscreen .feed-item .w{font-size:11px}.actscreen .tag{font-size:10px;padding:1px 6px}
@@ -486,7 +491,7 @@ table.t td .acc{margin:0}
   <button data-tab="tasks">Tasks <span class="badge hidden" id="bRoad"></span></button>
   <button data-tab="checkin">Check-in</button>
   <button data-tab="robes">Robes <span class="badge gold hidden" id="bRobe"></span></button>
-  <button data-tab="stage">Stage</button>
+  <button data-tab="stage">Stage <span class="badge gold hidden" id="bStage"></span></button>
   <button data-tab="certs">Certificates <span class="badge gold hidden" id="bCert"></span></button>
   <button data-tab="grads">Graduates <span class="badge green hidden" id="bGrad"></span></button>
   <button data-tab="feed">Updates <span class="badge hidden" id="bFeed"></span></button>
@@ -511,7 +516,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202610062115";
+const BUILD = "202610062136";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -828,9 +833,8 @@ function liveBadge(){
   const role = S.user.role === "admin" ? "Admin" : S.user.role === "manager" ? "Manager" : "Team";
   w.innerHTML = `<div><b>${esc(S.me)}</b> <span class="rolepill ${S.user.role}">${role}</span></div>
     <div class="live" style="justify-content:flex-end">${S.data ? `<span class="dot ${S.ok?"":"off"}"></span>${S.ok ? (RT && RT.status === "SUBSCRIBED" ? "Live ⚡" : "Live") + (secs!==null && secs>8 ? ` · ${secs}s ago` : "") : "Reconnecting…"}` : ""}</div>
-    <div class="acts"><button class="hbtn" id="hEv">⇄ Events</button>${S.data ? `<button class="hbtn" id="hRf" title="Reload everything from the server">⟳ Refresh</button>` : ""}<button class="hbtn" id="hPw">🔑 Password</button><button class="hbtn out" id="hOut">⏻ Log out</button></div>`;
+    <div class="acts"><button class="hbtn" id="hEv">⇄ Events</button>${S.data ? `<button class="hbtn" id="hRf" title="Reload everything from the server">⟳ Refresh</button>` : ""}<button class="hbtn out" id="hOut">⏻ Log out</button></div>`;
   $("#hOut").onclick = () => logout();
-  $("#hPw").onclick = () => changePwView(false);
   $("#hEv").onclick = () => { clearInterval(timer); eventsView(); };
   const rf = $("#hRf"); if (rf) rf.onclick = hardRefresh;
 }
@@ -1007,6 +1011,8 @@ function render(){
   const views = { overview:viewOverview, tasks:viewTasks, checkin:viewCheckin, robes:viewRobes, stage:viewStage, certs:viewCerts, grads:viewGrads, feed:viewFeed, settings:viewSettings, manage:() => openSettings("event"), users:() => openSettings("users") };
   const P = d.learners.filter(l => l.status === "present"), rw = P.filter(l => !l.robe_issued).length, cw = P.filter(l => l.stage_status === "done" && !l.cert_issued).length;
   $("#bRobe").textContent = rw; $("#bRobe").classList.toggle("hidden", !rw); $("#bCert").textContent = cw; $("#bCert").classList.toggle("hidden", !cw);
+  const sw = P.filter(l => l.robe_issued && l.stage_status !== "done").length, onS = P.some(l => l.stage_status === "called");
+  $("#bStage").textContent = sw; $("#bStage").classList.toggle("hidden", !sw); $("#bStage").title = `${sw} in the stage line${onS ? ", 1 on stage now" : ""}`;
   const gw = P.filter(l => l.cert_issued).length; $("#bGrad").textContent = gw; $("#bGrad").classList.toggle("hidden", !gw);
   (views[S.tab] || viewOverview)();
 }
@@ -1782,7 +1788,10 @@ const RAMP = { arr:"#9db3ec", robe:"#5577d8", crossed:"#2a47a8", cert:"#0f2462",
 function journey(L){
   const p = L.filter(l => l.status === "present");
   return { total:L.length, arrived:p.length, absent:L.filter(l => l.status === "absent").length, robed:p.filter(l => l.robe_issued).length,
-    crossed:p.filter(l => l.stage_status === "done").length, cert:p.filter(l => l.cert_issued).length };
+    crossed:p.filter(l => l.stage_status === "done").length, cert:p.filter(l => l.cert_issued).length,
+    line:p.filter(l => l.robe_issued && l.stage_status === "waiting").length, onstage:p.filter(l => l.stage_status === "called").length,
+    sent:p.filter(l => l.stage_status === "called" || l.stage_status === "done").length,
+    robing:p.filter(l => !l.robe_issued).length, certDue:p.filter(l => l.stage_status === "done" && !l.cert_issued).length };
 }
 function ring(val, total, label, color, sub){
   const r = 44, c = 2 * Math.PI * r, f = total ? Math.min(1, val / total) : 0;
@@ -1794,7 +1803,7 @@ function ring(val, total, label, color, sub){
     <div class="rl">${label}</div><div class="rs">${sub||""}</div></div>`;
 }
 function funnel(J){
-  const steps = [["Expected", J.total, RAMP.none], ["Arrived", J.arrived, RAMP.arr], ["Robed", J.robed, RAMP.robe], ["Crossed the stage", J.crossed, RAMP.crossed], ["Certificate received", J.cert, RAMP.cert]];
+  const steps = [["Expected", J.total, RAMP.none], ["Arrived", J.arrived, RAMP.arr], ["Robed", J.robed, RAMP.robe], ["Sent to the stage", J.sent, RAMP.crossed], ["Crossed the stage", J.crossed, RAMP.crossed], ["Certificate received", J.cert, RAMP.cert]];
   const max = Math.max(1, J.total);
   return `<div class="funnel">${steps.map(([k, v, c]) => `<div class="fr" title="${k}: ${v} of ${J.total}"><span class="fl">${k}</span><span class="ft"><i style="width:${(100*v/max).toFixed(1)}%;background:${c}"></i></span><span class="fv"><b>${v}</b> ${J.total ? Math.round(100*v/J.total) + "%" : ""}</span></div>`).join("")}</div>`;
 }
@@ -1831,6 +1840,16 @@ function viewOverview(){
   }
   $("#bn").innerHTML = bannerHTML(); wireBanner(); drawOverview();
 }
+function stageTiles(J, cls=""){
+  const nowOn = S.data.learners.filter(l => l.status === "present" && l.stage_status === "called");
+  const tile = (go, n, lab, sub, hot) => `<button class="stile${hot ? " hot" : ""}" data-go="${go}" type="button"><b>${n}</b><span>${lab}</span>${sub ? `<small>${sub}</small>` : ""}</button>`;
+  return `<div class="stiles ${cls}">
+    ${tile("robes", J.robing, "Waiting for robes", "present, not robed yet")}
+    ${tile("stage", J.line, "In the stage line", "robed, waiting to be called")}
+    ${tile("stage", J.onstage, "On stage now", nowOn.length ? esc(nowOn.map(fullName).join(", ")) : "nobody called yet", J.onstage > 0)}
+    ${tile("stage", J.crossed, "Crossed the stage", J.arrived ? Math.round(100*J.crossed/J.arrived) + "% of those present" : "nobody yet")}
+    ${tile("certs", J.certDue, "Waiting for certificates", "crossed, not capped yet")}</div>`;
+}
 function drawOverview(){
   const d = S.data, T = d.tasks, L = applyF(d.learners), J = journey(L);
   const done = T.filter(t => t.status === "Completed").length, road = T.filter(t => t.status === "Roadblock");
@@ -1840,6 +1859,7 @@ function drawOverview(){
       ${ring(J.robed, J.arrived, "Robes issued", RAMP.robe, "of those present")}
       ${ring(J.crossed, J.arrived, "Crossed the stage", RAMP.crossed, "of those present")}
       ${ring(J.cert, J.arrived, "Certificates", RAMP.cert, `${J.total ? Math.round(100*J.cert/J.total) : 0}% of all graduates`)}</div>
+    <h3 class="ch" style="margin-top:4px">Live on the floor</h3>${stageTiles(J)}
     <div class="grid g2" style="margin-top:6px"><div><h3 class="ch">The journey so far</h3>${funnel(J)}</div><div><h3 class="ch">Arrivals every 15 minutes</h3>${arrivalsChart(L, 520, 140)}</div></div>`;
   $("#ovRest").innerHTML = `<div class="card"><h2>Progress by programme <span class="small muted" style="font-weight:500">(stage order: NQF level, lowest first)</span></h2>${progBars(L)}</div>
   <div class="grid g2">
@@ -2041,6 +2061,7 @@ function viewStage(){
   const nextUp = queue.slice(0,5);
   const progOpts = progOrder.map(p => { const n = waiting.filter(l => (l.programme || "No programme") === p).length; return `<option value="${esc(p)}" ${p === sel ? "selected" : ""}>${esc(p)} · ${n} waiting</option>`; }).join("");
   let html = bannerHTML() + `<div class="card flowcard noprint"><div id="flow" class="flowwrap"></div></div>
+  ${stageTiles(journey(S.data.learners), "noprint")}
   <div class="stagebox noprint">
     <div class="now"><div class="l">Now on stage</div>
       ${called.length ? called.map(l=>`<div class="big">${esc(fullName(l))}</div><div class="pr">${l.seat?"Seat "+esc(l.seat)+" · ":""}Tag ${l._code} · #${l._seq} · NQF ${esc(l.nqf??"?")} · ${esc(l.programme||"")}${l.client?" · "+esc(l.client):""}</div>`).join("") : `<div class="big" style="opacity:.7">Nobody called yet</div><div class="pr">${P.length} arrived graduates in the line-up</div>`}
@@ -2082,6 +2103,7 @@ function viewStage(){
   main.innerHTML = html; putFlow("stage"); wireTags(main); wireBanner(); wireFilterBar(() => { const pos = $(".fbar [data-fk=q]").selectionStart; viewStage(); const q = $(".fbar [data-fk=q]"); if (q && S.f.L.q){ q.focus(); try { q.setSelectionRange(pos, pos); } catch {} } });
   if (keepQ){ const q = $(".fbar [data-fk=q]"); if (q){ q.focus(); q.setSelectionRange(q.value.length, q.value.length); } }
   const pat = $("#printAllTags"); if (pat) pat.onclick = () => { if (P.length && confirm(`Print ${P.length} name tags?`)) printTags(P); };
+  $$(".stiles [data-go]", main).forEach(b => b.onclick = () => setTab(b.dataset.go));
   if (!can("stage")) $$("#callNext,#undoCall,[data-sg]").forEach(b => b.remove());
   $$("[data-sg]").forEach(b => b.onclick = () => act("grad_stage", {p_learner:b.dataset.sg, p_stage:b.dataset.s}));
   const cn = $("#callNext"); if (cn) cn.onclick = async () => {
@@ -2138,10 +2160,11 @@ function viewFeed(){
         <div class="chips" id="fdChips" style="margin:4px 0 8px"></div><div id="fdList"></div>
         <div class="row noprint" style="margin-top:10px"><button class="btn ghost sm" id="setAl">🔔 Alerts and sound settings</button></div></section>
       <section class="annscreen card"><div class="ash"><h2>📣 Announcements</h2><span class="spacer"></span><span class="small" id="annCount"></span></div>
-        ${can("announce") ? `<div class="anncompose noprint"><div class="catpick" id="catPick">${Object.entries(ANN_CAT).map(([k,c]) => `<button type="button" class="catbtn ${k === (S.f.annCat || "general") ? "on" : ""}" data-cat="${k}" style="--cc:${c.c};--cb:${c.bg}">${c.icon} ${c.label}</button>`).join("")}</div>
-          <div class="row" style="align-items:stretch;margin-top:8px"><textarea id="annTxt" placeholder="Write an announcement for everyone" style="flex:1;min-height:56px"></textarea><button class="btn gold" id="annSend" style="min-width:120px">Announce</button></div></div>` : ""}
+        ${can("announce") ? `<div class="anncompose noprint"><div class="catpick" id="catPick">${Object.entries(ANN_CAT).filter(([k]) => k !== "late").map(([k,c]) => `<button type="button" class="catbtn ${k === (S.f.annCat || "general") ? "on" : ""}" data-cat="${k}" style="--cc:${c.c};--cb:${c.bg}">${c.icon} ${c.label}</button>`).join("")}</div>
+          <div class="row" style="align-items:stretch;margin-top:8px"><input type="text" id="annTxt" maxlength="2000" placeholder="Write an announcement for everyone" style="flex:1;min-width:0"><button class="btn gold" id="annSend" style="min-width:110px">Announce</button></div></div>` : ""}
         <div id="annList"></div><button class="lnk" id="annMore" type="button"></button></section></div>`;
     $$("#catPick [data-cat]").forEach(b => b.onclick = () => { S.f.annCat = b.dataset.cat; $$("#catPick [data-cat]").forEach(x => x.classList.toggle("on", x === b)); });
+    const at = $("#annTxt"); if (at) at.addEventListener("keydown", e => { if (e.key === "Enter"){ e.preventDefault(); $("#annSend").click(); } });
     const as = $("#annSend"); if (as) as.onclick = async () => { const v = $("#annTxt").value.trim(); if (!v) return $("#annTxt").focus(); as.disabled = true;
       if (await act("grad_post2", {p_text:v, p_kind:"announcement", p_category:S.f.annCat || "general", p_ref_type:null, p_ref_id:null}, `${annCat({category:S.f.annCat}).label} announcement sent to everyone`)) $("#annTxt").value = ""; as.disabled = false; };
     const fs = $("#fdSend"); if (fs){ const send = async () => { const v = $("#fdTxt").value.trim(); if (!v) return; fs.disabled = true; if (await act("grad_post2", {p_text:v, p_kind:"comment", p_category:null, p_ref_type:null, p_ref_id:null}, "Posted")) $("#fdTxt").value = ""; fs.disabled = false; };
@@ -2424,9 +2447,9 @@ async function setAccount(body){
   const u = S.user, role = u.viewer ? "Spectator (view only)" : ({admin:"Administrator", manager:"Manager", team:"Team member"})[u.role];
   body.innerHTML = `<div class="card"><h2>My account</h2>
     <div class="kvs"><div><span>Name</span><b>${esc(u.name)}</b></div><div><span>Email</span><b>${esc(u.email)}</b></div><div><span>Role</span><b>${role}</b></div><div><span>This sign-in lasts until</span><b id="accExp">…</b></div><div><span>Devices signed in</span><b id="accDev">…</b></div></div>
-    <h3 class="ch" style="margin-top:16px">What I can do</h3><div class="acc">${PERMS.filter(([k]) => can(k)).map(([k,l]) => `<span>${l}</span>`).join("") || `<span class="no">View only</span>`}</div>
-    <div class="row" style="margin-top:16px;flex-wrap:wrap"><button class="btn" id="accPw">🔑 Change my password</button><button class="btn ghost" id="accAll">Sign out on all my devices</button></div></div>`;
-  $("#accPw").onclick = () => changePwView(false);
+    ${u.role !== "admin" ? `<p class="small muted" style="margin-top:12px">🔑 Need a new password? Ask your Alumni Hub administrator to reset it for you.</p>` : ""}<h3 class="ch" style="margin-top:16px">What I can do</h3><div class="acc">${PERMS.filter(([k]) => can(k)).map(([k,l]) => `<span>${l}</span>`).join("") || `<span class="no">View only</span>`}</div>
+    <div class="row" style="margin-top:16px;flex-wrap:wrap">${u.role === "admin" ? `<button class="btn" id="accPw">🔑 Change my password</button>` : ""}<button class="btn ghost" id="accAll">Sign out on all my devices</button></div></div>`;
+  const ap = $("#accPw"); if (ap) ap.onclick = () => changePwView(false);
   $("#accAll").onclick = async () => { if (!confirm("Sign out of the Alumni Hub on every device, including this one?")) return; try { await rpc("hub_logout_all", {p_token:S.pin}); } catch {} logout(); };
   try { const r = await rpc("hub_my_sessions", {p_token:S.pin}); $("#accExp").textContent = r.this_expires ? new Date(r.this_expires).toLocaleString("en-ZA",{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}) : "–"; $("#accDev").textContent = r.active_sessions; } catch(e){ $("#accExp").textContent = "–"; }
 }
