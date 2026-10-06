@@ -171,6 +171,24 @@ class Bridge:
             return {"ok": False, "error": str(e)}
 
 
+def centre_window(hwnd):
+    """Open at a comfortable size in the middle of the screen. Maximise still fills the screen."""
+    try:
+        import ctypes
+        from ctypes import wintypes
+        user32 = ctypes.windll.user32
+        user32.ShowWindow(hwnd, 9)                      # restore if Windows opened it maximised
+        wa = wintypes.RECT()
+        user32.SystemParametersInfoW(0x0030, 0, ctypes.byref(wa), 0)
+        scale = (ctypes.windll.shcore.GetScaleFactorForDevice(0) or 100) / 100.0
+        aw, ah = wa.right - wa.left, wa.bottom - wa.top
+        w = int(min(aw * 0.8, 1320 * scale)); h = int(min(ah * 0.86, 860 * scale))
+        x = wa.left + (aw - w) // 2; y = wa.top + (ah - h) // 2
+        user32.SetWindowPos(hwnd, 0, x, y, w, h, 0x0004 | 0x0040)   # no z-order change, show
+    except Exception:
+        pass
+
+
 def set_window_icon(title):
     """Give the window and taskbar the Alumni Hub icon instead of the Python one."""
     try:
@@ -185,6 +203,7 @@ def set_window_icon(title):
                 small = user32.LoadImageW(None, ico, 1, 32, 32, 0x10)
                 user32.SendMessageW(hwnd, 0x80, 1, big)
                 user32.SendMessageW(hwnd, 0x80, 0, small)
+                centre_window(hwnd)
                 return
             time.sleep(0.25)
     except Exception:
