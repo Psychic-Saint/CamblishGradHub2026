@@ -1261,7 +1261,7 @@ async function viewUsers(){
         <label class="lbl">What this person can do</label><div id="upwrap"></div>
         <button class="btn gold" id="uadd" style="margin-top:12px">Create account</button><div id="uout"></div></div>
       <div class="card"><h2>People with access<span class="spacer"></span><span class="small muted" id="ucount"></span></h2><div id="ulist"><p class="muted">Loading…</p></div></div></div>
-      <div class="card"><h2>What each role can do</h2><p class="small muted" style="margin-top:-4px">Ticked items are switched on by default for that role. You can switch any of them on or off per person when you add them, or later with Edit access.</p>${accessMatrix()}</div>`;
+      <div class="card"><h2>What each role can do</h2><p class="small muted" style="margin-top:-4px">Ticked items are switched on by default for that role. You can switch any of them on or off per person when you add them, or later with Change access.</p>${accessMatrix()}</div>`;
     const drawPw = () => { const r = $("#ur").value; $("#upwrap").innerHTML = r === "admin" ? `<p class="small muted">Administrators can do everything.</p>` : permBoxes("upg", ROLE_DEFAULT[r].filter(p => myGrantable().includes(p)), myGrantable()); };
     $("#ur").onchange = drawPw; drawPw();
     $("#uadd").onclick = async () => {
@@ -1286,7 +1286,7 @@ async function drawUsers(){
       <div class="acc">${u.active ? PERMS.filter(([k]) => (u.perms||[]).includes(k)).map(([k,l]) => `<span>${l}</span>`).join("") || `<span class="no">View only</span>` : `<span class="no">No access (deactivated)</span>`}${u.custom && u.role !== "admin" ? `<span style="background:#fff6dd;color:#8a6200">Custom access</span>` : ""}</div>${u.active && u.role !== "admin" && PERMS.some(([k]) => !(u.perms||[]).includes(k)) ? `<div class="noacc">Can't: ${PERMS.filter(([k]) => !(u.perms||[]).includes(k)).map(([k,l]) => l.toLowerCase()).join(", ")}</div>` : ""}</div>
       ${u.id === S.user.id ? `<span class="tag">You</span>` : `
       <button class="sbtn p" data-ureset="${u.id}">Reset password</button>
-      ${u.role !== "admin" && u.active ? `<button class="sbtn n" data-uperm="${u.id}">Edit access</button>` : ""}
+      ${u.role !== "admin" && u.active ? `<button class="btn gold sm" data-uperm="${u.id}">🔑 Change access</button>` : ""}
       ${u.role !== "admin" ? `<button class="sbtn n" data-urole="${u.id}" data-to="${u.role==="manager"?"team":"manager"}">Make ${u.role==="manager"?"team":"manager"}</button>` : ""}
       <button class="sbtn ${u.active?"r":"c"}" data-uact="${u.id}" data-to="${u.active?0:1}">${u.active?"Deactivate":"Reactivate"}</button>`}</div>`).join("")}</div><div id="ucred"></div>`;
   $$("[data-ureset]").forEach(b => b.onclick = async () => { if (!confirm("Create a new temporary password for this person? Their current password stops working.")) return;
