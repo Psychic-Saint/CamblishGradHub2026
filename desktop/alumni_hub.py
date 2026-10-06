@@ -182,6 +182,39 @@ class Bridge:
         except Exception as e:
             return {"ok": False, "error": str(e)}
 
+    def save_pdf(self, name, html):
+        """Turn the report into a landscape PDF with Microsoft Edge (built into Windows), save it to Downloads and open it."""
+        try:
+            import subprocess
+            import tempfile
+            edge = next((e for e in [os.path.expandvars(r"%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe"),
+                                     os.path.expandvars(r"%ProgramFiles%\Microsoft\Edge\Application\msedge.exe")] if os.path.exists(e)), None)
+            if not edge:
+                return {"ok": False, "error": "Microsoft Edge was not found on this computer"}
+            folder = os.path.join(os.path.expanduser("~"), "Downloads")
+            safe = re.sub(r'[\\/:*?"<>|]', "", str(name)).strip()[:150] or "Graduation report.pdf"
+            if not safe.lower().endswith(".pdf"):
+                safe += ".pdf"
+            path = os.path.join(folder, safe)
+            base, ext = os.path.splitext(path)
+            i = 1
+            while os.path.exists(path):
+                path = f"{base} ({i}){ext}"
+                i += 1
+            tmp = os.path.join(tempfile.gettempdir(), "alumni_hub_report.html")
+            with open(tmp, "w", encoding="utf-8") as f:
+                f.write(html)
+            profile = os.path.join(tempfile.gettempdir(), "alumni_hub_pdf_profile")
+            subprocess.run([edge, "--headless=new", "--disable-gpu", "--no-first-run", f"--user-data-dir={profile}", "--no-pdf-header-footer",
+                            "--virtual-time-budget=6000", f"--print-to-pdf={path}", "file:///" + tmp.replace("\\", "/")],
+                           timeout=90, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+            if not os.path.exists(path):
+                return {"ok": False, "error": "Edge could not create the PDF"}
+            os.startfile(path)
+            return {"ok": True, "path": path}
+        except Exception as e:
+            return {"ok": False, "error": str(e)}
+
     def send_email(self, to, subject, body):
         try:
             import win32com.client

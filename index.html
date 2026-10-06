@@ -336,6 +336,8 @@ h3.ch{font-size:14px;margin:12px 0 6px}
 .smk{vertical-align:-2px;margin-right:4px}
 .stagebar{margin:10px auto 0;width:60%;text-align:center;background:#081a45;color:#f3d27a;font-weight:800;letter-spacing:4px;border-radius:0 0 40px 40px;padding:8px}
 #ulist .lrow{flex-wrap:wrap;row-gap:8px}
+.callsel{display:flex;align-items:center;gap:8px;margin-top:14px;color:#f3d27a;font-weight:700;font-size:13px;position:relative;z-index:1;flex-wrap:wrap}
+.callsel select{flex:1;min-width:200px;background:rgba(255,255,255,.95);color:var(--navy);font-weight:700;border:2px solid var(--gold);border-radius:10px;padding:8px 10px}
 .flowwrap{overflow-x:auto;scrollbar-width:none;margin:-4px -4px 10px;padding:4px}
 .flowcard{padding:10px 12px}.flowcard .flowwrap{margin:0}
 .flow{display:flex;align-items:center;gap:4px;min-width:max-content}
@@ -1529,15 +1531,41 @@ function pmTable(L){
    GRADUATION REPORT  (a standalone, printable story of the day)
    ====================================================================== */
 function reportDialog(){
-  modal(`<h3>Graduation report</h3><p class="small muted">A visual report of the day: attendance, robes, the stage, certificates, programmes, clients, project managers, tasks and announcements. ${fActive() ? "<b>Your current filters apply.</b>" : ""}</p>
-    <div class="row" style="margin-top:12px"><button class="btn gold" id="rDl">⬇ Download report</button><button class="btn" id="rOpen">Open to print or save as PDF</button><span class="spacer"></span><button class="btn ghost" id="mc">Close</button></div>`,
+  modal(`<h3>Graduation report</h3><p class="small muted">A landscape report of the day: attendance, robes, the stage, certificates, programmes, clients, project managers, tasks and announcements. ${fActive() ? "<b>Your current filters apply.</b>" : ""}</p>
+    <div class="row" style="margin-top:12px;flex-wrap:wrap"><button class="btn gold" id="rPdf">⬇ Download PDF (landscape)</button><button class="btn ghost" id="rOpen">Open to print</button><button class="btn ghost" id="rDl">Web page version</button><span class="spacer"></span><button class="btn ghost" id="mc">Close</button></div><div id="rMsg" class="small" style="margin-top:8px"></div>`,
     (m, close) => { $("#mc",m).onclick = close;
-      const name = `Graduation report ${S.data.event.name} ${new Date().toISOString().slice(0,10)}.html`.replace(/[\\/:*?"<>|]/g, "");
-      $("#rDl",m).onclick = () => saveFile(name, buildReport());
+      const base = `Graduation report ${S.data.event.name} ${new Date().toISOString().slice(0,10)}`.replace(/[\\/:*?"<>|]/g, "");
+      $("#rPdf",m).onclick = async () => { $("#rPdf",m).disabled = true; $("#rMsg",m).textContent = "Building the PDF…"; const ok = await reportPdf(base + ".pdf"); $("#rPdf",m).disabled = false; $("#rMsg",m).textContent = ok ? "Done." : ""; };
+      $("#rDl",m).onclick = () => saveFile(base + ".html", buildReport());
       $("#rOpen",m).onclick = () => { const html = buildReport().replace("</body>", `<script>setTimeout(()=>print(),700)<\/script></body>`);
-        if (DESKTOP() && DESKTOP().save_file) return saveFile(name, html, true);
-        const w = window.open(URL.createObjectURL(new Blob([html], {type:"text/html"})), "_blank"); if (!w) saveFile(name, html); };
+        if (DESKTOP() && DESKTOP().save_file) return saveFile(base + ".html", html, true);
+        const w = window.open(URL.createObjectURL(new Blob([html], {type:"text/html"})), "_blank"); if (!w) saveFile(base + ".html", html); };
     });
+}
+async function reportPdf(name){
+  const html = buildReport();
+  try {
+    if (DESKTOP() && DESKTOP().save_pdf){
+      const r = await DESKTOP().save_pdf(name, html);
+      toast(r && r.ok ? "PDF saved to Downloads and opened: " + name : "Could not make the PDF: " + (r && r.error), r && r.ok ? "green" : "red"); return !!(r && r.ok);
+    }
+    if (DESKTOP() && DESKTOP().save_file){   // older desktop installs: open it ready to save as PDF
+      await saveFile(name.replace(/\.pdf$/, ".html"), html.replace("</body>", `<script>setTimeout(()=>print(),700)<\/script></body>`), true); return true;
+    }
+    return await new Promise(res => {
+      const f = document.createElement("iframe"); f.style.cssText = "position:fixed;left:-12000px;top:0;width:1130px;height:900px;border:0";
+      const done = ok => { window.removeEventListener("message", onMsg); setTimeout(() => f.remove(), 1500); toast(ok ? "PDF downloaded: " + name : "Could not make the PDF. Use Open to print instead.", ok ? "green" : "red"); res(ok); };
+      const onMsg = e => { if (e.data && e.data.pdf) done(e.data.pdf === "done"); };
+      window.addEventListener("message", onMsg);
+      setTimeout(() => done(false), 60000);
+      f.srcdoc = html.replace("</body>", `<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>
+        <script>window.addEventListener("load", () => setTimeout(() => { try { html2pdf().set({ margin:[6,6,8,6], filename:${JSON.stringify(name)}, image:{type:"jpeg", quality:0.95},
+          html2canvas:{scale:2, useCORS:true, windowWidth:1100, backgroundColor:"#ffffff"}, jsPDF:{unit:"mm", format:"a4", orientation:"landscape"},
+          pagebreak:{mode:["css","legacy"], avoid:[".pb",".fr","tr",".kp",".rings",".ann",".story",".cover"]} }).from(document.querySelector(".page")).save()
+          .then(() => parent.postMessage({pdf:"done"}, "*")).catch(() => parent.postMessage({pdf:"fail"}, "*")); } catch(e){ parent.postMessage({pdf:"fail"}, "*"); } }, 600));<\/script></body>`);
+      document.body.appendChild(f);
+    });
+  } catch(e){ toast("Could not make the PDF: " + e.message, "red"); return false; }
 }
 async function saveFile(name, content, open){
   if (DESKTOP() && DESKTOP().save_file){ const r = await DESKTOP().save_file(name, content, true); toast(r && r.ok ? "Saved to Downloads and opened: " + name : "Could not save: " + (r && r.error), r && r.ok ? "green" : "red"); return; }
@@ -1563,8 +1591,11 @@ function buildReport(){
   const story = `${J.arrived} of ${J.total} graduates arrived (${pct(J.arrived,J.total)}%)${J.absent ? `, ${J.absent} were marked absent` : ""}. ${J.robed} received their robes, ${J.crossed} crossed the stage and ${J.cert} received their certificates.`
     + (arr.length ? ` Registration opened with the first arrival at ${fmt(arr[0])} and the last graduate checked in at ${fmt(arr[arr.length-1])}.` : "")
     + (st.length > 1 ? ` The ceremony ran from ${fmt(st[0])} to ${fmt(st[st.length-1])}: ${stageMins} minute${stageMins===1?"":"s"} on stage, about ${perGrad} second${perGrad===1?"":"s"} per graduate.` : "");
-  const css = `@page{size:A4;margin:14mm}*{box-sizing:border-box}body{font-family:Montserrat,"Segoe UI",Arial,sans-serif;color:#0d1b3e;margin:0;background:#eef2fb}
-    .page{max-width:900px;margin:0 auto;background:#fff;padding:0 0 30px;box-shadow:0 10px 40px -20px rgba(8,26,69,.4)}
+  const css = `@page{size:A4 landscape;margin:9mm}*{box-sizing:border-box}body{font-family:Montserrat,"Segoe UI",Arial,sans-serif;color:#0d1b3e;margin:0;background:#eef2fb}
+    .page{max-width:1100px;margin:0 auto;background:#fff;padding:0 0 30px;box-shadow:0 10px 40px -20px rgba(8,26,69,.4)}
+    .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}.two h2{margin-top:22px}
+    .two table{font-size:11px;table-layout:fixed}.two th{font-size:9.5px;padding:6px 4px;letter-spacing:.2px}.two td{padding:5px 4px;word-wrap:break-word}.two td:first-child,.two th:first-child{width:30%}.two .mb{width:34px}
+    .newpage{page-break-before:always;break-before:page}
     .cover{background:linear-gradient(135deg,#081a45,#1d3fae);color:#fff;padding:34px 40px 30px;position:relative;overflow:hidden}
     .cover:after{content:"";position:absolute;right:-60px;top:-40px;width:260px;height:260px;border:2px solid rgba(212,175,55,.5);transform:rotate(30deg)}
     .cover img{width:64px;height:64px;border-radius:50%;background:#fff;padding:4px;float:right}
@@ -1581,7 +1612,7 @@ function buildReport(){
     .kp{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}.kp div{background:#f6f8fd;border-radius:12px;padding:12px}.kp b{display:block;font-size:22px}.kp span{font-size:11px;color:#5b6785}
     .ann{padding:8px 0;border-bottom:1px solid #e6eaf3;font-size:13px}.ann small{color:#5b6785}
     .foot{text-align:center;color:#8a93a8;font-size:11px;margin-top:30px}.foot .c{font-size:5px;opacity:.25}
-    @media print{body{background:#fff}.page{box-shadow:none;max-width:none}h2{break-after:avoid}.pb,.fr,tr{break-inside:avoid}}`;
+    @media print{body{background:#fff}.page{box-shadow:none;max-width:none}h2{break-after:avoid}.pb,.fr,tr,.kp,.rings,.ann{break-inside:avoid}.newpage{break-before:page}}`;
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Graduation report · ${esc(d.event.name)}</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=swap" rel="stylesheet"><style>${css}</style></head><body><div class="page">
     <div class="cover"><img src="${document.querySelector('.top img').src}" alt="Camblish crest"><div class="tag">Graduation day report</div><h1>${esc(d.event.name)}</h1>
@@ -1589,12 +1620,11 @@ function buildReport(){
     <div class="in">
       <div class="story">${story} ${peak}</div>
       <div class="rings">${ring(J.arrived, J.total, "Present", RAMP.arr, `${J.absent} absent`)}${ring(J.robed, J.arrived, "Robes issued", RAMP.robe, "of those present")}${ring(J.crossed, J.arrived, "Crossed the stage", RAMP.crossed, "of those present")}${ring(J.cert, J.arrived, "Certificates", RAMP.cert, "of those present")}</div>
-      <h2>The journey through the day</h2>${funnel(J)}
-      <h2>Arrivals at registration</h2>${arrivalsChart(L, 800, 170)}
+      <div class="two"><div><h2>The journey through the day</h2>${funnel(J)}</div><div><h2>Arrivals at registration</h2>${arrivalsChart(L, 520, 170)}</div></div>
       <div class="kp"><div><b>${fmt(arr[0])}</b><span>First arrival</span></div><div><b>${fmt(arr[arr.length-1])}</b><span>Last arrival</span></div><div><b>${st.length ? fmt(st[0]) : "–"}</b><span>First graduate on stage</span></div><div><b>${stageMins ? stageMins + " min" : "–"}</b><span>Time on stage${perGrad ? ` · ${perGrad}s each` : ""}</span></div></div>
-      <h2>Progress by programme</h2>${progBars(L, 80)}
-      ${tbl("By programme","programme")}${tbl("By client","client")}${tbl("By project manager","pm")}
-      <h2>Team and tasks</h2><div class="kp"><div><b>${tDone}/${T.length}</b><span>Tasks completed</span></div><div><b>${roads}</b><span>Roadblocks raised</span></div><div><b>${anns.length}</b><span>Announcements</span></div><div><b>${new Set(d.feed.map(f => f.actor)).size}</b><span>Team members active</span></div></div>
+      <h2 class="newpage">Progress by programme</h2>${progBars(L, 80)}
+      <div class="newpage">${tbl("By programme","programme")}</div><div class="two"><div>${tbl("By client","client")}</div><div>${tbl("By project manager","pm")}</div></div>
+      <h2 class="newpage">Team and tasks</h2><div class="kp"><div><b>${tDone}/${T.length}</b><span>Tasks completed</span></div><div><b>${roads}</b><span>Roadblocks raised</span></div><div><b>${anns.length}</b><span>Announcements</span></div><div><b>${new Set(d.feed.map(f => f.actor)).size}</b><span>Team members active</span></div></div>
       ${T.filter(t => t.status !== "Completed").length ? `<p style="font-size:13px"><b>Still open:</b> ${T.filter(t => t.status !== "Completed").map(t => esc(t.title) + ` (${esc(t.status)})`).join("; ")}</p>` : ""}
       ${anns.length ? `<h2>Announcements</h2>${anns.map(a => `<div class="ann"><small>${fmt(a.created_at)} · ${esc(a.actor)}</small><br>${esc(a.text)}</div>`).join("")}` : ""}
       <div class="foot">Camblish Training Institute · Taking the Lead, Shaping the Future<br><span class="c">Designed and developed by Eddie Bila</span></div>
@@ -1611,18 +1641,25 @@ function viewStage(){
   const notYet = S.data.learners.filter(l=>l.status==="expected");
   const notYetBy = {}; notYet.forEach(l => { const g = groupOf(l); notYetBy[g] = (notYetBy[g]||0)+1; });
   const late = waiting.filter(l=>l._late);
-  const nextUp = waiting.slice(0,5);
+  // the stage manager can call one programme at a time; inside it, first to arrive goes first
+  const progOrder = [...new Set(P.filter(l => l.stage_status !== "done").sort((a,b) => progKey(a).localeCompare(progKey(b))).map(l => l.programme || "No programme"))];
+  if (S.f.stageProg && !progOrder.includes(S.f.stageProg)) progOrder.push(S.f.stageProg);
+  const sel = S.f.stageProg || "";
+  const queue = sel ? waiting.filter(l => (l.programme || "No programme") === sel).sort(byArrival) : waiting;
+  const nextUp = queue.slice(0,5);
+  const progOpts = progOrder.map(p => { const n = waiting.filter(l => (l.programme || "No programme") === p).length; return `<option value="${esc(p)}" ${p === sel ? "selected" : ""}>${esc(p)} · ${n} waiting</option>`; }).join("");
   let html = bannerHTML() + `<div class="card flowcard noprint"><div id="flow" class="flowwrap"></div></div>
   <div class="stagebox noprint">
     <div class="now"><div class="l">Now on stage</div>
       ${called.length ? called.map(l=>`<div class="big">${esc(fullName(l))}</div><div class="pr">${l.seat?"Seat "+esc(l.seat)+" · ":""}Tag ${l._code} · #${l._seq} · NQF ${esc(l.nqf??"?")} · ${esc(l.programme||"")}${l.client?" · "+esc(l.client):""}</div>`).join("") : `<div class="big" style="opacity:.7">Nobody called yet</div><div class="pr">${P.length} arrived graduates in the line-up</div>`}
-      <div class="row" style="margin-top:14px;position:relative;z-index:1">
-        <button class="btn gold lg" id="callNext" ${waiting.length?"":"disabled"}>${called.length?"✓ Done, call next":"▶ Call first graduate"}</button>
+      <label class="callsel">Calling <select id="stProg" aria-label="Programme to call"><option value="">All programmes, in stage order</option>${progOpts}</select></label>
+      <div class="row" style="margin-top:12px;position:relative;z-index:1">
+        <button class="btn gold lg" id="callNext" ${queue.length || called.length ? "" : "disabled"}>${called.length ? (queue.length ? "✓ Done, call next" : "✓ Done") : "▶ Call first graduate"}</button>
         ${called.length?`<button class="btn ghost sm" id="undoCall">Back to waiting</button>`:""}
       </div>
       <div class="small" style="margin-top:10px;color:#c9d3f2">${done} of ${P.length} crossed · ${robing} still getting robes · ${notYet.length} not yet arrived</div>
     </div>
-    <div class="card" style="margin:0"><h2>Up next</h2>
+    <div class="card" style="margin:0"><h2>Up next${sel ? ` <span class="tag gold">${esc(sel)}</span>` : ""}</h2>
       ${nextUp.length ? nextUp.map((l,i)=>`<div class="row" style="padding:6px 0;border-bottom:1px solid var(--line)"><span class="seq" style="width:auto;min-width:30px;height:30px;font-size:12px;padding:0 6px;border-radius:15px">${l._code}</span><div style="flex:1"><b>${esc(fullName(l))}</b><div class="small muted">${esc(l.programme||"")}${l.client?" · "+esc(l.client):""}</div></div>${l._late?`<span class="tag red">Late arrival</span>`:""}${i===0?`<span class="tag gold">Next</span>`:""}</div>`).join("") : `<div class="empty">No one waiting.</div>`}
     </div>
   </div>
@@ -1657,8 +1694,9 @@ function viewStage(){
   const cn = $("#callNext"); if (cn) cn.onclick = async () => {
     cn.disabled = true;
     for (const l of called) await rpc("grad_stage", {p_code:CODE,p_pin:S.pin,p_actor:S.me,p_learner:l.id,p_stage:"done"}).catch(()=>{});
-    const nxt = waiting[0]; if (nxt) await act("grad_stage", {p_learner:nxt.id, p_stage:"called"}); else await pull(true);
+    const nxt = queue[0]; if (nxt) await act("grad_stage", {p_learner:nxt.id, p_stage:"called"}); else { if (sel) toast(`Everyone in ${sel} who is ready has crossed`, "green"); await pull(true); }
   };
+  const sp = $("#stProg"); if (sp) sp.onchange = () => { S.f.stageProg = sp.value; viewStage(); };
   const uc = $("#undoCall"); if (uc) uc.onclick = async () => { for (const l of called) await rpc("grad_stage",{p_code:CODE,p_pin:S.pin,p_actor:S.me,p_learner:l.id,p_stage:"waiting"}).catch(()=>{}); pull(true); };
 }
 
