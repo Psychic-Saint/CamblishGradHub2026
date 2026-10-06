@@ -5,7 +5,7 @@ Author: Eddie Bila · Camblish Training Institute · *Taking the Lead, Shaping t
 One interface for graduations and alumni events: live check-in, stage order with first come, first on stage, name tags, team tasks with roadblocks, announcements, user accounts for @camblish.co.za staff and Excel learner uploads.
 
 ## Open it
-- **Web / phones:** https://psychic-saint.github.io/camblish-alumni-hub/
+- **Web / phones:** https://psychic-saint.github.io/CamblishGradHub2026/
 - **Windows desktop:** run `desktop/run.bat` (needs Python 3.12 with `pip install pywebview pillow pywin32`) or build a standalone app with `desktop/build.bat`. The desktop app opens the same GitHub page, adds silent name-tag printing to label printers and sends login emails through Outlook. It falls back to a bundled copy when offline.
 
 ## How it fits together
