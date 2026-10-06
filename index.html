@@ -412,10 +412,12 @@ nav.tabs .badge.green{background:var(--ok);color:#fff}
 .feed-item.mine{background:linear-gradient(90deg,#fffaf0,#fff)}
 #capSpin{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:radial-gradient(circle at 50% 40%,rgba(29,63,174,.92),rgba(8,26,69,.97));perspective:900px;transition:opacity .35s}
 #capSpin.out{opacity:0}
-.stiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:8px 0 14px}
-.stile{text-align:left;background:#fff;border:1px solid var(--line);border-top:4px solid var(--royal);border-radius:14px;padding:10px 12px;cursor:pointer;font:inherit;color:var(--ink);box-shadow:0 6px 16px -14px rgba(8,26,69,.6);transition:transform .12s}
-.stile:hover{transform:translateY(-2px)}.stile b{display:block;font-size:26px;line-height:1.1;color:var(--navy)}.stile span{display:block;font-weight:800;font-size:12.5px}.stile small{display:block;font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.stile.hot{border-top-color:var(--gold);background:linear-gradient(180deg,#fff8e1,#fff)}.stile.hot b{color:#8a6510}
+.catsel{width:auto;max-width:165px;flex:0 0 auto;border:2px solid var(--cc,#1d3fae);background:var(--cb,#fff);color:var(--cc,#1d3fae);font-weight:800;border-radius:10px;padding:0 10px;cursor:pointer}
+@media (max-width:600px){.anncompose .row{flex-wrap:wrap!important}.anncompose .catsel{flex:1;max-width:none}}
+.stiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:6px 0 12px}
+.stile{display:grid;grid-template-columns:auto 1fr;column-gap:8px;align-items:center;text-align:left;background:#fff;border:1px solid var(--line);border-left:4px solid var(--royal);border-radius:10px;padding:6px 10px;cursor:pointer;font:inherit;color:var(--ink);transition:transform .12s}
+.stile:hover{transform:translateY(-1px)}.stile b{grid-row:span 2;font-size:20px;line-height:1;color:var(--navy);min-width:22px}.stile span{font-weight:800;font-size:12px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.stile small{font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
+.stile.hot{border-left-color:var(--gold);background:linear-gradient(90deg,#fff8e1,#fff)}.stile.hot b{color:#8a6510}
 @media (max-width:860px){.stiles{grid-template-columns:repeat(2,minmax(0,1fr))}.stiles .stile:nth-child(3){grid-column:1/-1}}
 .fdgrid{display:flex;flex-direction:column}.fdgrid .annscreen{order:-1}
 .actscreen .feed-item{gap:8px;padding:6px 4px}.actscreen .feed-item .ic{width:24px;height:24px;font-size:12px}
@@ -516,7 +518,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202610062136";
+const BUILD = "202610062231";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -2160,10 +2162,11 @@ function viewFeed(){
         <div class="chips" id="fdChips" style="margin:4px 0 8px"></div><div id="fdList"></div>
         <div class="row noprint" style="margin-top:10px"><button class="btn ghost sm" id="setAl">🔔 Alerts and sound settings</button></div></section>
       <section class="annscreen card"><div class="ash"><h2>📣 Announcements</h2><span class="spacer"></span><span class="small" id="annCount"></span></div>
-        ${can("announce") ? `<div class="anncompose noprint"><div class="catpick" id="catPick">${Object.entries(ANN_CAT).filter(([k]) => k !== "late").map(([k,c]) => `<button type="button" class="catbtn ${k === (S.f.annCat || "general") ? "on" : ""}" data-cat="${k}" style="--cc:${c.c};--cb:${c.bg}">${c.icon} ${c.label}</button>`).join("")}</div>
-          <div class="row" style="align-items:stretch;margin-top:8px"><input type="text" id="annTxt" maxlength="2000" placeholder="Write an announcement for everyone" style="flex:1;min-width:0"><button class="btn gold" id="annSend" style="min-width:110px">Announce</button></div></div>` : ""}
+        ${can("announce") ? `<div class="anncompose noprint"><div class="row" style="align-items:stretch;gap:6px;flex-wrap:nowrap"><input type="text" id="annTxt" maxlength="2000" placeholder="Write an announcement for everyone" style="flex:1;min-width:0">
+          <select id="annCatSel" class="catsel" aria-label="Announcement category">${Object.entries(ANN_CAT).filter(([k]) => k !== "late").map(([k,c]) => `<option value="${k}" ${k === (S.f.annCat || "general") ? "selected" : ""}>${c.icon} ${c.label}</option>`).join("")}</select>
+          <button class="btn gold" id="annSend" style="min-width:92px;padding-left:12px;padding-right:12px">Announce</button></div></div>` : ""}
         <div id="annList"></div><button class="lnk" id="annMore" type="button"></button></section></div>`;
-    $$("#catPick [data-cat]").forEach(b => b.onclick = () => { S.f.annCat = b.dataset.cat; $$("#catPick [data-cat]").forEach(x => x.classList.toggle("on", x === b)); });
+    const cs = $("#annCatSel"); if (cs){ const paint = () => { const c = annCat({category:cs.value}); cs.style.setProperty("--cc", c.c); cs.style.setProperty("--cb", c.bg); }; paint(); cs.onchange = () => { S.f.annCat = cs.value; paint(); }; }
     const at = $("#annTxt"); if (at) at.addEventListener("keydown", e => { if (e.key === "Enter"){ e.preventDefault(); $("#annSend").click(); } });
     const as = $("#annSend"); if (as) as.onclick = async () => { const v = $("#annTxt").value.trim(); if (!v) return $("#annTxt").focus(); as.disabled = true;
       if (await act("grad_post2", {p_text:v, p_kind:"announcement", p_category:S.f.annCat || "general", p_ref_type:null, p_ref_id:null}, `${annCat({category:S.f.annCat}).label} announcement sent to everyone`)) $("#annTxt").value = ""; as.disabled = false; };
