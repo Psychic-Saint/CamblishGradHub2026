@@ -529,7 +529,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202610070028";
+const BUILD = "202610070041";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -1974,20 +1974,19 @@ async function reportPdf(name, htmlIn){
     if (DESKTOP() && DESKTOP().save_file){   // older desktop installs: open it ready to save as PDF
       await saveFile(name.replace(/\.pdf$/, ".html"), html.replace("</body>", `<script>setTimeout(()=>print(),700)<\/script></body>`), true); return true;
     }
-    return await new Promise(res => {
-      const f = document.createElement("iframe"); f.style.cssText = "position:fixed;left:-12000px;top:0;width:1130px;height:900px;border:0";
-      const done = ok => { window.removeEventListener("message", onMsg); setTimeout(() => f.remove(), 1500); toast(ok ? "PDF downloaded: " + name : "Could not make the PDF. Use Open to print instead.", ok ? "green" : "red"); res(ok); };
-      const onMsg = e => { if (e.data && e.data.pdf) done(e.data.pdf === "done"); };
-      window.addEventListener("message", onMsg);
-      setTimeout(() => done(false), 60000);
-      f.srcdoc = html.replace("</body>", `<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>
-        <script>window.addEventListener("load", () => setTimeout(() => { try { html2pdf().set({ margin:[6,6,8,6], filename:${JSON.stringify(name)}, image:{type:"jpeg", quality:0.95},
-          html2canvas:{scale:2, useCORS:true, windowWidth:1100, backgroundColor:"#ffffff"}, jsPDF:{unit:"mm", format:"a4", orientation:"landscape"},
-          pagebreak:{mode:["css","legacy"], avoid:[".pb",".fr","tr",".kp",".rings",".ann",".story",".cover",".glr",".glh"]} }).from(document.querySelector(".page")).save()
-          .then(() => parent.postMessage({pdf:"done"}, "*")).catch(() => parent.postMessage({pdf:"fail"}, "*")); } catch(e){ parent.postMessage({pdf:"fail"}, "*"); } }, 600));<\/script></body>`);
-      document.body.appendChild(f);
-    });
+    return printHTML(htmlIn || buildReport(), true);
   } catch(e){ toast("Could not make the PDF: " + e.message, "red"); return false; }
+}
+/* print through the browser's own engine: clean page breaks, then "Save as PDF" */
+function printHTML(html, asPdf){
+  return new Promise(res => {
+    const f = document.createElement("iframe"); f.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0"; f.srcdoc = html; document.body.appendChild(f);
+    f.onload = () => setTimeout(() => {
+      try { f.contentWindow.focus(); f.contentWindow.print(); if (asPdf) toast("In the print window choose “Save as PDF” as the printer, then Save. The layout is already set to landscape.", "gold big"); res(true); }
+      catch(e){ toast("Could not open printing: " + e.message, "red"); res(false); }
+      setTimeout(() => f.remove(), 60000);
+    }, 700);
+  });
 }
 async function saveFile(name, content, open){
   if (DESKTOP() && DESKTOP().save_file){ const r = await DESKTOP().save_file(name, content, true); toast(r && r.ok ? "Saved to Downloads and opened: " + name : "Could not save: " + (r && r.error), r && r.ok ? "green" : "red"); return; }
@@ -2073,7 +2072,7 @@ function buildReport(mode){
     .page{max-width:1100px;margin:0 auto;background:#fff;padding:0 0 30px;box-shadow:0 10px 40px -20px rgba(8,26,69,.4)}
     .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}.two h2{margin-top:22px}
     .two table{font-size:11px;table-layout:fixed}.two th{font-size:9.5px;padding:6px 4px;letter-spacing:.2px}.two td{padding:5px 4px;word-wrap:break-word}.two td:first-child,.two th:first-child{width:30%}.two .mb{width:34px}
-    .newpage{page-break-before:always;break-before:page}
+    .newpage{page-break-before:always;break-before:page;margin-top:0!important;padding-top:4px}
     .cover{background:linear-gradient(135deg,#081a45,#1d3fae);color:#fff;padding:34px 40px 30px;position:relative;overflow:hidden}
     .cover:after{content:"";position:absolute;right:-60px;top:-40px;width:260px;height:260px;border:2px solid rgba(212,175,55,.5);transform:rotate(30deg)}
     .cover img{width:100px;height:100px;border-radius:50%;background:#fff;padding:7px;float:right;object-fit:contain;box-shadow:0 0 0 3px rgba(212,175,55,.75),0 8px 20px -8px rgba(0,0,0,.5);position:relative;z-index:1}
@@ -2102,9 +2101,9 @@ function buildReport(mode){
       ${gradListHTML(L)}` : `
       <div class="story">${story} ${peak}</div>
       <div class="rings">${ring(J.arrived, J.total, "Present", RAMP.arr, `${J.absent} absent`)}${ring(J.robed, J.arrived, "Robes issued", RAMP.robe, "of those present")}${ring(J.crossed, J.arrived, "Crossed the stage", RAMP.crossed, "of those present")}${ring(J.cert, J.arrived, "Certificates", RAMP.cert, "of those present")}</div>
-      <div class="two"><div><h2>The journey through the day</h2>${funnel(J)}</div><div><h2>Arrivals at registration</h2>${arrivalsChart(L, 520, 170)}</div></div>
+      <div class="two"><div><h2>The journey through the day</h2>${funnel(J)}</div><div><h2>Arrivals at registration</h2>${arrivalsChart(L, 520, 125)}</div></div>
       <div class="kp"><div><b>${fmt(arr[0])}</b><span>First arrival</span></div><div><b>${fmt(arr[arr.length-1])}</b><span>Last arrival</span></div><div><b>${st.length ? fmt(st[0]) : "–"}</b><span>First graduate on stage</span></div><div><b>${stageMins ? stageMins + " min" : "–"}</b><span>Time on stage${perGrad ? ` · ${perGrad}s each` : ""}</span></div></div>
-      <h2 class="newpage">Progress by programme</h2>${progBars(L, 80)}
+      <h2>Progress by programme</h2>${progBars(L, 80)}
       <div class="newpage">${tbl("By programme","programme")}</div><div class="two"><div>${tbl("By client","client")}</div><div>${tbl("By project manager","pm")}</div></div>
       <h2 class="newpage">Team and tasks</h2><div class="kp"><div><b>${tDone}/${T.length}</b><span>Tasks completed</span></div><div><b>${roads}</b><span>Roadblocks raised</span></div><div><b>${anns.length}</b><span>Announcements</span></div><div><b>${new Set(d.feed.map(f => f.actor)).size}</b><span>Team members active</span></div></div>
       ${T.filter(t => t.status !== "Completed").length ? `<p style="font-size:13px"><b>Still open:</b> ${T.filter(t => t.status !== "Completed").map(t => esc(t.title) + ` (${esc(t.status)})`).join("; ")}</p>` : ""}
