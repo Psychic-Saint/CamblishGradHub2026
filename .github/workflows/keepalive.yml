@@ -1,0 +1,21 @@
+name: Keep the hub awake
+
+# Pings the database every day so the free Supabase project never pauses
+# from inactivity, and checks that the live page is reachable.
+on:
+  schedule:
+    - cron: "17 5 * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping the database
+        run: |
+          curl -sf --retry 5 --retry-delay 20 -X POST \
+            "https://jrbihuegqydoqnsxxvma.supabase.co/rest/v1/rpc/hub_status" \
+            -H "apikey: sb_publishable_J8SQCrGd5l2qpnVefK_z2w_kuYZ412s" \
+            -H "Content-Type: application/json" -d '{}'
+      - name: Check the live page
+        run: curl -sf --retry 5 --retry-delay 20 -o /dev/null https://psychic-saint.github.io/CamblishGradHub2026/
