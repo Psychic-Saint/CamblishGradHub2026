@@ -489,6 +489,16 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
+const BUILD = "202610062005";
+/* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
+(function checkLatest(){
+  if (location.protocol !== "https:") return;
+  const go = () => fetch(location.pathname + "?nc=" + Date.now(), {cache:"no-store"}).then(r => r.text()).then(t => {
+    const m = t.match(/const BUILD = "(\d+)"/);
+    if (m && m[1] > BUILD && !sessionStorage.getItem("hub_upd_" + m[1])){ sessionStorage.setItem("hub_upd_" + m[1], 1); const u = new URL(location.href); u.searchParams.set("v", m[1]); location.replace(u.toString()); }
+  }).catch(() => {});
+  go();
+})();
 let CODE = params.get("e");
 const HUB_URL = "https://psychic-saint.github.io/CamblishGradHub2026/";
 const TOKEN_KEY = "hub_token";
