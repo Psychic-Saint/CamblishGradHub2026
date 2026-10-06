@@ -206,7 +206,10 @@ body{background:
 .goldbar{height:3px;background:linear-gradient(90deg,transparent,var(--gold),var(--gold-2),var(--gold),transparent)}
 nav.tabs{background:transparent;border:0}
 nav.tabs .in{padding:10px 12px 4px;gap:8px}
-nav.tabs button{background:rgba(255,255,255,.08);color:#dfe6fb;border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:9px 16px;box-shadow:0 3px 0 rgba(0,0,0,.25);transition:transform .15s}
+nav.tabs button{border-radius:12px!important;padding:9px 16px!important;transition:transform .15s;background:linear-gradient(180deg,#3563e9,#1d3fae)!important;color:#fff!important;border:1px solid rgba(243,210,122,.55)!important;font-weight:800!important;text-shadow:0 1px 0 rgba(0,0,0,.25);box-shadow:0 4px 0 #0b1f5c,0 10px 18px -8px rgba(0,0,0,.55)!important;}
+nav.tabs button:hover{background:linear-gradient(180deg,#4a76f0,#2448c0)!important}
+nav.tabs button.on{background:linear-gradient(180deg,#f8dc85,#d4af37)!important;color:#081a45!important;border-color:#fff3c4!important;text-shadow:none;box-shadow:0 4px 0 #9c7d22,0 12px 22px -8px rgba(212,175,55,.85)!important;transform:translateY(-2px)}
+nav.tabs button.legacy{background:rgba(255,255,255,.08);color:#dfe6fb;border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:9px 16px;box-shadow:0 3px 0 rgba(0,0,0,.25);transition:transform .15s}
 nav.tabs button:hover{transform:translateY(-2px);background:rgba(255,255,255,.14)}
 nav.tabs button.on{background:linear-gradient(180deg,var(--gold-2),var(--gold));color:var(--navy);border-color:transparent;box-shadow:0 4px 0 #9c7d22,0 10px 18px -8px rgba(212,175,55,.8)}
 .stick{box-shadow:none}
@@ -391,6 +394,32 @@ nav.tabs .badge.green{background:var(--ok);color:#fff}
 .pkeys{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;color:var(--muted);align-items:center}.pkeys i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-2px}
 .pkeys i.hatch{background:repeating-linear-gradient(45deg,#e3cf8e,#e3cf8e 2px,#f7efd2 2px,#f7efd2 4px)}.pkeys .sep{width:1px;height:14px;background:var(--line)}
 @media (max-width:760px){.pwrap{grid-template-columns:1fr}.pplan{max-height:55vh}}
+.annscreen{background:linear-gradient(160deg,#081a45,#14328f);color:#fff;border:0;box-shadow:0 18px 40px -20px rgba(8,26,69,.8)}
+.annscreen h2{color:#fff}.annscreen .ash .small{color:#f3d27a;font-weight:700}
+.ash{display:flex;align-items:center;gap:10px;margin-bottom:8px}.ash h2{margin:0}
+.actscreen{margin-top:16px;border-top:4px solid var(--gold)}
+.catpick{display:flex;gap:6px;flex-wrap:wrap}.catbtn{border:2px solid transparent;background:var(--cb);color:var(--cc);font-weight:800;border-radius:999px;padding:6px 12px;cursor:pointer;font-size:12.5px}
+.catbtn.on{border-color:#fff;box-shadow:0 0 0 3px var(--cc);transform:translateY(-1px)}
+.anncompose textarea{background:#fff;color:var(--ink)}
+.annlist{display:grid;gap:10px;margin-top:12px}
+.anncard{background:#fff;color:var(--ink);border-radius:14px;padding:12px 14px;border-left:6px solid var(--cc);box-shadow:0 8px 20px -12px rgba(0,0,0,.6)}
+.anncard.big{padding:16px 18px;background:linear-gradient(90deg,var(--cb),#fff 60%)}.anncard.big .act{font-size:18px}
+.anncard .ach{display:flex;align-items:center;gap:8px;margin-bottom:6px}.anncard .act{font-size:15px;font-weight:700;margin-bottom:4px;white-space:pre-wrap}
+.anncard.cat-disaster.big{animation:disasterpulse 1.6s ease-in-out 3}
+@keyframes disasterpulse{0%,100%{box-shadow:0 8px 20px -12px rgba(0,0,0,.6)}50%{box-shadow:0 0 0 5px rgba(179,38,30,.45)}}
+.anncat{display:inline-block;color:#fff;border-radius:999px;padding:2px 9px;font-size:11px;font-weight:800;letter-spacing:.2px;vertical-align:1px}
+#annMore{color:#f3d27a;margin-top:8px}
+.feed-item.mine{background:linear-gradient(90deg,#fffaf0,#fff)}
+#capSpin{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:radial-gradient(circle at 50% 40%,rgba(29,63,174,.92),rgba(8,26,69,.97));perspective:900px;transition:opacity .35s}
+#capSpin.out{opacity:0}
+#capSpin .capstage{position:relative;width:170px;height:170px;transform-style:preserve-3d}
+#capSpin img{width:170px;height:170px;border-radius:24%;box-shadow:0 20px 40px -12px rgba(0,0,0,.6),0 0 0 4px rgba(243,210,122,.55);animation:capspin 1.4s cubic-bezier(.45,.05,.55,.95) infinite}
+#capSpin .capshadow{position:absolute;left:20%;right:20%;bottom:-26px;height:14px;border-radius:50%;background:rgba(0,0,0,.35);filter:blur(6px);animation:capshadow 1.4s ease-in-out infinite}
+#capSpin .captxt{color:#f3d27a;font-weight:800;letter-spacing:.6px;font-size:16px}
+@keyframes capspin{0%{transform:rotateY(0) translateY(0)}50%{transform:rotateY(180deg) translateY(-14px)}100%{transform:rotateY(360deg) translateY(0)}}
+@keyframes capshadow{0%,100%{transform:scaleX(1);opacity:.6}50%{transform:scaleX(.7);opacity:.3}}
+#confetti{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:9999}
+@media (prefers-reduced-motion: reduce){#capSpin img{animation:none}}
 .ciReset{color:var(--bad)!important;border-color:#f3c3bd!important}
 .dangerzone{border:1px solid #f3c3bd;background:linear-gradient(180deg,#fff,#fff6f5)}
 .btn.red{background:linear-gradient(180deg,#e0483d,#b3261e);color:#fff;box-shadow:0 3px 0 #7d1a14}
@@ -597,6 +626,58 @@ window.addEventListener("focus", () => { unread = 0; document.title = baseTitle;
 document.addEventListener("visibilitychange", () => { if (!document.hidden){ unread = 0; document.title = baseTitle; } });
 function bounceTab(tab){ if (store.get("hub_noshake")) return; const b = $(`nav.tabs [data-tab="${tab}"]`); if (!b) return; b.classList.remove("shake"); void b.offsetWidth; b.classList.add("shake"); setTimeout(() => b.classList.remove("shake"), 1400); }
 
+/* ---------- sign-in spinner and celebration ---------- */
+function capSpin(on){
+  let o = $("#capSpin");
+  if (!on){ if (o){ o.classList.add("out"); setTimeout(() => o.remove(), 350); } return; }
+  if (o) return;
+  const src = (document.querySelector("img.capico") || {}).src || "";
+  o = document.createElement("div"); o.id = "capSpin";
+  o.innerHTML = `<div class="capstage"><img src="${src}" alt=""><div class="capshadow"></div></div><div class="captxt">Signing you in…</div>`;
+  document.body.appendChild(o);
+}
+function popSound(){
+  if (store.get("hub_mute")) return;
+  const c = audio(); if (!c) return;
+  try {
+    const out = c.createDynamicsCompressor(); out.connect(c.destination);
+    const pop = t => {   // balloon pop: a sharp noise burst plus a low thump
+      const len = Math.floor(c.sampleRate * .09), buf = c.createBuffer(1, len, c.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
+      const n = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain(); n.buffer = buf; f.type = "bandpass"; f.frequency.value = 1800 + Math.random() * 900; f.Q.value = .7;
+      n.connect(f); f.connect(g); g.connect(out); g.gain.setValueAtTime(1.4, t); g.gain.exponentialRampToValueAtTime(.001, t + .12); n.start(t);
+      const o = c.createOscillator(), og = c.createGain(); o.type = "sine"; o.frequency.setValueAtTime(160, t); o.frequency.exponentialRampToValueAtTime(50, t + .1); o.connect(og); og.connect(out);
+      og.gain.setValueAtTime(.7, t); og.gain.exponentialRampToValueAtTime(.001, t + .14); o.start(t); o.stop(t + .15);
+    };
+    const t0 = c.currentTime + .05; [0, .16, .27, .45, .52].forEach(x => pop(t0 + x));
+    [1046.5, 1318.5, 1568, 2093].forEach((fq, i) => bell(c, out, fq, t0 + .7 + i * .09, .9, .32));   // happy chime after the pops
+  } catch {}
+}
+function celebrate(){
+  popSound();
+  if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return toast("🎓 Welcome, " + (S.me || ""), "gold big");
+  const cv = document.createElement("canvas"); cv.id = "confetti"; document.body.appendChild(cv);
+  const ctx = cv.getContext("2d"), dpr = Math.min(2, window.devicePixelRatio || 1);
+  const size = () => { cv.width = innerWidth * dpr; cv.height = innerHeight * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }; size();
+  const cols = ["#d4af37","#f3d27a","#fff3c4","#1d3fae","#3563e9","#9db3ec","#ffffff","#2e9e6a","#e0483d"];
+  const P = [];
+  const burst = (x, dir, n) => { for (let i = 0; i < n; i++){ const a = (-90 + dir * (10 + Math.random() * 40)) * Math.PI / 180, v = 11 + Math.random() * 9;
+    P.push({x, y:innerHeight + 10, vx:Math.cos(a) * v, vy:Math.sin(a) * v, w:6 + Math.random() * 6, h:9 + Math.random() * 8, r:Math.random() * 6, vr:(Math.random() - .5) * .35, c:cols[i % cols.length], shape:Math.random() < .25 ? "c" : "r", wob:Math.random() * 6}); } };
+  burst(innerWidth * .15, 1, 110); burst(innerWidth * .85, -1, 110);
+  setTimeout(() => { for (let i = 0; i < 90; i++) P.push({x:Math.random() * innerWidth, y:-20 - Math.random() * 200, vx:(Math.random() - .5) * 2, vy:2 + Math.random() * 3, w:6 + Math.random() * 5, h:9 + Math.random() * 7, r:Math.random() * 6, vr:(Math.random() - .5) * .3, c:cols[i % cols.length], shape:Math.random() < .25 ? "c" : "r", wob:Math.random() * 6}); }, 350);
+  const t0 = performance.now();
+  const frame = now => {
+    const t = (now - t0) / 1000; ctx.clearRect(0, 0, innerWidth, innerHeight);
+    P.forEach(p => { p.vy += .32; p.vx *= .99; p.vy *= .99; p.x += p.vx + Math.sin(t * 4 + p.wob) * .6; p.y += p.vy; p.r += p.vr;
+      ctx.save(); ctx.globalAlpha = Math.max(0, Math.min(1, 4.6 - t)); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c;
+      if (p.shape === "c"){ ctx.beginPath(); ctx.arc(0, 0, p.w / 2, 0, Math.PI * 2); ctx.fill(); } else { ctx.scale(1, Math.abs(Math.cos(t * 6 + p.wob)) + .15); ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); }
+      ctx.restore(); });
+    if (t < 4.8) requestAnimationFrame(frame); else cv.remove();
+  };
+  requestAnimationFrame(frame);
+  toast("🎓 Welcome, " + (S.me || "") + "!", "gold big");
+}
+
 /* ---------- modal ---------- */
 function modal(html, onMount){
   const bg = document.createElement("div"); bg.className = "modal-bg";
@@ -654,7 +735,7 @@ async function pull(force){
         const others = fresh.filter(f => !(f.actor === S.me && mineRecently));
         others.slice().reverse().slice(-4).forEach(announceItem);
         if (fresh.some(f => /^reset the event/.test(f.text || "")) && force !== "full"){ S.lastFeedId = Math.max(prevLast, newest); pulling = false; S.f.collapsed = {}; return pull("full"); }
-        if (others.length){ if (S.tab !== "feed"){ S.unseen = (S.unseen||0) + others.length; } bounceTab("feed"); }
+        if (fresh.length){ if (S.tab !== "feed"){ S.unseen = (S.unseen||0) + fresh.length; } bounceTab("feed"); }
       }
       S.lastFeedId = Math.max(prevLast, newest);
       render();
@@ -667,9 +748,24 @@ async function pull(force){
   pulling = false; liveBadge();
   if (pullAgain){ pullAgain = false; pull(false); }
 }
+const ANN_CAT = {
+  general:{label:"General", icon:"📣", c:"#1d3fae", bg:"#eef2fb"},
+  urgent:{label:"Urgent", icon:"⚠️", c:"#c2410c", bg:"#fff1e6"},
+  disaster:{label:"Disaster level", icon:"🚨", c:"#b3261e", bg:"#fde8e6"},
+  help:{label:"Help needed!", icon:"🙋", c:"#a16207", bg:"#fff8db"},
+  unattended:{label:"Post left unattended", icon:"🚷", c:"#6a1b9a", bg:"#f5eafa"},
+  client:{label:"Client dissatisfied", icon:"😟", c:"#be185d", bg:"#fdeaf3"},
+  late:{label:"Running late", icon:"⏰", c:"#0f766e", bg:"#e6f6f4"},
+  good:{label:"Good news", icon:"🎉", c:"#1e7a4f", bg:"#e7f6ee"} };
+const annCat = f => ANN_CAT[f.category] || ANN_CAT.general;
 const KIND_TITLE = { announcement:"📣 Announcement", roadblock:"⚠ Roadblock", checkin:"✓ Check-in", robe:"🎓 Robes", stage:"🎓 On stage", cert:"📜 Certificate", status:"Task update", task:"📝 Task", comment:"💬 Comment", update:"Update" };
 function announceItem(f){
   const txt = `${f.actor}: ${f.text}`;
+  if (f.kind === "announcement"){ const c = annCat(f);
+    toast(`${c.icon} ${c.label.toUpperCase()} · ${txt}`, ["disaster","urgent","client","unattended"].includes(f.category) ? "red big" : "gold big");
+    chime(["disaster","urgent"].includes(f.category) ? "roadblock" : "announcement"); if (f.category === "disaster") setTimeout(() => chime("roadblock"), 1300);
+    notify(`${c.icon} ${c.label}`, txt);
+    document.body.classList.add("ann-flash"); setTimeout(() => document.body.classList.remove("ann-flash"), 1600); return; }
   toast((f.kind === "announcement" ? "📣 " : f.kind === "roadblock" ? "⚠ " : "") + txt, f.kind === "roadblock" ? "red" : ["checkin","robe","stage","cert"].includes(f.kind) ? "green" : f.kind === "announcement" ? "gold big" : "");
   chime(f.kind);
   notify(KIND_TITLE[f.kind] || "Alumni Hub update", txt);
@@ -748,13 +844,13 @@ async function authView(msg){
   const go = async () => {
     const em = $("#em").value.trim(), pw = $("#pw").value;
     if (!em || !pw) return;
-    $("#go").disabled = true; $("#go").textContent = "Signing in…";
+    $("#go").disabled = true; $("#go").textContent = "Signing in…"; audio(); capSpin(true);
     try {
       const r = await rpc("hub_login", {p_email:em, p_password:pw});
-      if (!r.ok){ $("#out").innerHTML = `<div class="err">${esc(r.error)}</div>`; $("#go").disabled=false; $("#go").textContent="Sign in"; return; }
+      if (!r.ok){ capSpin(false); $("#out").innerHTML = `<div class="err">${esc(r.error)}</div>`; $("#go").disabled=false; $("#go").textContent="Sign in"; return; }
       store.set("hub_email", em.toLowerCase());
-      afterAuth(r.token, r);
-    } catch(e){ $("#out").innerHTML = `<div class="err">${esc(e.message)}</div>`; $("#go").disabled=false; $("#go").textContent="Sign in"; }
+      S.celebrate = true; afterAuth(r.token, r);
+    } catch(e){ capSpin(false); $("#out").innerHTML = `<div class="err">${esc(e.message)}</div>`; $("#go").disabled=false; $("#go").textContent="Sign in"; }
   };
   $("#go").onclick = go; $("#pw").addEventListener("keydown", e => { if (e.key==="Enter") go(); }); $("#em").addEventListener("keydown", e => { if (e.key==="Enter") $("#pw").focus(); });
   try { const st = await rpc("hub_status", {}); $("#setupLink").innerHTML = st.has_users ? `<button class="linkish" id="su">Administrator setup</button>` : `<b>First time here?</b> <button class="linkish" id="su">Set up the Alumni Hub</button>`; $("#su").onclick = setupHubView; } catch {}
@@ -793,14 +889,15 @@ function changePwView(forced){
   $("#go").onclick = async () => {
     if ($("#p1").value !== $("#p2").value) return $("#out").innerHTML = `<div class="err">The new passwords do not match.</div>`;
     try { await rpc("hub_change_password", {p_token:S.pin, p_current:$("#p0").value, p_new:$("#p1").value});
-      S.user.must_change = false; toast("Password saved", "green"); openEvent(); }
+      S.user.must_change = false; toast("Password saved", "green"); S.celebrate = true; capSpin(true); openEvent(); }
     catch(e){ $("#out").innerHTML = `<div class="err">${esc(e.message)}</div>`; }
   };
 }
 function afterAuth(tok, r){
   S.pin = tok; S.user = r.user; S.me = r.user.name; S.events = r.events || [];
   store.set(TOKEN_KEY, tok);
-  if (r.user.must_change) return changePwView(true);
+  if (r.user.must_change){ capSpin(false); return changePwView(true); }
+  if (!S.celebrate) capSpin(false);
   openEvent();
 }
 async function logout(expired){
@@ -819,6 +916,7 @@ function openEvent(){
   enterApp();
 }
 async function eventsView(){
+  capSpin(false);
   clearInterval(timer);
   document.body.classList.remove("auth");
   $("#tabs").classList.add("hidden");
@@ -848,9 +946,11 @@ async function enterApp(){
   S.data = null; S.version = 0; S.lastFeedId = 0; S.unseen = 0; S.maxRev = 0; S.f.L = F0();
   const h = location.hash.replace("#",""); if (["overview","tasks","checkin","robes","stage","certs","grads","feed","settings"].includes(h)) S.tab = h;
   try { history.replaceState(null, "", "?e=" + CODE + "#" + S.tab); } catch {}
+  if (S.celebrate) S.tab = "overview";
   liveBadge();
   main.innerHTML = `<div class="card"><p class="muted">Connecting…</p></div>`;
   await pull(true); startSync();
+  if (S.celebrate){ S.celebrate = false; capSpin(false); if (S.tab !== "overview") setTab("overview"); try { history.replaceState(null, "", "?e=" + CODE + "#overview"); } catch {} celebrate(); }
 }
 
 /* ======================================================================
@@ -878,7 +978,8 @@ function render(){
 function bannerHTML(){
   const ann = S.data.feed.find(f => f.kind === "announcement");
   if (!ann || store.get("dismiss_" + CODE) === ann.id) return "";
-  return `<div class="banner"><span style="font-size:20px">📣</span><div><b>${esc(ann.actor)} · ${ago(ann.created_at)}</b>${esc(ann.text)}</div><button data-dismiss="${ann.id}">Got it</button></div>`;
+  const c = annCat(ann);
+  return `<div class="banner" style="border-left:6px solid ${c.c}"><span style="font-size:22px">${c.icon}</span><div><span class="anncat" style="background:${c.c}">${c.label}</span> <b>${esc(ann.actor)} · ${ago(ann.created_at)}</b>${esc(ann.text)}</div><button data-dismiss="${ann.id}">Got it</button></div>`;
 }
 function wireBanner(){ $$("[data-dismiss]").forEach(b => b.onclick = () => { store.set("dismiss_" + CODE, +b.dataset.dismiss); render(); }); }
 
@@ -1891,35 +1992,45 @@ function viewStage(){
 const ICON = {announcement:"📣", roadblock:"⚠", checkin:"✓", robe:"🎓", cert:"📜", stage:"🎤", status:"↻", task:"📝", comment:"💬", update:"ℹ"};
 function feedItem(f){
   const task = f.ref_type==="task" ? S.data.tasks.find(t=>t.id===f.ref_id) : null;
-  return `<div class="feed-item ${f.kind}"><div class="ic">${ICON[f.kind]||"•"}</div><div style="flex:1"><div class="t"><b>${esc(f.actor||"")}</b>${f.role==="manager"?` <span class="tag gold">Manager</span>`:""} ${f.kind==="comment"&&task?`on <i>${esc(task.title)}</i>: `:""}${esc(f.text)}</div><div class="w">${ago(f.created_at)} · ${fmtTime(f.created_at)}</div></div></div>`;
+  return `<div class="feed-item ${f.kind}"><div class="ic">${ICON[f.kind]||"•"}</div><div style="flex:1"><div class="t"><b>${esc(f.actor||"")}</b>${f.role==="manager"?` <span class="tag gold">Manager</span>`:""}${f.kind==="announcement"?` <span class="anncat" style="background:${annCat(f).c}">${annCat(f).icon} ${annCat(f).label}</span>`:""} ${f.kind==="comment"&&task?`on <i>${esc(task.title)}</i>: `:""}${esc(f.text)}</div><div class="w">${ago(f.created_at)} · ${fmtTime(f.created_at)}</div></div></div>`;
+}
+function annCard(f, big){
+  const c = annCat(f);
+  return `<div class="anncard ${big ? "big" : ""} cat-${f.category || "general"}" style="--cc:${c.c};--cb:${c.bg}"><div class="ach"><span class="anncat" style="background:${c.c}">${c.icon} ${c.label}</span><span class="spacer"></span><span class="small muted">${ago(f.created_at)} · ${fmtTime(f.created_at)}</span></div>
+    <div class="act">${esc(f.text)}</div><div class="small muted">From <b>${esc(f.actor || "")}</b></div></div>`;
 }
 function viewFeed(){
   S.unseen = 0; $("#bFeed").classList.add("hidden");
   if (!$("#fdView")){
-    main.innerHTML = `<div id="bn"></div><div class="card" id="fdView">
-      <h2>Team updates</h2>
-      <div class="noprint ${can("comment") || can("announce") ? "" : "hidden"}"><textarea id="fdTxt" placeholder="${can("announce")?"Write a comment or announcement for the whole team":"Write an update for the team"}"></textarea>
-      <div class="row" style="margin-top:8px">${can("announce")?`<label class="row small" style="gap:6px;cursor:pointer"><input type="checkbox" id="fdAnn" checked> Send as announcement (alert and banner for everyone)</label>`:""}
-      <span class="spacer"></span><button class="btn" id="fdSend">Post</button></div></div>
-      <div class="chips" id="fdChips" style="margin:14px 0 6px"></div><div id="fdList"></div>
-      <div class="row noprint" style="margin-top:10px"><button class="btn ghost sm" id="notifBtn">🔔 Enable phone/desktop alerts</button><button class="btn ghost sm" id="sndTest">🔊 Test alert sound</button><button class="btn ghost sm" id="sndMute">${store.get("hub_mute") ? "🔈 Turn sound on" : "🔇 Mute sound on this device"}</button></div></div>`;
-    $("#sndTest").onclick = () => { store.del("hub_mute"); chime("announcement"); };
-    $("#sndMute").onclick = () => { if (store.get("hub_mute")) store.del("hub_mute"); else store.set("hub_mute", 1); $("#sndMute").textContent = store.get("hub_mute") ? "🔈 Turn sound on" : "🔇 Mute sound on this device"; };
-    $("#fdSend").onclick = async () => {
-      const v = $("#fdTxt").value.trim(); if (!v) return;
-      const ann = $("#fdAnn") && $("#fdAnn").checked;
-      $("#fdSend").disabled = true;
-      if (await act("grad_post", {p_text:v, p_kind: ann?"announcement":"comment", p_ref_type:null, p_ref_id:null}, ann?"Announcement sent to everyone":"Posted")) $("#fdTxt").value = "";
-      $("#fdSend").disabled = false;
-    };
-    $("#notifBtn").onclick = async () => { try { const p = await Notification.requestPermission(); toast(p==="granted"?"Alerts enabled on this device":"Alerts were not allowed"); } catch { toast("This browser does not support alerts"); } };
+    main.innerHTML = `<div id="bn"></div><div id="fdView">
+      <section class="annscreen card"><div class="ash"><h2>📣 Announcements</h2><span class="spacer"></span><span class="small" id="annCount"></span></div>
+        ${can("announce") ? `<div class="anncompose noprint"><div class="catpick" id="catPick">${Object.entries(ANN_CAT).map(([k,c]) => `<button type="button" class="catbtn ${k === (S.f.annCat || "general") ? "on" : ""}" data-cat="${k}" style="--cc:${c.c};--cb:${c.bg}">${c.icon} ${c.label}</button>`).join("")}</div>
+          <div class="row" style="align-items:stretch;margin-top:8px"><textarea id="annTxt" placeholder="Write an announcement for everyone" style="flex:1;min-height:56px"></textarea><button class="btn gold" id="annSend" style="min-width:120px">Announce</button></div></div>` : ""}
+        <div id="annList"></div><button class="lnk" id="annMore" type="button"></button></section>
+      <section class="actscreen card"><div class="ash"><h2>Activity</h2><span class="spacer"></span><span class="small muted">Everything that happens, newest first</span></div>
+        ${can("comment") ? `<div class="row noprint" style="margin-bottom:8px"><input type="text" id="fdTxt" placeholder="Write an update for the team" style="flex:1"><button class="btn" id="fdSend">Post</button></div>` : ""}
+        <div class="chips" id="fdChips" style="margin:4px 0 8px"></div><div id="fdList"></div>
+        <div class="row noprint" style="margin-top:10px"><button class="btn ghost sm" id="setAl">🔔 Alerts and sound settings</button></div></section></div>`;
+    $$("#catPick [data-cat]").forEach(b => b.onclick = () => { S.f.annCat = b.dataset.cat; $$("#catPick [data-cat]").forEach(x => x.classList.toggle("on", x === b)); });
+    const as = $("#annSend"); if (as) as.onclick = async () => { const v = $("#annTxt").value.trim(); if (!v) return $("#annTxt").focus(); as.disabled = true;
+      if (await act("grad_post2", {p_text:v, p_kind:"announcement", p_category:S.f.annCat || "general", p_ref_type:null, p_ref_id:null}, `${annCat({category:S.f.annCat}).label} announcement sent to everyone`)) $("#annTxt").value = ""; as.disabled = false; };
+    const fs = $("#fdSend"); if (fs){ const send = async () => { const v = $("#fdTxt").value.trim(); if (!v) return; fs.disabled = true; if (await act("grad_post2", {p_text:v, p_kind:"comment", p_category:null, p_ref_type:null, p_ref_id:null}, "Posted")) $("#fdTxt").value = ""; fs.disabled = false; };
+      fs.onclick = send; $("#fdTxt").addEventListener("keydown", e => { if (e.key === "Enter") send(); }); }
+    $("#setAl").onclick = () => openSettings("alerts");
+    $("#annMore").onclick = () => { S.f.annAll = !S.f.annAll; viewFeed(); };
   }
-  $("#bn").innerHTML = bannerHTML(); wireBanner();
-  const kinds = {All:()=>true, Announcements:f=>f.kind==="announcement", Roadblocks:f=>f.kind==="roadblock", Comments:f=>f.kind==="comment", Tasks:f=>["status","task","roadblock"].includes(f.kind), "Check-ins":f=>f.kind==="checkin", Robes:f=>f.kind==="robe", Stage:f=>f.kind==="stage", Certificates:f=>f.kind==="cert"};
+  $("#bn").innerHTML = ""; 
+  const anns = S.data.feed.filter(f => f.kind === "announcement");
+  $("#annCount").textContent = anns.length ? `${anns.length} so far` : "";
+  const shown = S.f.annAll ? anns : anns.slice(0, 3);
+  $("#annList").innerHTML = shown.length ? `<div class="annlist">${shown.map((f, i) => annCard(f, i === 0)).join("")}</div>` : `<div class="empty" style="color:#c9d3f2">No announcements yet.</div>`;
+  $("#annMore").textContent = anns.length > 3 ? (S.f.annAll ? "Show only the latest 3" : `Show all ${anns.length} announcements`) : "";
+  const kinds = {All:f=>f.kind!=="announcement", Roadblocks:f=>f.kind==="roadblock", Comments:f=>f.kind==="comment", Tasks:f=>["status","task","roadblock"].includes(f.kind), "Check-ins":f=>f.kind==="checkin", Robes:f=>f.kind==="robe", Stage:f=>f.kind==="stage", Certificates:f=>f.kind==="cert", Changes:f=>f.kind==="update"};
+  if (!kinds[S.f.feedKind]) S.f.feedKind = "All";
   $("#fdChips").innerHTML = Object.keys(kinds).map(k=>`<button class="chip ${S.f.feedKind===k?"on":""}" data-k="${k}">${k}</button>`).join("");
   $$("#fdChips .chip").forEach(b => b.onclick = () => { S.f.feedKind = b.dataset.k; viewFeed(); });
-  const list = S.data.feed.filter(kinds[S.f.feedKind]);
-  $("#fdList").innerHTML = list.map(feedItem).join("") || `<div class="empty">Nothing here yet.</div>`;
+  const list = S.data.feed.filter(kinds[S.f.feedKind]).slice(0, 150);
+  $("#fdList").innerHTML = list.map(f => feedItem(f).replace('class="feed-item', `class="feed-item${f.actor === S.me ? " mine" : ""}`)).join("") || `<div class="empty">Nothing here yet.</div>`;
 }
 
 /* ---------- MANAGE ---------- */
