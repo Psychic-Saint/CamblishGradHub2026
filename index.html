@@ -525,7 +525,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202610062308";
+const BUILD = "202610062331";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -583,7 +583,8 @@ const STATIONS = [
   ["certs","📜 Certificates table", ["certs","tasks_update","comment"], 5],
   ["floor","⭐ Floor team (every station)", ROLE_DEFAULT.team, 0]];
 const sameSet = (a, b) => a.length === b.length && a.every(x => b.includes(x));
-const stationOf = perms => (STATIONS.find(st => sameSet(st[2], perms || [])) || [])[0] || "";
+const STATION_CORE = ["checkin","robes","stage","certs"];
+const stationOf = perms => { const c = STATION_CORE.filter(k => (perms || []).includes(k)); return c.length === 1 ? c[0] : c.length === 4 ? "floor" : ""; };
 function stationSelect(id, cur){ return `<select id="${id}" class="stsel">${STATIONS.map(([k,l]) => `<option value="${k}" ${k === cur ? "selected" : ""}>${l}</option>`).join("")}<option value="" ${!cur ? "selected" : ""}>✏ Custom (tick below)</option></select>`; }
 function wireStation(sel, boxes){
   const apply = () => { const st = STATIONS.find(x => x[0] === sel.value); if (!st) return; $$("input", boxes).forEach(i => { if (!i.disabled) i.checked = st[2].includes(i.value); }); };
