@@ -1,0 +1,5 @@
+desktop/build/
+desktop/dist/
+desktop/hub.html
+desktop/*.spec
+__pycache__/

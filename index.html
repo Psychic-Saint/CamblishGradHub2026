@@ -1,0 +1,1182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="author" content="Eddie Bila">
+<meta name="robots" content="noindex,nofollow">
+<title>Camblish Alumni Hub</title>
+<style>
+:root{
+  --navy:#0b1f4d; --royal:#1d3fae; --royal-2:#2f56d6; --gold:#c9a227; --gold-soft:#f6ecc8;
+  --ink:#16213a; --muted:#5b6785; --line:#dde3f0; --bg:#f3f5fa; --card:#fff;
+  --ok:#1f8a4c; --ok-soft:#e3f4ea; --bad:#b4232c; --bad-soft:#fbe7e8; --warn:#9a6700; --warn-soft:#fff4d6;
+  --prog:#1d3fae; --prog-soft:#e8eeff; --hold:#6b5b95; --hold-soft:#efeaf9;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 "Segoe UI",Calibri,system-ui,-apple-system,Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+.stick{position:sticky;top:0;z-index:30;box-shadow:0 2px 10px rgba(11,31,77,.18)}
+.top{background:var(--navy);color:#fff;position:relative;overflow:hidden}
+.top::after{content:"";position:absolute;right:-50px;top:-40px;width:200px;height:200px;background:linear-gradient(135deg,transparent 46%,rgba(201,162,39,.55) 46% 50%,transparent 50%);pointer-events:none}
+.top-in{max-width:1180px;margin:0 auto;padding:10px 16px;display:flex;gap:12px;align-items:center;position:relative;z-index:1}
+.top img{width:40px;height:auto;background:#fff;border-radius:8px;padding:3px}
+.top h1{font-size:16px;margin:0;line-height:1.2}
+.top .sub{font-size:12px;color:#c9d3f2}
+.top .who{margin-left:auto;text-align:right;font-size:12px;color:#c9d3f2}
+.top .who b{color:#fff;font-size:13px}
+.live{display:inline-flex;align-items:center;gap:6px}
+.dot{width:8px;height:8px;border-radius:50%;background:#3ddc84;box-shadow:0 0 0 0 rgba(61,220,132,.6);animation:pulse 2s infinite}
+.dot.off{background:#e5534b;animation:none}
+@media (max-width:560px){.top::after{display:none}.top h1{font-size:14px}.top .sub{font-size:11px}.top .who{font-size:11px}.top img{width:32px}nav.tabs button{padding:10px 10px;font-size:14px}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(61,220,132,.6)}70%{box-shadow:0 0 0 7px rgba(61,220,132,0)}100%{box-shadow:0 0 0 0 rgba(61,220,132,0)}}
+.goldbar{height:3px;background:var(--gold)}
+nav.tabs{background:#fff;border-bottom:1px solid var(--line)}
+nav.tabs .in{max-width:1180px;margin:0 auto;padding:0 10px;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+nav.tabs button{background:none;border:0;padding:12px 14px;font-weight:600;color:var(--muted);border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap;display:flex;gap:6px;align-items:center}
+nav.tabs button.on{color:var(--royal);border-bottom-color:var(--gold)}
+nav.tabs .badge{background:var(--bad);color:#fff;border-radius:99px;font-size:11px;padding:1px 7px}
+main{max-width:1180px;margin:0 auto;padding:16px 16px 70px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+.card h2{font-size:16px;margin:0 0 10px;color:var(--navy);display:flex;align-items:center;gap:8px}
+.card h2 .spacer{flex:1}
+.muted{color:var(--muted)}
+.small{font-size:12.5px}
+.grid{display:grid;gap:14px}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g2{grid-template-columns:1fr 1fr}
+@media (max-width:860px){.g4{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;border-top:4px solid var(--royal)}
+.kpi .n{font-size:28px;font-weight:700;color:var(--navy);line-height:1.1}
+.kpi .l{font-size:12.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.kpi .bar{height:6px;background:#e8ecf7;border-radius:99px;margin-top:8px;overflow:hidden}
+.kpi .bar i{display:block;height:100%;background:var(--royal)}
+.kpi.red{border-top-color:var(--bad)} .kpi.red .n{color:var(--bad)}
+.kpi.gold{border-top-color:var(--gold)} .kpi.green{border-top-color:var(--ok)}
+.btn{appearance:none;border:0;border-radius:10px;padding:9px 14px;font-weight:600;cursor:pointer;background:var(--royal);color:#fff;display:inline-flex;align-items:center;gap:6px;line-height:1.2}
+.btn:hover{background:var(--royal-2)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.ghost{background:#fff;color:var(--royal);border:1px solid #c8d1e6}
+.btn.ghost:hover{background:#f2f5fd}
+.btn.gold{background:var(--gold);color:var(--navy)}
+.btn.green{background:var(--ok)} .btn.red{background:var(--bad)}
+.btn.sm{padding:6px 10px;font-size:13px;border-radius:8px}
+.btn.lg{padding:12px 18px;font-size:16px}
+input[type=text],input[type=password],input[type=search],input[type=date],input[type=datetime-local],select,textarea{width:100%;padding:10px 12px;border:1px solid #c8d1e6;border-radius:10px;background:#fff}
+textarea{min-height:70px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--royal-2);outline-offset:1px;border-color:transparent}
+label.lbl{display:block;font-weight:600;font-size:13.5px;margin:10px 0 5px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.spacer{flex:1}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:99px;white-space:nowrap}
+.s-Not-started{background:#eef1f7;color:var(--muted)}
+.s-In-progress{background:var(--prog-soft);color:var(--prog)}
+.s-Completed{background:var(--ok-soft);color:var(--ok)}
+.s-Roadblock{background:var(--bad-soft);color:var(--bad)}
+.s-On-hold{background:var(--hold-soft);color:var(--hold)}
+.tag{font-size:12px;padding:2px 8px;border-radius:6px;background:#eef1f7;color:var(--muted);white-space:nowrap}
+.tag.gold{background:var(--gold-soft);color:#6d5200}
+.tag.red{background:var(--bad-soft);color:var(--bad)}
+.tag.green{background:var(--ok-soft);color:var(--ok)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid #c8d1e6;background:#fff;border-radius:99px;padding:5px 12px;font-size:13px;cursor:pointer;font-weight:600;color:var(--muted)}
+.chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.task{border:1px solid var(--line);border-left:5px solid #c8d1e6;border-radius:12px;padding:12px 14px;margin-top:10px;background:#fff}
+.task.st-Completed{border-left-color:var(--ok);background:#fbfefc}
+.task.st-Roadblock{border-left-color:var(--bad);background:#fffafa}
+.task.st-In-progress{border-left-color:var(--royal)}
+.task.st-On-hold{border-left-color:var(--hold)}
+.task h3{font-size:15px;margin:0;flex:1;min-width:180px}
+.task.st-Completed h3{text-decoration:line-through;text-decoration-color:rgba(31,138,76,.5)}
+.task .meta{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.task .note{font-size:13.5px;padding:8px 10px;border-radius:8px;margin:6px 0;background:var(--bad-soft);color:var(--bad)}
+.task .note.ok{background:#f3f5fa;color:var(--ink)}
+.task .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.sbtn{border:1px solid #c8d1e6;background:#fff;border-radius:8px;padding:6px 10px;font-size:13px;font-weight:600;cursor:pointer}
+.sbtn.c{color:var(--ok);border-color:#b9e2c8} .sbtn.c.on,.sbtn.c:hover{background:var(--ok);color:#fff}
+.sbtn.r{color:var(--bad);border-color:#f0c4c7} .sbtn.r.on,.sbtn.r:hover{background:var(--bad);color:#fff}
+.sbtn.p{color:var(--royal);border-color:#c5d2f5} .sbtn.p.on,.sbtn.p:hover{background:var(--royal);color:#fff}
+.sbtn.h{color:var(--hold);border-color:#d6cdea} .sbtn.h.on,.sbtn.h:hover{background:var(--hold);color:#fff}
+.sbtn.n{color:var(--muted)} .sbtn.n:hover{background:#eef1f7}
+.thread{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+.msg{font-size:13.5px;padding:6px 0;border-bottom:1px solid #f0f2f8}
+.msg b{color:var(--navy)}
+.lrow{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line);background:#fff}
+.lrow:last-child{border-bottom:0}
+.lrow .nm{font-weight:600}
+.lrow .info{flex:1;min-width:0}
+.lrow.present{background:#f7fcf9}
+.lrow.absent{background:#fff8f8;opacity:.8}
+.list{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.bigbtn{min-width:96px;justify-content:center}
+.group-h{background:var(--navy);color:#fff;padding:8px 12px;font-weight:600;font-size:13.5px;display:flex;gap:8px;align-items:center}
+.group-h .tag{background:rgba(255,255,255,.15);color:#fff}
+.seq{width:38px;height:38px;border-radius:50%;background:var(--prog-soft);color:var(--royal);display:grid;place-items:center;font-weight:700;flex:none}
+.lrow.called{background:var(--gold-soft)}
+.lrow.called .seq{background:var(--gold);color:var(--navy)}
+.lrow.done{opacity:.55}
+.lrow.done .seq{background:var(--ok);color:#fff}
+.stagebox{display:grid;grid-template-columns:1.2fr 1fr;gap:14px}
+@media (max-width:860px){.stagebox{grid-template-columns:1fr}}
+.now{background:var(--navy);color:#fff;border-radius:14px;padding:18px;position:relative;overflow:hidden}
+.now::after{content:"";position:absolute;right:-30px;bottom:-30px;width:140px;height:140px;background:linear-gradient(135deg,transparent 46%,rgba(201,162,39,.6) 46% 52%,transparent 52%)}
+.now .l{font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:var(--gold)}
+.now .big{font-size:26px;font-weight:700;margin:4px 0}
+.now .pr{color:#c9d3f2}
+.feed-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid #f0f2f8}
+.feed-item .ic{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;flex:none;font-size:14px;background:#eef1f7}
+.feed-item.announcement{background:var(--gold-soft);border-radius:10px;padding:10px;border:0;margin:6px 0}
+.feed-item.announcement .ic{background:var(--gold);color:var(--navy)}
+.feed-item.roadblock .ic{background:var(--bad-soft);color:var(--bad)}
+.feed-item.checkin .ic{background:var(--ok-soft);color:var(--ok)}
+.feed-item.stage .ic{background:var(--prog-soft);color:var(--royal)}
+.feed-item .t{font-size:14px}
+.feed-item .w{font-size:12px;color:var(--muted)}
+.banner{background:var(--gold);color:var(--navy);border-radius:12px;padding:12px 14px;margin-bottom:14px;display:flex;gap:10px;align-items:flex-start;box-shadow:0 4px 14px rgba(201,162,39,.35)}
+.banner b{display:block}
+.banner button{margin-left:auto;background:rgba(11,31,77,.12);border:0;border-radius:8px;padding:4px 10px;cursor:pointer;font-weight:600}
+.toasts{position:fixed;right:14px;bottom:14px;z-index:60;display:flex;flex-direction:column;gap:8px;max-width:360px}
+.toast{background:var(--navy);color:#fff;border-radius:12px;padding:10px 14px;box-shadow:0 8px 24px rgba(0,0,0,.25);font-size:13.5px;border-left:5px solid var(--gold);animation:tin .25s ease-out}
+.toast.red{border-left-color:#ff6b6b}.toast.green{border-left-color:#3ddc84}
+@media (max-width:560px){.toasts{bottom:auto;top:118px;left:10px;right:10px;max-width:none;pointer-events:none}.toast{padding:8px 12px;font-size:13px;opacity:.96}}
+@keyframes tin{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
+.modal-bg{position:fixed;inset:0;background:rgba(11,31,77,.45);z-index:50;display:grid;place-items:center;padding:16px}
+.modal{background:#fff;border-radius:16px;padding:18px;width:100%;max-width:520px;max-height:90vh;overflow:auto}
+.modal h3{margin:0 0 6px;color:var(--navy)}
+table.t{width:100%;border-collapse:collapse;font-size:13.5px}
+table.t th,table.t td{padding:8px;border-bottom:1px solid var(--line);text-align:left}
+table.t th{font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+.scroll{overflow-x:auto}
+.err{background:var(--bad-soft);color:var(--bad);padding:10px 12px;border-radius:10px;margin-top:10px;font-size:14px}
+.okm{background:var(--ok-soft);color:var(--ok);padding:10px 12px;border-radius:10px;margin-top:10px;font-size:14px}
+.empty{padding:24px;text-align:center;color:var(--muted)}
+.center{max-width:460px;margin:30px auto}
+.mini-bar{height:8px;border-radius:99px;background:#e8ecf7;overflow:hidden;display:flex}
+.mini-bar i{display:block;height:100%}
+.foot{text-align:center;color:var(--muted);font-size:12px;padding:20px 0 30px}
+.foot b{color:var(--navy)}
+.hidden{display:none!important}
+#tagArea{display:none}
+body.printing-tag > *:not(#tagArea){display:none!important}
+body.printing-tag #tagArea{display:block}
+.ntag{box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;overflow:hidden;font-family:"Segoe UI",Calibri,Arial,sans-serif;color:#000;page-break-after:always;break-after:page}
+.ntag .tg-top{display:flex;align-items:center;gap:1.5mm;font-size:2.4mm;font-weight:600}
+.ntag .tg-top img{height:5mm}
+.ntag .tg-name{font-weight:800;line-height:1.05;margin:1mm 0}
+.ntag .tg-prog{font-size:2.8mm}
+.ntag .tg-code{font-weight:900;border:0.5mm solid #000;border-radius:1.5mm;padding:0.5mm 2mm;display:inline-block}
+.tagprev{border:1px dashed #9fb0d8;border-radius:8px;padding:6px;background:#fff;display:inline-block}
+@media print{
+  .top,nav.tabs,.toasts,.noprint,.banner,.foot{display:none!important}
+  main{padding:0} .card{border:0;padding:0}
+  .lrow{break-inside:avoid}
+  body{background:#fff}
+}
+/* ================= ALUMNI HUB 3D THEME ================= */
+:root{ --navy:#081a45; --navy-2:#0d2766; --royal:#1d3fae; --royal-2:#3561e8; --gold:#d4af37; --gold-2:#f3d27a; --gold-soft:#fbf1cf; --bg:#eef2fb; --line:#d9e1f2 }
+body{background:
+  radial-gradient(1100px 520px at 0% -8%, rgba(53,97,232,.55), transparent 60%),
+  radial-gradient(900px 480px at 105% 0%, rgba(212,175,55,.28), transparent 60%),
+  linear-gradient(180deg, var(--navy) 0, var(--navy-2) 230px, var(--bg) 230px, var(--bg) 100%);
+  background-attachment:fixed}
+.top{background:linear-gradient(135deg, rgba(8,26,69,.92), rgba(29,63,174,.85));backdrop-filter:blur(8px);border-bottom:1px solid rgba(243,210,122,.35)}
+.top::after{background:linear-gradient(135deg,transparent 46%,rgba(243,210,122,.7) 46% 49%,transparent 49%),linear-gradient(135deg,transparent 56%,rgba(255,255,255,.08) 56% 62%,transparent 62%)}
+.top img{box-shadow:0 0 0 2px var(--gold),0 6px 14px rgba(0,0,0,.35);transition:transform .6s;transform-style:preserve-3d}
+.top img:hover{transform:rotateY(360deg)}
+.brand{display:flex;align-items:center;gap:8px}
+.brand h1{font-size:17px;letter-spacing:.3px}
+.ver{font-size:10.5px;font-weight:800;letter-spacing:1px;color:var(--navy);background:linear-gradient(180deg,var(--gold-2),var(--gold));padding:2px 7px;border-radius:6px;box-shadow:0 2px 0 #9c7d22}
+.evpill{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:#fff;border-radius:99px;padding:3px 10px;font-size:12px;cursor:pointer}
+.evpill:hover{background:rgba(255,255,255,.18)}
+.who .acts{display:flex;gap:6px;justify-content:flex-end;margin-top:4px}
+.hbtn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:8px;padding:3px 9px;font-size:12px;cursor:pointer;box-shadow:0 2px 0 rgba(0,0,0,.25)}
+.hbtn:hover{background:rgba(255,255,255,.2)} .hbtn.out{background:linear-gradient(180deg,var(--gold-2),var(--gold));color:var(--navy);border-color:transparent;font-weight:700;box-shadow:0 2px 0 #9c7d22}
+.goldbar{height:3px;background:linear-gradient(90deg,transparent,var(--gold),var(--gold-2),var(--gold),transparent)}
+nav.tabs{background:transparent;border:0}
+nav.tabs .in{padding:10px 12px 4px;gap:8px}
+nav.tabs button{background:rgba(255,255,255,.08);color:#dfe6fb;border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:9px 16px;box-shadow:0 3px 0 rgba(0,0,0,.25);transition:transform .15s}
+nav.tabs button:hover{transform:translateY(-2px);background:rgba(255,255,255,.14)}
+nav.tabs button.on{background:linear-gradient(180deg,var(--gold-2),var(--gold));color:var(--navy);border-color:transparent;box-shadow:0 4px 0 #9c7d22,0 10px 18px -8px rgba(212,175,55,.8)}
+.stick{box-shadow:none}
+.card{border:0;border-radius:18px;background:linear-gradient(180deg,#fff,#fbfcff);
+  box-shadow:0 1px 0 #fff inset,0 2px 4px rgba(8,26,69,.06),0 14px 30px -12px rgba(8,26,69,.28),0 40px 60px -40px rgba(8,26,69,.35)}
+.card h2{font-size:16.5px}
+.kpi{border:0;border-radius:18px;background:linear-gradient(160deg,#fff 0%,#f4f7ff 100%);position:relative;overflow:hidden;
+  box-shadow:0 1px 0 #fff inset,0 6px 0 -1px var(--royal),0 18px 30px -14px rgba(8,26,69,.45);transition:transform .25s,box-shadow .25s;transform:perspective(900px) translateZ(0)}
+.kpi::after{content:"";position:absolute;right:-30px;top:-30px;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,rgba(53,97,232,.15),transparent 70%)}
+.kpi:hover{transform:perspective(900px) rotateX(6deg) rotateY(-6deg) translateY(-4px)}
+.kpi.red{box-shadow:0 1px 0 #fff inset,0 6px 0 -1px var(--bad),0 18px 30px -14px rgba(8,26,69,.45)}
+.kpi.gold{box-shadow:0 1px 0 #fff inset,0 6px 0 -1px var(--gold),0 18px 30px -14px rgba(8,26,69,.45)}
+.kpi.green{box-shadow:0 1px 0 #fff inset,0 6px 0 -1px var(--ok),0 18px 30px -14px rgba(8,26,69,.45)}
+.kpi .n{font-size:32px;text-shadow:0 2px 0 rgba(8,26,69,.08)}
+.btn{background:linear-gradient(180deg,var(--royal-2),var(--royal));box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 4px 0 #13297a,0 10px 18px -8px rgba(19,41,122,.7);transition:transform .08s,box-shadow .08s,filter .15s;border-radius:11px}
+.btn:hover{filter:brightness(1.08);background:linear-gradient(180deg,var(--royal-2),var(--royal))}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 1px 0 #13297a}
+.btn.gold{background:linear-gradient(180deg,var(--gold-2),var(--gold));color:var(--navy);box-shadow:0 1px 0 rgba(255,255,255,.6) inset,0 4px 0 #9c7d22,0 10px 18px -8px rgba(156,125,34,.7)}
+.btn.green{background:linear-gradient(180deg,#2fb267,#1f8a4c);box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 4px 0 #13603a,0 10px 18px -8px rgba(19,96,58,.7)}
+.btn.red{background:linear-gradient(180deg,#d63a44,#b4232c);box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 4px 0 #7f1820}
+.btn.ghost{background:linear-gradient(180deg,#fff,#f1f4fc);color:var(--royal);border:1px solid #cdd7ee;box-shadow:0 3px 0 #cdd7ee}
+.btn.ghost:active{box-shadow:0 1px 0 #cdd7ee}
+.sbtn{border-radius:9px;box-shadow:0 2px 0 #d5ddef;transition:transform .08s}
+.sbtn:active{transform:translateY(2px);box-shadow:none}
+.task{border-radius:14px;border:0;border-left:6px solid #c8d1e6;box-shadow:0 1px 0 #fff inset,0 8px 18px -12px rgba(8,26,69,.35);transition:transform .2s}
+.task:hover{transform:translateY(-2px)}
+.list{border:0;border-radius:14px;box-shadow:0 10px 24px -16px rgba(8,26,69,.4)}
+.group-h{background:linear-gradient(90deg,var(--navy),var(--royal))}
+.now{background:radial-gradient(600px 300px at 0% 0%,rgba(53,97,232,.6),transparent 70%),linear-gradient(135deg,var(--navy),#0f2a72);border-radius:20px;
+  box-shadow:0 2px 0 rgba(243,210,122,.5) inset,0 24px 40px -18px rgba(8,26,69,.7);transform:perspective(1000px) rotateX(2deg)}
+.now .big{text-shadow:0 3px 0 rgba(0,0,0,.25)}
+.seq{box-shadow:0 2px 0 rgba(29,63,174,.25)}
+.banner{background:linear-gradient(135deg,var(--gold-2),var(--gold));border-radius:14px;box-shadow:0 4px 0 #9c7d22,0 16px 30px -14px rgba(156,125,34,.8)}
+.toast{border-radius:14px;background:linear-gradient(135deg,var(--navy),#14307e);box-shadow:0 16px 30px -10px rgba(0,0,0,.45)}
+.modal{border-radius:20px;box-shadow:0 40px 80px -20px rgba(8,26,69,.6);animation:pop .25s ease-out}
+@keyframes pop{from{transform:perspective(900px) rotateX(-12deg) translateY(16px);opacity:0}to{transform:none;opacity:1}}
+.foot{color:#7b86a3}
+/* events */
+.evgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;margin-top:6px}
+.evtile{position:relative;border-radius:18px;padding:18px;color:#fff;cursor:pointer;overflow:hidden;min-height:140px;
+  background:radial-gradient(400px 200px at 0% 0%,rgba(53,97,232,.7),transparent 70%),linear-gradient(135deg,var(--navy),#14307e);
+  box-shadow:0 2px 0 rgba(243,210,122,.45) inset,0 6px 0 #061336,0 22px 34px -16px rgba(8,26,69,.8);transition:transform .25s}
+.evtile:hover{transform:perspective(900px) rotateX(7deg) rotateY(-7deg) translateY(-6px)}
+.evtile::after{content:"";position:absolute;right:-40px;bottom:-40px;width:150px;height:150px;background:linear-gradient(135deg,transparent 46%,rgba(243,210,122,.6) 46% 51%,transparent 51%)}
+.evtile h3{margin:0 0 6px;font-size:17px}
+.evtile .m{color:#c9d3f2;font-size:13px}
+.evtile .n{position:absolute;left:18px;bottom:14px;font-size:12px;color:var(--gold-2);font-weight:700;letter-spacing:.5px}
+.evtile.new{background:linear-gradient(180deg,#fff,#f4f7ff);color:var(--royal);border:2px dashed #b9c6ea;box-shadow:0 10px 24px -16px rgba(8,26,69,.4);display:grid;place-items:center;font-weight:700}
+/* ================= AUTH SCENE ================= */
+body.auth .stick,body.auth .foot{display:none}
+body.auth{background:radial-gradient(900px 600px at 15% 10%,rgba(53,97,232,.65),transparent 60%),radial-gradient(800px 500px at 90% 90%,rgba(212,175,55,.35),transparent 60%),linear-gradient(160deg,#050f2c,#0b1f4d 45%,#132f80);min-height:100vh}
+body.auth main{max-width:none;padding:0}
+.scene{min-height:100vh;display:grid;grid-template-columns:1.1fr 1fr;align-items:center;gap:30px;padding:30px 6vw;perspective:1400px;position:relative;overflow:hidden}
+@media (max-width:860px){.scene{grid-template-columns:1fr;padding:24px 16px}.hero{display:none}}
+.beam{position:absolute;width:140%;height:3px;left:-20%;background:linear-gradient(90deg,transparent,rgba(243,210,122,.9),transparent);transform:rotate(-24deg);opacity:.5;animation:sweep 7s linear infinite}
+.beam.b2{top:70%;animation-delay:-3.5s;opacity:.3}
+@keyframes sweep{0%{transform:translateY(-200px) rotate(-24deg)}100%{transform:translateY(600px) rotate(-24deg)}}
+.hero{color:#fff;position:relative;z-index:1}
+.coin{width:190px;height:190px;position:relative;transform-style:preserve-3d;animation:spin 9s ease-in-out infinite;margin-bottom:28px}
+.coin .face{position:absolute;inset:0;border-radius:50%;display:grid;place-items:center;backface-visibility:hidden;
+  background:radial-gradient(circle at 35% 30%,#fff,#e9eefc 60%,#c9d3ef);box-shadow:0 0 0 6px var(--gold),0 0 0 9px #9c7d22,0 30px 50px -10px rgba(0,0,0,.6)}
+.coin .face img{width:62%}
+.coin .back{transform:rotateY(180deg);background:radial-gradient(circle at 35% 30%,var(--gold-2),var(--gold) 60%,#9c7d22);color:var(--navy);font-weight:900;font-size:40px;letter-spacing:2px;text-shadow:0 2px 0 rgba(255,255,255,.4)}
+@keyframes spin{0%,15%{transform:rotateY(0) rotateX(8deg)}45%,60%{transform:rotateY(180deg) rotateX(8deg)}90%,100%{transform:rotateY(360deg) rotateX(8deg)}}
+.hero h1{font-size:46px;line-height:1.02;margin:0;letter-spacing:-.5px;text-shadow:0 4px 0 rgba(0,0,0,.25)}
+.hero h1 span{background:linear-gradient(180deg,var(--gold-2),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:#c9d3f2;font-size:16px;max-width:460px}
+.hero .ver{font-size:12px;margin-left:6px;vertical-align:middle}
+.glass{position:relative;z-index:1;background:linear-gradient(160deg,rgba(255,255,255,.96),rgba(240,244,255,.92));border-radius:22px;padding:28px;max-width:440px;width:100%;justify-self:center;
+  box-shadow:0 2px 0 #fff inset,0 10px 0 -2px rgba(212,175,55,.9),0 40px 80px -20px rgba(0,0,0,.6);transform:rotateY(-8deg) rotateX(4deg);transition:transform .5s}
+.glass:hover{transform:rotateY(0) rotateX(0)}
+@media (max-width:860px){.glass{transform:none}}
+.glass h2{margin:0 0 4px;color:var(--navy);font-size:22px}
+.glass .sub{color:var(--muted);margin:0 0 14px;font-size:14px}
+.glass input{padding:12px 14px;font-size:15px;border-radius:12px;box-shadow:0 2px 0 rgba(8,26,69,.04) inset}
+.glass .btn{width:100%;justify-content:center;padding:13px;font-size:16px;margin-top:14px}
+.linkish{background:none;border:0;color:var(--royal);cursor:pointer;font-weight:600;padding:0;font-size:13.5px}
+.cred{background:linear-gradient(135deg,var(--navy),#14307e);color:#fff;border-radius:16px;padding:16px;margin-top:12px;box-shadow:0 6px 0 #061336,0 20px 30px -16px rgba(8,26,69,.7)}
+.cred code{background:rgba(255,255,255,.12);padding:3px 8px;border-radius:8px;font-size:15px;color:var(--gold-2);letter-spacing:1px}
+.rolepill{font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;padding:2px 8px;border-radius:6px;background:#e8eeff;color:var(--royal)}
+.rolepill.admin{background:linear-gradient(180deg,var(--gold-2),var(--gold));color:var(--navy)}
+.rolepill.manager{background:var(--navy);color:#fff}
+.stick{background:linear-gradient(180deg,#081a45,#0d2766);box-shadow:0 10px 24px -14px rgba(8,26,69,.7)}
+
+@media (max-width:640px){.top-in{flex-wrap:wrap;gap:8px}.who{margin-left:0;width:100%;display:flex;align-items:center;gap:8px;text-align:left;flex-wrap:wrap}.who .live{margin-left:auto}.who .acts{margin-top:0;width:100%;justify-content:flex-start}#evSub{display:none}.brand h1{font-size:15px}.toasts{top:170px}}
+</style>
+</head>
+<body>
+<div class="stick"><header class="top"><div class="top-in">
+  <img src="data:image/jpeg;base64,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" alt="Camblish crest">
+  <div><div class="brand"><h1>Camblish Alumni Hub</h1><span class="ver">V1.0</span></div><div class="sub"><span class="evpill" id="evName" title="Switch event">Taking the Lead, Shaping the Future</span> <span id="evSub"></span></div></div>
+  <div class="who" id="who"></div>
+</div></header>
+<div class="goldbar"></div>
+<nav class="tabs hidden" id="tabs"><div class="in">
+  <button data-tab="overview">Overview</button>
+  <button data-tab="tasks">Tasks <span class="badge hidden" id="bRoad"></span></button>
+  <button data-tab="checkin">Check-in</button>
+  <button data-tab="stage">Stage order</button>
+  <button data-tab="feed">Updates <span class="badge hidden" id="bFeed"></span></button>
+  <button data-tab="users" id="tabUsers" class="hidden">Users</button>
+  <button data-tab="manage" id="tabManage" class="hidden">Manage</button>
+</div></nav></div>
+<main id="main"><div class="card"><p class="muted">Loading…</p></div></main>
+<div class="toasts" id="toasts"></div>
+<div class="foot"><b>Camblish Alumni Hub V1.0</b> · Taking the Lead, Shaping the Future<br>Camblish Training Institute</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+"use strict";
+const SB_URL = "https://jrbihuegqydoqnsxxvma.supabase.co";
+const SB_KEY = "sb_publishable_J8SQCrGd5l2qpnVefK_z2w_kuYZ412s";
+const STATUSES = ["Not started","In progress","Completed","Roadblock","On hold"];
+const CATEGORIES = ["Venue & logistics","Certificates & academic","Learners & invitations","Programme & stage","Catering","Décor & gowns","Media & photography","Registration desk","Finance & approvals","Other"];
+
+const $ = (s, el=document) => el.querySelector(s);
+const $$ = (s, el=document) => [...el.querySelectorAll(s)];
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const cls = s => String(s||"").replace(/\s+/g,"-");
+const params = new URLSearchParams(location.search);
+let CODE = params.get("e");
+const HUB_URL = "https://psychic-saint.github.io/camblish-alumni-hub/";
+const TOKEN_KEY = "hub_token";
+const DESKTOP = () => window.pywebview && window.pywebview.api;
+const main = $("#main");
+const store = { get(k){ try{return JSON.parse(localStorage.getItem(k));}catch{return null;} }, set(k,v){ try{localStorage.setItem(k,JSON.stringify(v));}catch{} }, del(k){ try{localStorage.removeItem(k);}catch{} } };
+
+async function rpc(fn, args){
+  const res = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, { method:"POST", headers:{ apikey:SB_KEY, Authorization:`Bearer ${SB_KEY}`, "Content-Type":"application/json" }, body:JSON.stringify(args) });
+  const txt = await res.text(); let data; try{ data = txt ? JSON.parse(txt) : null; }catch{ data = txt; }
+  if (!res.ok) throw new Error((data && data.message) || `Request failed (${res.status})`);
+  return data;
+}
+function ago(ts){
+  if (!ts) return "";
+  const s = Math.round((Date.now() - new Date(ts).getTime())/1000);
+  if (s < 45) return "just now"; if (s < 3600) return Math.round(s/60) + " min ago";
+  if (s < 86400) return Math.round(s/3600) + " h ago";
+  return new Date(ts).toLocaleDateString("en-ZA",{day:"numeric",month:"short"});
+}
+const fmtTime = ts => ts ? new Date(ts).toLocaleTimeString("en-ZA",{hour:"2-digit",minute:"2-digit"}) : "";
+const fmtDue = ts => ts ? new Date(ts).toLocaleString("en-ZA",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}) : "";
+const fullName = l => [l.first_name, l.middle_name, l.surname].filter(Boolean).join(" ");
+
+/* ---------- toasts, sound, notifications ---------- */
+function toast(text, kind=""){
+  const t = document.createElement("div"); t.className = "toast " + kind; t.textContent = text;
+  $("#toasts").appendChild(t); setTimeout(()=>t.remove(), 4500);
+  while ($("#toasts").children.length > 4) $("#toasts").firstChild.remove();
+}
+let audioCtx = null;
+function beep(high){
+  try { audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)();
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination);
+    o.frequency.value = high ? 880 : 620; g.gain.setValueAtTime(.12, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(.001, audioCtx.currentTime + .35);
+    o.start(); o.stop(audioCtx.currentTime + .36);
+  } catch {}
+}
+function notify(title, body){
+  try { if ("Notification" in window && Notification.permission === "granted" && document.hidden) new Notification(title, {body}); } catch {}
+  try { navigator.vibrate && navigator.vibrate(120); } catch {}
+}
+
+/* ---------- modal ---------- */
+function modal(html, onMount){
+  const bg = document.createElement("div"); bg.className = "modal-bg";
+  bg.innerHTML = `<div class="modal">${html}</div>`;
+  document.body.appendChild(bg);
+  const close = () => bg.remove();
+  bg.addEventListener("click", e => { if (e.target === bg) close(); });
+  onMount && onMount(bg.querySelector(".modal"), close);
+  return close;
+}
+function ask(title, label, {required=false, placeholder="", okText="Save", okClass=""}={}){
+  return new Promise(res => {
+    modal(`<h3>${esc(title)}</h3><label class="lbl">${esc(label)}</label><textarea id="mq" placeholder="${esc(placeholder)}"></textarea>
+      <div class="row" style="margin-top:12px"><span class="spacer"></span><button class="btn ghost" id="mc">Cancel</button><button class="btn ${okClass}" id="mo">${esc(okText)}</button></div><div id="me"></div>`,
+      (m, close) => {
+        $("#mq",m).focus();
+        $("#mc",m).onclick = () => { close(); res(null); };
+        $("#mo",m).onclick = () => { const v = $("#mq",m).value.trim(); if (required && !v){ $("#me",m).innerHTML = `<div class="err">Please add a short note.</div>`; return; } close(); res(v); };
+      });
+  });
+}
+
+/* ======================================================================
+   STATE + LIVE SYNC
+   ====================================================================== */
+const S = { pin:null, me:null, role:null, data:null, version:0, lastFeedId:0, tab:"overview", ok:true, lastSync:0,
+  f:{ taskStatus:"Active", taskOwner:"", taskQ:"", ciQ:"", ciFilter:"All", ciPm:"", ciRegion:"", feedKind:"All", openThreads:new Set() } };
+const sessKey = () => "grad_" + CODE;
+
+async function pull(force){
+  try {
+    const v = await rpc("grad_version", {p_code:CODE, p_pin:S.pin});
+    S.ok = true; S.lastSync = Date.now();
+    if (force || v !== S.version){
+      const d = await rpc("grad_state", {p_code:CODE, p_pin:S.pin});
+      const prevLast = S.lastFeedId;
+      S.data = d; S.version = d.version; S.role = d.role;
+      const newest = d.feed.length ? d.feed[0].id : 0;
+      if (prevLast){
+        d.feed.filter(f => f.id > prevLast && f.actor !== S.me).reverse().forEach(announceItem);
+        if (S.tab !== "feed"){ S.unseen = (S.unseen||0) + d.feed.filter(f => f.id > prevLast && f.actor !== S.me).length; }
+      }
+      S.lastFeedId = Math.max(prevLast, newest);
+      render();
+    }
+  } catch(e){
+    S.ok = false;
+    if (/Session expired|Incorrect PIN/.test(e.message)){ return logout(true); }
+    if (/Event not found/.test(e.message)){ CODE = null; store.del("hub_event"); clearInterval(timer); return eventsView(); }
+  }
+  liveBadge();
+}
+function announceItem(f){
+  const txt = `${f.actor}: ${f.text}`;
+  if (f.kind === "announcement"){ toast("📣 " + txt); beep(true); notify("Announcement", txt); }
+  else if (f.kind === "roadblock"){ toast("⚠ " + txt, "red"); beep(true); notify("Roadblock", txt); }
+  else if (f.kind === "checkin" || f.kind === "stage"){ toast(txt, "green"); }
+  else { toast(txt); beep(false); }
+}
+let timer = null;
+function startSync(){ clearInterval(timer); timer = setInterval(() => pull(false), 3000); document.addEventListener("visibilitychange", () => { if (!document.hidden) pull(false); }); }
+function liveBadge(){
+  const w = $("#who"); if (!w || !S.user) return;
+  const secs = S.lastSync ? Math.round((Date.now()-S.lastSync)/1000) : null;
+  const role = S.user.role === "admin" ? "Admin" : S.user.role === "manager" ? "Manager" : "Team";
+  w.innerHTML = `<div><b>${esc(S.me)}</b> <span class="rolepill ${S.user.role}">${role}</span></div>
+    <div class="live" style="justify-content:flex-end">${S.data ? `<span class="dot ${S.ok?"":"off"}"></span>${S.ok ? "Live" + (secs!==null && secs>6 ? ` · ${secs}s ago` : "") : "Reconnecting…"}` : ""}</div>
+    <div class="acts"><button class="hbtn" id="hEv">⇄ Events</button><button class="hbtn" id="hPw">🔑 Password</button><button class="hbtn out" id="hOut">⏻ Log out</button></div>`;
+  $("#hOut").onclick = () => logout();
+  $("#hPw").onclick = () => changePwView(false);
+  $("#hEv").onclick = () => { clearInterval(timer); eventsView(); };
+}
+setInterval(liveBadge, 5000);
+
+async function act(fn, args, okMsg){
+  try { await rpc(fn, Object.assign({p_code:CODE, p_pin:S.pin, p_actor:S.me}, args)); if (okMsg) toast(okMsg, "green"); await pull(true); return true; }
+  catch(e){ toast("Could not save: " + e.message, "red"); return false; }
+}
+
+/* ======================================================================
+   LOGIN
+   ====================================================================== */
+function authShell(inner){
+  document.body.classList.add("auth");
+  $("#tabs").classList.add("hidden");
+  main.innerHTML = `<div class="scene"><div class="beam" style="top:20%"></div><div class="beam b2"></div>
+    <div class="hero"><div class="coin"><div class="face"><img src="${document.querySelector('.top img').src}" alt=""></div><div class="face back">CTI</div></div>
+      <h1>Camblish<br><span>Alumni Hub</span><span class="ver">V1.0</span></h1>
+      <p>Graduations, alumni and events in one place. Live check-in, stage order, team tasks and announcements for the whole Camblish team.</p>
+      <p style="color:var(--gold-2);font-weight:700;letter-spacing:.4px">Taking the Lead, Shaping the Future</p></div>
+    <div class="glass">${inner}</div></div>`;
+}
+async function authView(msg){
+  clearInterval(timer); S.data = null;
+  authShell(`<h2>Welcome back</h2><p class="sub">Sign in with your Camblish email address.</p>
+    <label class="lbl">Email</label><input type="text" id="em" placeholder="name@camblish.co.za" autocomplete="username">
+    <label class="lbl">Password</label><input type="password" id="pw" autocomplete="current-password">
+    <button class="btn" id="go">Sign in</button>
+    <div id="out">${msg ? `<div class="err">${esc(msg)}</div>` : ""}</div>
+    <p class="small muted" style="margin-top:14px">Forgot your password? Ask a Camblish manager to reset it. You'll receive a new temporary password by email.</p>
+    <p class="small" id="setupLink" style="margin-top:6px"></p>`);
+  const remembered = store.get("hub_email"); if (remembered) $("#em").value = remembered;
+  ($("#em").value ? $("#pw") : $("#em")).focus();
+  const go = async () => {
+    const em = $("#em").value.trim(), pw = $("#pw").value;
+    if (!em || !pw) return;
+    $("#go").disabled = true; $("#go").textContent = "Signing in…";
+    try {
+      const r = await rpc("hub_login", {p_email:em, p_password:pw});
+      if (!r.ok){ $("#out").innerHTML = `<div class="err">${esc(r.error)}</div>`; $("#go").disabled=false; $("#go").textContent="Sign in"; return; }
+      store.set("hub_email", em.toLowerCase());
+      afterAuth(r.token, r);
+    } catch(e){ $("#out").innerHTML = `<div class="err">${esc(e.message)}</div>`; $("#go").disabled=false; $("#go").textContent="Sign in"; }
+  };
+  $("#go").onclick = go; $("#pw").addEventListener("keydown", e => { if (e.key==="Enter") go(); }); $("#em").addEventListener("keydown", e => { if (e.key==="Enter") $("#pw").focus(); });
+  try { const st = await rpc("hub_status", {}); $("#setupLink").innerHTML = st.has_users ? `<button class="linkish" id="su">Administrator setup</button>` : `<b>First time here?</b> <button class="linkish" id="su">Set up the Alumni Hub</button>`; $("#su").onclick = setupHubView; } catch {}
+}
+function setupHubView(){
+  authShell(`<h2>Set up the Alumni Hub</h2><p class="sub">Create the first administrator account. You need the Camblish admin key.</p>
+    <label class="lbl">Admin key</label><input type="password" id="ak">
+    <label class="lbl">Your full name</label><input type="text" id="nm">
+    <label class="lbl">Your Camblish email</label><input type="text" id="em" placeholder="name@camblish.co.za">
+    <label class="lbl">Choose a password</label><input type="password" id="p1" placeholder="8+ characters, letters and numbers">
+    <label class="lbl">Confirm password</label><input type="password" id="p2">
+    <button class="btn gold" id="go">Create administrator</button><div id="out"></div>
+    <p style="margin-top:12px"><button class="linkish" id="bk">← Back to sign in</button></p>`);
+  $("#bk").onclick = () => authView();
+  $("#go").onclick = async () => {
+    const em = $("#em").value.trim();
+    if (!/@camblish\.co\.za$/i.test(em)) return $("#out").innerHTML = `<div class="err">Use your @camblish.co.za email address.</div>`;
+    if ($("#p1").value !== $("#p2").value) return $("#out").innerHTML = `<div class="err">The passwords do not match.</div>`;
+    try { const r = await rpc("hub_bootstrap", {p_admin_key:$("#ak").value.trim(), p_email:em, p_name:$("#nm").value.trim(), p_password:$("#p1").value});
+      store.set("hub_email", em.toLowerCase()); afterAuth(r.token, r); }
+    catch(e){ $("#out").innerHTML = `<div class="err">${esc(e.message)}</div>`; }
+  };
+}
+function changePwView(forced){
+  clearInterval(timer);
+  const body = `<h2>${forced ? "Choose your own password" : "Change password"}</h2>
+    <p class="sub">${forced ? "You signed in with a temporary password. Choose a new one to continue." : "Enter your current password and a new one."}</p>
+    <label class="lbl">${forced ? "Temporary password" : "Current password"}</label><input type="password" id="p0" autocomplete="current-password">
+    <label class="lbl">New password</label><input type="password" id="p1" placeholder="8+ characters, letters and numbers" autocomplete="new-password">
+    <label class="lbl">Confirm new password</label><input type="password" id="p2" autocomplete="new-password">
+    <button class="btn gold" id="go">Save password</button><div id="out"></div>
+    ${forced ? `<p style="margin-top:12px"><button class="linkish" id="bk">Log out</button></p>` : `<p style="margin-top:12px"><button class="linkish" id="bk">← Back</button></p>`}`;
+  authShell(body);
+  $("#p0").focus();
+  $("#bk").onclick = () => forced ? logout() : openEvent();
+  $("#go").onclick = async () => {
+    if ($("#p1").value !== $("#p2").value) return $("#out").innerHTML = `<div class="err">The new passwords do not match.</div>`;
+    try { await rpc("hub_change_password", {p_token:S.pin, p_current:$("#p0").value, p_new:$("#p1").value});
+      S.user.must_change = false; toast("Password saved", "green"); openEvent(); }
+    catch(e){ $("#out").innerHTML = `<div class="err">${esc(e.message)}</div>`; }
+  };
+}
+function afterAuth(tok, r){
+  S.pin = tok; S.user = r.user; S.me = r.user.name; S.events = r.events || [];
+  store.set(TOKEN_KEY, tok);
+  if (r.user.must_change) return changePwView(true);
+  openEvent();
+}
+async function logout(expired){
+  clearInterval(timer);
+  try { if (S.pin && !expired) await rpc("hub_logout", {p_token:S.pin}); } catch {}
+  store.del(TOKEN_KEY); S.pin = null; S.user = null; S.data = null;
+  $("#who").innerHTML = "";
+  authView(expired ? "Your session has ended. Please sign in again." : "");
+}
+function openEvent(){
+  CODE = CODE || store.get("hub_event");
+  if (!CODE || !S.events.some(e => e.code === CODE)){
+    if (S.events.length === 1) CODE = S.events[0].code;
+    else return eventsView();
+  }
+  enterApp();
+}
+async function eventsView(){
+  clearInterval(timer);
+  document.body.classList.remove("auth");
+  $("#tabs").classList.add("hidden");
+  try { const r = await rpc("hub_me", {p_token:S.pin}); S.user = r.user; S.events = r.events; } catch(e){ return logout(true); }
+  liveBadge();
+  $("#evName").textContent = "Choose an event"; $("#evSub").textContent = "";
+  const mgr = ["admin","manager"].includes(S.user.role);
+  main.innerHTML = `<div class="card"><h2>Your events</h2><p class="muted small" style="margin:0 0 10px">Pick a graduation or alumni event to work on.</p>
+    <div class="evgrid">${S.events.map(e => `<div class="evtile" data-code="${esc(e.code)}"><h3>${esc(e.name)}</h3>
+      <div class="m">${e.date ? new Date(e.date).toLocaleDateString("en-ZA",{day:"numeric",month:"long",year:"numeric"}) : "Date to be confirmed"}${e.venue ? " · " + esc(e.venue) : ""}</div>
+      <div class="n">${e.learners} ALUMNI</div></div>`).join("")}
+      ${mgr ? `<div class="evtile new" id="newEv">+ New event</div>` : ""}</div>
+    ${!S.events.length && !mgr ? `<div class="empty">No events yet. A manager needs to create one.</div>` : ""}</div>`;
+  $$(".evtile[data-code]").forEach(t => t.onclick = () => { CODE = t.dataset.code; enterApp(); });
+  const ne = $("#newEv"); if (ne) ne.onclick = () => modal(`<h3>New event</h3>
+    <label class="lbl">Event name</label><input type="text" id="nen" placeholder="e.g. Camblish Graduation Ceremony 2027">
+    <div class="grid g2" style="gap:10px"><div><label class="lbl">Date</label><input type="date" id="ned"></div><div><label class="lbl">Venue</label><input type="text" id="nev"></div></div>
+    <div class="row" style="margin-top:14px"><span class="spacer"></span><button class="btn ghost" id="mc">Cancel</button><button class="btn gold" id="mo">Create event</button></div><div id="me"></div>`,
+    (m, close) => { $("#mc",m).onclick = close; $("#mo",m).onclick = async () => {
+      try { const code = await rpc("hub_event_create", {p_token:S.pin, p_name:$("#nen",m).value, p_date:$("#ned",m).value||null, p_venue:$("#nev",m).value});
+        close(); CODE = code; const r = await rpc("hub_me", {p_token:S.pin}); S.events = r.events; enterApp(); toast("Event created. Upload the learner list under Check-in or Manage.", "green"); }
+      catch(e){ $("#me",m).innerHTML = `<div class="err">${esc(e.message)}</div>`; } }; });
+}
+async function enterApp(){
+  document.body.classList.remove("auth");
+  store.set("hub_event", CODE);
+  S.data = null; S.version = 0; S.lastFeedId = 0; S.unseen = 0;
+  const h = location.hash.replace("#",""); if (["overview","tasks","checkin","stage","feed","users","manage"].includes(h)) S.tab = h;
+  try { history.replaceState(null, "", "?e=" + CODE + "#" + S.tab); } catch {}
+  liveBadge();
+  main.innerHTML = `<div class="card"><p class="muted">Connecting…</p></div>`;
+  await pull(true); startSync();
+}
+
+/* ======================================================================
+   RENDER
+   ====================================================================== */
+function render(){
+  if (!S.data) return;
+  const d = S.data;
+  $("#evName").textContent = d.event.name + "  ▾";
+  $("#evName").onclick = () => { clearInterval(timer); eventsView(); };
+  $("#evSub").textContent = [d.event.date ? new Date(d.event.date).toLocaleDateString("en-ZA",{weekday:"short",day:"numeric",month:"long",year:"numeric"}) : "", d.event.venue].filter(Boolean).join(" · ");
+  $("#tabUsers").classList.toggle("hidden", !(S.user && ["admin","manager"].includes(S.user.role)));
+  $("#tabs").classList.remove("hidden");
+  $("#tabManage").classList.toggle("hidden", S.role !== "manager");
+  const road = d.tasks.filter(t=>t.status==="Roadblock").length;
+  $("#bRoad").textContent = road; $("#bRoad").classList.toggle("hidden", !road);
+  $("#bFeed").textContent = S.unseen||""; $("#bFeed").classList.toggle("hidden", !S.unseen || S.tab==="feed");
+  $$("nav.tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === S.tab));
+  const views = { overview:viewOverview, tasks:viewTasks, checkin:viewCheckin, stage:viewStage, feed:viewFeed, manage:viewManage, users:viewUsers };
+  (views[S.tab] || viewOverview)();
+}
+function bannerHTML(){
+  const ann = S.data.feed.find(f => f.kind === "announcement");
+  if (!ann || store.get("dismiss_" + CODE) === ann.id) return "";
+  return `<div class="banner"><span style="font-size:20px">📣</span><div><b>${esc(ann.actor)} · ${ago(ann.created_at)}</b>${esc(ann.text)}</div><button data-dismiss="${ann.id}">Got it</button></div>`;
+}
+function wireBanner(){ $$("[data-dismiss]").forEach(b => b.onclick = () => { store.set("dismiss_" + CODE, +b.dataset.dismiss); render(); }); }
+
+/* ---------- ordering ---------- */
+function orderKey(a, b){
+  const n = (a.nqf ?? 99) - (b.nqf ?? 99); if (n) return n;
+  const p = (a.programme||"").localeCompare(b.programme||""); if (p) return p;
+  const c = (a.client||"").localeCompare(b.client||""); if (c) return c;
+  const s = (a.surname||"").localeCompare(b.surname||""); if (s) return s;
+  return (a.first_name||"").localeCompare(b.first_name||"");
+}
+const groupOf = l => `NQF ${l.nqf ?? "?"} · ${l.programme || "Programme not set"}`;
+function stageList(){
+  // Groups run NQF level (low to high), then programme. Inside a group it is first come, first on stage.
+  const present = S.data.learners.filter(l => l.status === "present");
+  const gkey = l => [String(l.nqf ?? 99).padStart(3,"0"), l.programme||""].join("|");
+  const keys = [...new Set(present.map(gkey))].sort();
+  const t = l => new Date(l.arrived_at || 0).getTime();
+  const started = k => present.some(l => gkey(l) === k && l.stage_status !== "waiting");
+  // A group is closed once a later group has started: anyone from it who arrives after that goes to the very end.
+  const closedAt = {};
+  keys.forEach((k, i) => {
+    const later = present.filter(l => keys.indexOf(gkey(l)) > i && l.stage_at).map(l => new Date(l.stage_at).getTime());
+    closedAt[k] = later.length ? Math.min(...later) : Infinity;
+  });
+  const main = [], late = [];
+  present.forEach(l => { l._late = l.stage_status === "waiting" && t(l) > closedAt[gkey(l)]; (l._late ? late : main).push(l); });
+  main.sort((a,b) => keys.indexOf(gkey(a)) - keys.indexOf(gkey(b)) || t(a) - t(b));
+  late.sort((a,b) => t(a) - t(b));
+  const all = main.concat(late);
+  all.forEach((l,i) => l._seq = i+1);
+  // Stable tag codes: line number = programme position among ALL programmes on the list, then arrival position in that line
+  const lines = [...new Set(S.data.learners.map(gkey))].sort();
+  const pos = {};
+  main.forEach(l => { const k = gkey(l); pos[k] = (pos[k]||0) + 1; l._code = `${lines.indexOf(k)+1}-${String(pos[k]).padStart(2,"0")}`; l._line = lines.indexOf(k)+1; });
+  late.forEach((l,i) => { l._code = `L-${String(i+1).padStart(2,"0")}`; l._line = "Late"; });
+  return all;
+}
+
+/* ---------- NAME TAGS ---------- */
+const TAG_SIZES = {
+  "62x29": {label:"62 x 29 mm label (Brother QL)", w:62, h:29, name:6.2, code:6},
+  "50x30": {label:"50 x 30 mm label (Niimbot, Phomemo, Zebra)", w:50, h:30, name:5.4, code:5.6},
+  "40x30": {label:"40 x 30 mm label", w:40, h:30, name:4.6, code:5},
+  "58x40": {label:"58 mm receipt/thermal roll", w:58, h:40, name:6.4, code:7},
+  "90x55": {label:"90 x 55 mm badge / card", w:90, h:55, name:9, code:10}
+};
+const tagPrefs = () => Object.assign({size:"62x29", auto:false}, store.get("tagprefs") || {});
+const saveTagPrefs = o => store.set("tagprefs", Object.assign(tagPrefs(), o));
+function codeOf(l){ stageList(); const x = S.data.learners.find(y=>y.id===l.id); return (x && x._code) || ""; }
+function printTags(list){
+  if (DESKTOP() && DESKTOP().print_tags){
+    const ev = S.data ? S.data.event.name : "Camblish Alumni Hub";
+    DESKTOP().print_tags(list.map(l => ({name:[l.first_name, l.surname].filter(Boolean).join(" "), programme:l.programme||"", nqf:l.nqf||"", code:l._code||"", event:ev})), tagPrefs().size, tagPrefs().printer||"")
+      .then(r => toast(r && r.ok ? `🖨 ${list.length > 1 ? list.length + " tags" : "Tag " + (list[0]._code||"")} printed` : "Printing failed: " + (r && r.error), r && r.ok ? "green" : "red"));
+    return;
+  }
+  const sz = TAG_SIZES[tagPrefs().size] || TAG_SIZES["62x29"];
+  const crest = document.querySelector(".top img").src;
+  let area = $("#tagArea"); if (!area){ area = document.createElement("div"); area.id = "tagArea"; document.body.appendChild(area); }
+  area.innerHTML = `<style>@page{size:${sz.w}mm ${sz.h}mm;margin:0}</style>` + list.map(l => `
+    <div class="ntag" style="width:${sz.w}mm;height:${sz.h}mm;padding:1.5mm 2.5mm">
+      <div class="tg-top"><img src="${crest}" alt=""><span>${esc(S.data ? S.data.event.name : "Camblish Graduation")}</span></div>
+      <div class="tg-name" style="font-size:${sz.name}mm">${esc([l.first_name, l.surname].filter(Boolean).join(" "))}</div>
+      <div style="display:flex;align-items:center;gap:2mm;justify-content:space-between">
+        <div class="tg-prog">${esc(l.programme||"")}${l.nqf?` · NQF ${esc(l.nqf)}`:""}</div>
+        <div class="tg-code" style="font-size:${sz.code}mm">${esc(l._code || "")}</div></div>
+    </div>`).join("");
+  document.body.classList.add("printing-tag");
+  const done = () => { document.body.classList.remove("printing-tag"); window.removeEventListener("afterprint", done); };
+  window.addEventListener("afterprint", done);
+  setTimeout(() => { window.print(); setTimeout(done, 1500); }, 120);
+}
+
+/* ---------- OVERVIEW ---------- */
+function viewOverview(){
+  const d = S.data, T = d.tasks, L = d.learners;
+  const done = T.filter(t=>t.status==="Completed").length, road = T.filter(t=>t.status==="Roadblock");
+  const pres = L.filter(l=>l.status==="present").length, absent = L.filter(l=>l.status==="absent").length;
+  const crossed = L.filter(l=>l.stage_status==="done").length;
+  const pct = (a,b) => b ? Math.round(100*a/b) : 0;
+  const now = new Date();
+  const overdue = T.filter(t => t.due_at && new Date(t.due_at) < now && t.status !== "Completed");
+  const groups = {};
+  L.forEach(l => { const g = groupOf(l); (groups[g] = groups[g] || {nqf:l.nqf??99, prog:l.programme||"", total:0, pres:0, abs:0, done:0, clients:new Set()}); const G = groups[g]; G.total++; if (l.status==="present") G.pres++; if (l.status==="absent") G.abs++; if (l.stage_status==="done") G.done++; if (l.client) G.clients.add(l.client); });
+  const gl = Object.entries(groups).sort((a,b)=> a[1].nqf-b[1].nqf || a[1].prog.localeCompare(b[1].prog));
+  const statusCounts = STATUSES.map(s => [s, T.filter(t=>t.status===s).length]);
+  main.innerHTML = bannerHTML() + `
+  <div class="grid g4">
+    <div class="kpi green"><div class="l">Tasks completed</div><div class="n">${done}<span class="muted" style="font-size:16px"> / ${T.length}</span></div><div class="bar"><i style="width:${pct(done,T.length)}%;background:var(--ok)"></i></div></div>
+    <div class="kpi red"><div class="l">Roadblocks</div><div class="n">${road.length}</div><div class="small muted">${overdue.length} task${overdue.length===1?"":"s"} overdue</div></div>
+    <div class="kpi"><div class="l">Learners arrived</div><div class="n">${pres}<span class="muted" style="font-size:16px"> / ${L.length}</span></div><div class="bar"><i style="width:${pct(pres,L.length)}%"></i></div></div>
+    <div class="kpi gold"><div class="l">Crossed the stage</div><div class="n">${crossed}<span class="muted" style="font-size:16px"> / ${pres}</span></div><div class="bar"><i style="width:${pct(crossed,pres)}%;background:var(--gold)"></i></div></div>
+  </div>
+  <div class="grid g2" style="margin-top:14px">
+    <div class="card"><h2>Roadblocks needing attention<span class="spacer"></span><button class="btn ghost sm" data-go="tasks">All tasks</button></h2>
+      ${road.length ? road.map(t=>`<div class="task st-Roadblock"><div class="row"><h3>${esc(t.title)}</h3><span class="tag">${esc(t.owner||"Unassigned")}</span></div>${t.status_note?`<div class="note">${esc(t.status_note)}</div>`:""}<div class="small muted">Raised by ${esc(t.updated_by||"")} · ${ago(t.updated_at)}</div></div>`).join("") : `<div class="empty">No roadblocks. 👍</div>`}
+      ${overdue.filter(t=>t.status!=="Roadblock").length ? `<h2 style="margin-top:14px">Overdue</h2>` + overdue.filter(t=>t.status!=="Roadblock").map(t=>`<div class="row" style="padding:6px 0;border-bottom:1px solid var(--line)"><span style="flex:1">${esc(t.title)}</span><span class="tag red">due ${fmtDue(t.due_at)}</span><span class="tag">${esc(t.owner||"Unassigned")}</span></div>`).join("") : ""}
+    </div>
+    <div class="card"><h2>Task status</h2>
+      <div class="mini-bar" style="height:14px;margin-bottom:10px">${statusCounts.filter(s=>s[1]).map(([s,n])=>`<i class="s-${cls(s)}" title="${s}: ${n}" style="width:${pct(n,T.length)}%;background:${({"Completed":"var(--ok)","Roadblock":"var(--bad)","In progress":"var(--royal)","On hold":"var(--hold)","Not started":"#c8d1e6"})[s]}"></i>`).join("")}</div>
+      <div class="chips">${statusCounts.map(([s,n])=>`<span class="pill s-${cls(s)}">${s}: ${n}</span>`).join("")}</div>
+      <h2 style="margin-top:16px">Latest updates<span class="spacer"></span><button class="btn ghost sm" data-go="feed">All updates</button></h2>
+      ${d.feed.slice(0,6).map(feedItem).join("") || `<div class="empty">No updates yet.</div>`}
+    </div>
+  </div>
+  ${pmTable(L)}
+  <div class="card"><h2>Attendance by programme (stage order: NQF level, then programme, first come first served)</h2>
+    ${gl.length ? `<div class="scroll"><table class="t"><thead><tr><th>Programme</th><th>Clients</th><th>Expected</th><th>Arrived</th><th>Absent</th><th>Crossed</th><th style="width:28%">Progress</th></tr></thead><tbody>
+    ${gl.map(([g,G])=>`<tr><td><b>${esc(g)}</b></td><td class="small">${esc([...G.clients].join(", "))}</td><td>${G.total}</td><td>${G.pres}</td><td>${G.abs}</td><td>${G.done}</td>
+      <td><div class="mini-bar"><i style="width:${pct(G.done,G.total)}%;background:var(--gold)"></i><i style="width:${pct(G.pres-G.done,G.total)}%;background:var(--ok)"></i><i style="width:${pct(G.abs,G.total)}%;background:var(--bad)"></i></div></td></tr>`).join("")}
+    </tbody></table></div><p class="small muted">Gold: crossed the stage · Green: arrived, waiting · Red: absent</p>` : `<div class="empty">No learners loaded yet. ${S.role==="manager"?"Import the graduate list under Manage.":"A manager needs to import the graduate list."}</div>`}
+  </div>`;
+  wireBanner(); $$("[data-go]").forEach(b => b.onclick = () => setTab(b.dataset.go));
+}
+
+function pmTable(L){
+  const pms = {}; L.forEach(l => { if (!l.pm) return; const P = pms[l.pm] = pms[l.pm] || {t:0,p:0,a:0,r:0,ri:0}; P.t++; if (l.status==="present") P.p++; if (l.status==="absent") P.a++; if (/^y/i.test(l.robe||"")) P.r++; if (l.robe_issued) P.ri++; });
+  const e = Object.entries(pms).sort((a,b)=>a[0].localeCompare(b[0]));
+  if (!e.length) return "";
+  return `<div class="card"><h2>By project manager</h2><div class="scroll"><table class="t"><thead><tr><th>Project manager</th><th>Graduates</th><th>Arrived</th><th>Absent</th><th>Not yet arrived</th><th>Robes issued</th></tr></thead><tbody>
+    ${e.map(([k,P])=>`<tr><td><b>${esc(k)}</b></td><td>${P.t}</td><td>${P.p}</td><td>${P.a}</td><td>${P.t-P.p-P.a}</td><td>${P.ri}</td></tr>`).join("")}</tbody></table></div></div>`;
+}
+/* ---------- TASKS ---------- */
+function viewTasks(){
+  if (!$("#taskView")){
+    main.innerHTML = `<div id="bn"></div><div class="card" id="taskView">
+      <h2>Graduation tasks<span class="spacer"></span><button class="btn gold sm" id="addTask">+ Add task</button></h2>
+      <div class="row noprint" style="margin-bottom:6px"><input type="search" id="tq" placeholder="Search tasks" style="flex:2;min-width:160px"><select id="towner" style="flex:1;min-width:140px"></select></div>
+      <div class="chips noprint" id="tchips"></div>
+      <div id="tlist"></div></div>`;
+    $("#tq").value = S.f.taskQ; $("#tq").oninput = e => { S.f.taskQ = e.target.value; drawTasks(); };
+    $("#towner").onchange = e => { S.f.taskOwner = e.target.value; drawTasks(); };
+    $("#addTask").onclick = () => taskForm();
+  }
+  $("#bn").innerHTML = bannerHTML(); wireBanner();
+  const owners = [...new Set(S.data.tasks.map(t=>t.owner).filter(Boolean).concat(S.data.members.map(m=>m.name)))].sort();
+  $("#towner").innerHTML = `<option value="">All owners</option><option value="__me">My tasks</option>` + owners.map(o=>`<option ${o===S.f.taskOwner?"selected":""}>${esc(o)}</option>`).join("");
+  if (S.f.taskOwner==="__me") $("#towner").value="__me";
+  drawTasks();
+}
+function drawTasks(){
+  const T = S.data.tasks;
+  const filters = ["Active","All",...STATUSES];
+  $("#tchips").innerHTML = filters.map(f=>{ const n = f==="All"?T.length : f==="Active"?T.filter(t=>t.status!=="Completed").length : T.filter(t=>t.status===f).length; return `<button class="chip ${S.f.taskStatus===f?"on":""}" data-f="${f}">${f} (${n})</button>`; }).join("");
+  $$("#tchips .chip").forEach(c => c.onclick = () => { S.f.taskStatus = c.dataset.f; drawTasks(); });
+  const q = S.f.taskQ.toLowerCase();
+  let list = T.filter(t => (S.f.taskStatus==="All" || (S.f.taskStatus==="Active" ? t.status!=="Completed" : t.status===S.f.taskStatus))
+    && (!S.f.taskOwner || (S.f.taskOwner==="__me" ? t.owner===S.me : t.owner===S.f.taskOwner))
+    && (!q || [t.title,t.details,t.category,t.owner].join(" ").toLowerCase().includes(q)));
+  const rank = {Roadblock:0,"In progress":1,"Not started":2,"On hold":3,Completed:4};
+  list.sort((a,b)=> rank[a.status]-rank[b.status] || (a.due_at||"9").localeCompare(b.due_at||"9"));
+  const byCat = {}; list.forEach(t => (byCat[t.category||"Other"] = byCat[t.category||"Other"] || []).push(t));
+  if (!T.length){
+    $("#tlist").innerHTML = `<div class="empty">No tasks yet.${S.role==="manager"?`<br><br><button class="btn" id="seed">Load the standard graduation checklist</button>`:""}</div>`;
+    const sb = $("#seed"); if (sb) sb.onclick = seedTasks; return;
+  }
+  $("#tlist").innerHTML = list.length ? Object.entries(byCat).map(([c,ts]) => `<div class="small muted" style="margin-top:14px;font-weight:700;text-transform:uppercase;letter-spacing:.6px">${esc(c)}</div>` + ts.map(taskCard).join("")).join("") : `<div class="empty">No tasks match these filters.</div>`;
+  wireTasks();
+}
+function taskCard(t){
+  const now = new Date(), over = t.due_at && new Date(t.due_at) < now && t.status!=="Completed";
+  const thread = S.data.feed.filter(f => f.ref_id === t.id && f.kind === "comment").reverse();
+  const open = S.f.openThreads.has(t.id);
+  const btn = (s,c,label) => `<button class="sbtn ${c} ${t.status===s?"on":""}" data-st="${s}" data-id="${t.id}">${label}</button>`;
+  return `<div class="task st-${cls(t.status)}">
+    <div class="row"><h3>${esc(t.title)}</h3><span class="pill s-${cls(t.status)}">${esc(t.status)}</span></div>
+    <div class="meta"><span class="tag">👤 ${esc(t.owner||"Unassigned")}</span>${t.due_at?`<span class="tag ${over?"red":""}">⏰ ${fmtDue(t.due_at)}${over?" · overdue":""}</span>`:""}${t.priority==="High"?`<span class="tag red">High priority</span>`:""}${t.priority==="Low"?`<span class="tag">Low priority</span>`:""}</div>
+    ${t.details?`<div class="small" style="white-space:pre-wrap">${esc(t.details)}</div>`:""}
+    ${t.status_note?`<div class="note ${t.status==="Roadblock"?"":"ok"}">${t.status==="Roadblock"?"⚠ ":""}${esc(t.status_note)}</div>`:""}
+    <div class="small muted">Updated by ${esc(t.updated_by||t.created_by||"")} · ${ago(t.updated_at)}</div>
+    <div class="acts">${btn("Completed","c","✓ Completed")}${btn("In progress","p","In progress")}${btn("Roadblock","r","⚠ Roadblock")}${btn("On hold","h","On hold")}${btn("Not started","n","Reset")}
+      <span class="spacer"></span><button class="sbtn n" data-th="${t.id}">💬 ${thread.length||""} Comments</button><button class="sbtn n" data-ed="${t.id}">Edit</button>${S.role==="manager"?`<button class="sbtn n" data-rm="${t.id}">Remove</button>`:""}</div>
+    ${open?`<div class="thread">${thread.map(f=>`<div class="msg"><b>${esc(f.actor)}</b> <span class="small muted">${ago(f.created_at)}</span><br>${esc(f.text)}</div>`).join("")||`<div class="small muted">No comments yet.</div>`}
+      <div class="row" style="margin-top:8px"><input type="text" placeholder="Write a comment" data-cin="${t.id}" style="flex:1"><button class="btn sm" data-csend="${t.id}">Send</button></div></div>`:""}
+  </div>`;
+}
+function wireTasks(){
+  $$("[data-st]").forEach(b => b.onclick = async () => {
+    const t = S.data.tasks.find(x=>x.id===b.dataset.id), s = b.dataset.st;
+    let note = null;
+    if (s === "Roadblock"){ note = await ask("Report a roadblock", "What is blocking \"" + t.title + "\"? The whole team will be alerted.", {required:true, okText:"Alert the team", okClass:"red"}); if (note===null) return; }
+    else if (s === "On hold"){ note = await ask("Put on hold", "Reason (optional)"); if (note===null) return; }
+    else if (s === "Completed"){ note = ""; }
+    await act("grad_task_status", {p_task:t.id, p_status:s, p_note:note}, s==="Completed" ? "Marked completed" : null);
+  });
+  $$("[data-th]").forEach(b => b.onclick = () => { const id=b.dataset.th; S.f.openThreads.has(id)?S.f.openThreads.delete(id):S.f.openThreads.add(id); drawTasks(); const i=$(`[data-cin="${id}"]`); i&&i.focus(); });
+  $$("[data-csend]").forEach(b => { const id=b.dataset.csend, inp=$(`[data-cin="${id}"]`);
+    const send = async () => { const v=inp.value.trim(); if(!v) return; inp.disabled=true; if (await act("grad_post",{p_text:v,p_kind:"comment",p_ref_type:"task",p_ref_id:id})) {} };
+    b.onclick = send; inp.addEventListener("keydown", e=>{ if(e.key==="Enter") send(); }); });
+  $$("[data-ed]").forEach(b => b.onclick = () => taskForm(S.data.tasks.find(x=>x.id===b.dataset.ed)));
+  $$("[data-rm]").forEach(b => b.onclick = async () => { if (confirm("Remove this task for everyone?")) await act("grad_task_archive",{p_task:b.dataset.rm},"Task removed"); });
+}
+function taskForm(t){
+  t = t || {};
+  const owners = S.data.members.map(m=>m.name);
+  const dueLocal = t.due_at ? new Date(new Date(t.due_at).getTime() - new Date().getTimezoneOffset()*60000).toISOString().slice(0,16) : "";
+  modal(`<h3>${t.id?"Edit task":"New task"}</h3>
+    <label class="lbl">Task</label><input type="text" id="ft" value="${esc(t.title||"")}" placeholder="e.g. Confirm sound system with venue">
+    <label class="lbl">Details</label><textarea id="fd">${esc(t.details||"")}</textarea>
+    <div class="grid g2" style="gap:10px"><div><label class="lbl">Category</label><select id="fc">${CATEGORIES.map(c=>`<option ${c===(t.category||"")?"selected":""}>${c}</option>`).join("")}</select></div>
+    <div><label class="lbl">Owner</label><input type="text" id="fo" list="ownl" value="${esc(t.owner||"")}" placeholder="Who is responsible?"><datalist id="ownl">${owners.map(o=>`<option value="${esc(o)}">`).join("")}</datalist></div>
+    <div><label class="lbl">Due</label><input type="datetime-local" id="fdue" value="${dueLocal}"></div>
+    <div><label class="lbl">Priority</label><select id="fp">${["Normal","High","Low"].map(p=>`<option ${p===(t.priority||"Normal")?"selected":""}>${p}</option>`).join("")}</select></div></div>
+    <div class="row" style="margin-top:14px"><span class="spacer"></span><button class="btn ghost" id="mc">Cancel</button><button class="btn" id="mo">${t.id?"Save changes":"Add task"}</button></div><div id="me"></div>`,
+    (m, close) => {
+      $("#mc",m).onclick = close;
+      $("#mo",m).onclick = async () => {
+        const task = { id:t.id||"", title:$("#ft",m).value.trim(), details:$("#fd",m).value.trim(), category:$("#fc",m).value, owner:$("#fo",m).value.trim(), priority:$("#fp",m).value,
+          due_at: $("#fdue",m).value ? new Date($("#fdue",m).value).toISOString() : "" };
+        if (!task.title){ $("#me",m).innerHTML = `<div class="err">Please give the task a name.</div>`; return; }
+        $("#mo",m).disabled = true;
+        if (await act("grad_task_save", {p_task:task}, t.id?"Task updated":"Task added")) close(); else $("#mo",m).disabled = false;
+      };
+      $("#ft",m).focus();
+    });
+}
+async function seedTasks(){
+  const C = CATEGORIES;
+  const list = [
+    [C[0],"Confirm venue booking, hall layout and seating capacity","High"],[C[0],"Book sound system, microphones and projector","High"],[C[0],"Arrange parking, signage and directions to the venue",""],[C[0],"Venue walk-through and rehearsal",""],
+    [C[1],"Final graduate list signed off per programme, client and NQF level","High"],[C[1],"Print and quality-check certificates","High"],[C[1],"Sort certificates in stage order (NQF level, then programme)","High"],[C[1],"Certificate folders/covers ready",""],
+    [C[2],"Send invitations to learners with date, time, venue and dress code","High"],[C[2],"Confirm attendance with each learner",""],[C[2],"Invite clients, sponsors and SETA representatives",""],[C[2],"Guest list and VIP seating plan",""],
+    [C[3],"Draft programme of the day and run sheet","High"],[C[3],"Confirm MC and speakers",""],[C[3],"Prepare name cards or list for the MC in stage order",""],[C[3],"Stage marshals briefed on line-up procedure",""],
+    [C[4],"Confirm catering numbers and menu",""],[C[4],"Water and refreshments for learners and guests",""],
+    [C[5],"Order gowns and caps; check sizes",""],[C[5],"Stage décor, banners and Camblish branding",""],
+    [C[6],"Book photographer and videographer",""],[C[6],"Photo backdrop and social media plan",""],
+    [C[7],"Set up registration desk and check-in devices",""],[C[7],"Load graduate list into this system and test check-in","High"],
+    [C[8],"Budget approval and supplier quotations",""],[C[8],"Supplier payments processed",""]
+  ];
+  try { for (const [category,title,priority] of list) await rpc("grad_task_save",{p_code:CODE,p_pin:S.pin,p_actor:S.me,p_task:{title,category,priority:priority||"Normal"}}); toast("Checklist loaded", "green"); await pull(true); }
+  catch(e){ toast(e.message, "red"); }
+}
+
+/* ---------- CHECK-IN ---------- */
+function viewCheckin(){
+  if (!$("#ciView")){
+    main.innerHTML = `<div id="bn"></div><div class="card" id="ciView">
+      <h2>Graduate check-in<span class="spacer"></span><span id="ciSum" class="small muted"></span><button class="btn gold sm hidden" id="upl">⬆ Upload learners (Excel)</button></h2>
+      <input type="search" id="ciq" placeholder="Search by name, surname, programme or client" style="font-size:16px;padding:12px 14px">
+      <div class="row" style="margin-top:8px"><select id="cipm" style="flex:1;min-width:150px"></select><select id="cireg" style="flex:1;min-width:120px"></select></div>
+      <details class="noprint" style="margin-top:8px"><summary class="small" style="cursor:pointer;color:var(--royal);font-weight:600">🖨 Name tag printer</summary>
+        <div class="row" style="margin-top:8px"><label class="row small" style="gap:6px"><input type="checkbox" id="autoTag"> Print a name tag automatically when a graduate is marked present</label></div>
+        <div class="row" style="margin-top:6px"><span class="small">Label size</span><select id="tagSize" style="max-width:260px"></select><select id="tagPrinter" class="hidden" style="max-width:260px"></select><button class="btn ghost sm" id="testTag">Print test tag</button></div>
+        <p class="small muted">Tags show the graduate's line and place number (for example 2-07 means line 2, seventh in that line). Numbers never change once printed. In the desktop app tags print straight to the chosen printer; in a browser, set the default printer to the label printer.</p></details>
+      <div class="chips" id="cichips" style="margin:10px 0"></div><div id="cilist"></div></div>`;
+    const ts = $("#tagSize"); ts.innerHTML = Object.entries(TAG_SIZES).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join("");
+    ts.value = tagPrefs().size; ts.onchange = () => saveTagPrefs({size:ts.value});
+    if (DESKTOP() && DESKTOP().list_printers){ DESKTOP().list_printers().then(ps => { const tp = $("#tagPrinter"); if (!tp) return; tp.classList.remove("hidden");
+      tp.innerHTML = `<option value="">Default printer</option>` + ps.map(p => `<option ${p===tagPrefs().printer?"selected":""}>${esc(p)}</option>`).join(""); tp.onchange = () => saveTagPrefs({printer:tp.value}); }); }
+    $("#autoTag").checked = tagPrefs().auto; $("#autoTag").onchange = e => saveTagPrefs({auto:e.target.checked});
+    $("#testTag").onclick = () => printTags([{first_name:"Sample", surname:"Graduate", programme:"EUC L3", nqf:3, _code:"1-01", client:"Bidvest Prestige"}]);
+    $("#ciq").value = S.f.ciQ; $("#ciq").oninput = e => { S.f.ciQ = e.target.value; drawCheckin(); };
+    $("#upl").onclick = () => modal(`<h3>Upload learners</h3><p class="small muted">Choose an Excel or CSV file. New learners are added to this event and anyone already on the list is skipped.</p>
+      <input type="file" id="imf" accept=".xlsx,.xls,.csv"><div id="imPrev"></div>
+      <div class="row" style="margin-top:12px"><span class="spacer"></span><button class="btn ghost" id="mc">Close</button></div>`, (m, close) => { $("#mc",m).onclick = close; $("#imf",m).onchange = importPreview; });
+    $("#cipm").onchange = e => { S.f.ciPm = e.target.value; drawCheckin(); };
+    $("#cireg").onchange = e => { S.f.ciRegion = e.target.value; drawCheckin(); };
+  }
+  $("#bn").innerHTML = bannerHTML(); wireBanner();
+  $("#upl").classList.toggle("hidden", S.role !== "manager");
+  const uniq = k => [...new Set(S.data.learners.map(l=>l[k]).filter(Boolean))].sort();
+  $("#cipm").innerHTML = `<option value="">All project managers</option>` + uniq("pm").map(v=>`<option ${v===S.f.ciPm?"selected":""}>${esc(v)}</option>`).join("");
+  $("#cireg").innerHTML = `<option value="">All regions</option>` + uniq("region").map(v=>`<option ${v===S.f.ciRegion?"selected":""}>${esc(v)}</option>`).join("");
+  $("#cipm").classList.toggle("hidden", !uniq("pm").length); $("#cireg").classList.toggle("hidden", !uniq("region").length);
+  drawCheckin();
+}
+function drawCheckin(){
+  const L = S.data.learners.filter(l => (!S.f.ciPm || l.pm===S.f.ciPm) && (!S.f.ciRegion || l.region===S.f.ciRegion));
+  const c = {All:L.length, Expected:L.filter(l=>l.status==="expected").length, Present:L.filter(l=>l.status==="present").length, Absent:L.filter(l=>l.status==="absent").length};
+  $("#ciSum").textContent = `${c.Present} arrived · ${c.Expected} still expected · ${c.Absent} absent`;
+  $("#cichips").innerHTML = Object.entries(c).map(([k,n])=>`<button class="chip ${S.f.ciFilter===k?"on":""}" data-f="${k}">${k} (${n})</button>`).join("");
+  $$("#cichips .chip").forEach(b => b.onclick = () => { S.f.ciFilter = b.dataset.f; drawCheckin(); });
+  const words = S.f.ciQ.toLowerCase().split(/\s+/).filter(Boolean);
+  const list = L.filter(l => (S.f.ciFilter==="All" || l.status===S.f.ciFilter.toLowerCase())
+    && words.every(w => [l.first_name,l.middle_name,l.surname,l.programme,l.client,l.cohort,l.learner_ref,l.pm,l.region].join(" ").toLowerCase().includes(w))).sort(orderKey);
+  if (!L.length){ $("#cilist").innerHTML = `<div class="empty">No graduates loaded yet.</div>`; return; }
+  const shown = list.slice(0, 200);
+  $("#cilist").innerHTML = shown.length ? `<div class="list">${shown.map(l=>`
+    <div class="lrow ${l.status}">
+      <div class="info"><div class="nm">${esc(fullName(l))}</div>
+        <div class="small muted">NQF ${esc(l.nqf??"?")} · ${esc(l.programme||"")}${l.client?" · "+esc(l.client):""}${l.region?" · "+esc(l.region):""}${l.pm?" · PM: "+esc(l.pm):""}</div>
+        <div class="meta" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:3px">${/^n/i.test(l.rsvp||"")?`<span class="tag red">RSVP: not attending</span>`:""}${/^y/i.test(l.rsvp||"")?`<span class="tag green">RSVP: attending</span>`:""}${/^y/i.test(l.robe||"")?`<span class="tag gold">Needs robe</span>`:""}${l.belt?`<span class="tag">Belt: ${esc(l.belt)}</span>`:""}${l.name_tag?`<span class="tag">Name tag: ${esc(l.name_tag)}</span>`:""}${l.status!=="present"&&l.phone?`<a class="tag" href="tel:${esc(l.phone.split("/")[0].trim())}">📞 ${esc(l.phone)}</a>`:""}</div>
+        ${l.status==="present"?`<div class="small" style="color:var(--ok)">Arrived ${fmtTime(l.arrived_at)} · by ${esc(l.checked_by||"")}</div>`:""}
+        ${l.status==="absent"?`<div class="small" style="color:var(--bad)">Marked absent by ${esc(l.checked_by||"")}</div>`:""}</div>
+      ${l.status==="present" ? `<span class="tag gold" title="Stage tag">${esc(codeOf(l))}</span><button class="sbtn n" data-tag="${l.id}" title="Print name tag">🖨</button><button class="sbtn ${l.robe_issued?"c on":"n"}" data-robe="${l.id}" data-v="${l.robe_issued?0:1}">${l.robe_issued?"✓ Robe issued":"Issue robe"}</button><span class="pill s-Completed">✓ Present</span><button class="btn ghost sm" data-ci="${l.id}" data-s="expected">Undo</button>`
+        : l.status==="absent" ? `<button class="btn ghost sm" data-ci="${l.id}" data-s="expected">Undo</button><button class="btn green bigbtn" data-ci="${l.id}" data-s="present">Arrived</button>`
+        : `<button class="btn ghost sm" data-ci="${l.id}" data-s="absent">Absent</button><button class="btn green bigbtn" data-ci="${l.id}" data-s="present">✓ Present</button>`}
+    </div>`).join("")}</div>${list.length>200?`<p class="small muted">Showing 200 of ${list.length}. Search to narrow down.</p>`:""}` : `<div class="empty">No match. Check the spelling or try the surname only.</div>`;
+  $$("[data-tag]").forEach(b => b.onclick = () => { stageList(); printTags([S.data.learners.find(x=>x.id===b.dataset.tag)]); });
+  $$("[data-robe]").forEach(b => b.onclick = () => { b.disabled = true; act("grad_robe", {p_learner:b.dataset.robe, p_issued:b.dataset.v==="1"}); });
+  $$("[data-ci]").forEach(b => b.onclick = async () => {
+    b.disabled = true;
+    const l = S.data.learners.find(x=>x.id===b.dataset.ci);
+    if (await act("grad_checkin", {p_learner:b.dataset.ci, p_status:b.dataset.s}, b.dataset.s==="present" ? `${fullName(l)} checked in` : null)){
+      if (b.dataset.s === "present" && tagPrefs().auto){ stageList(); const fresh = S.data.learners.find(x=>x.id===l.id); if (fresh) printTags([fresh]); }
+      if (b.dataset.s === "present" && S.f.ciQ){ S.f.ciQ = ""; const q=$("#ciq"); if(q){ q.value=""; q.focus(); } drawCheckin(); }
+    }
+  });
+}
+
+/* ---------- STAGE ORDER ---------- */
+function viewStage(){
+  const P = stageList();
+  const called = P.filter(l=>l.stage_status==="called");
+  const waiting = P.filter(l=>l.stage_status==="waiting");
+  const done = P.filter(l=>l.stage_status==="done").length;
+  const notYet = S.data.learners.filter(l=>l.status==="expected");
+  const notYetBy = {}; notYet.forEach(l => { const g = groupOf(l); notYetBy[g] = (notYetBy[g]||0)+1; });
+  const late = waiting.filter(l=>l._late);
+  const nextUp = waiting.slice(0,5);
+  let html = bannerHTML() + `
+  <div class="stagebox noprint">
+    <div class="now"><div class="l">Now on stage</div>
+      ${called.length ? called.map(l=>`<div class="big">${esc(fullName(l))}</div><div class="pr">Tag ${l._code} · #${l._seq} · NQF ${esc(l.nqf??"?")} · ${esc(l.programme||"")}${l.client?" · "+esc(l.client):""}</div>`).join("") : `<div class="big" style="opacity:.7">Nobody called yet</div><div class="pr">${P.length} arrived graduates in the line-up</div>`}
+      <div class="row" style="margin-top:14px;position:relative;z-index:1">
+        <button class="btn gold lg" id="callNext" ${waiting.length?"":"disabled"}>${called.length?"✓ Done, call next":"▶ Call first graduate"}</button>
+        ${called.length?`<button class="btn ghost sm" id="undoCall">Back to waiting</button>`:""}
+      </div>
+      <div class="small" style="margin-top:10px;color:#c9d3f2">${done} of ${P.length} crossed · ${notYet.length} not yet arrived</div>
+    </div>
+    <div class="card" style="margin:0"><h2>Up next</h2>
+      ${nextUp.length ? nextUp.map((l,i)=>`<div class="row" style="padding:6px 0;border-bottom:1px solid var(--line)"><span class="seq" style="width:auto;min-width:30px;height:30px;font-size:12px;padding:0 6px;border-radius:15px">${l._code}</span><div style="flex:1"><b>${esc(fullName(l))}</b><div class="small muted">${esc(l.programme||"")}${l.client?" · "+esc(l.client):""}</div></div>${l._late?`<span class="tag red">Late arrival</span>`:""}${i===0?`<span class="tag gold">Next</span>`:""}</div>`).join("") : `<div class="empty">No one waiting.</div>`}
+    </div>
+  </div>
+  ${late.length?`<div class="err noprint" style="margin-top:12px">${late.length} late arrival${late.length>1?"s":""} after their programme had finished: ${late.map(l=>esc(fullName(l))).join(", ")}. They have been moved to the end of the ceremony.</div>`:""}
+  <div class="card" style="margin-top:14px"><h2>Full stage order<span class="spacer"></span><button class="btn ghost sm noprint" id="printAllTags">Reprint all tags</button><button class="btn ghost sm noprint" onclick="window.print()">Print for MC</button></h2>
+    <p class="small muted noprint">Only checked-in graduates appear here. Programmes go up by NQF level (lowest first). Within each programme it is first come, first on stage: the earliest arrival walks first and nobody already in the line moves back. Someone who arrives after their programme has finished goes to the end of the ceremony.</p>`;
+  if (!P.length) html += `<div class="empty">No graduates checked in yet. As people arrive at the Check-in tab, they appear here in order.</div>`;
+  else {
+    let g = null; html += `<div class="list">`;
+    P.forEach(l => {
+      const gg = l._late ? "Late arrivals (end of ceremony)" : groupOf(l);
+      if (gg !== g){ g = gg; const inG = P.filter(x=>(x._late ? "Late arrivals (end of ceremony)" : groupOf(x))===gg); html += `<div class="group-h">${esc(gg)}<span class="spacer"></span><span class="tag">${inG.length} present</span>${notYetBy[gg]?`<span class="tag">${notYetBy[gg]} not yet arrived</span>`:""}</div>`; }
+      html += `<div class="lrow ${l.stage_status}"><span class="seq" style="width:auto;min-width:38px;padding:0 6px;border-radius:19px">${l.stage_status==="done"?"✓ "+l._code:l._code}</span>
+        <div class="info"><div class="nm">${esc(fullName(l))}</div><div class="small muted">${l._late?esc(l.programme||"")+" · ":""}${esc(l.client||"")}${l.cohort?" · "+esc(l.cohort):""} · arrived ${fmtTime(l.arrived_at)}</div></div>
+        ${l._late?`<span class="tag red">Late arrival</span>`:""}
+        ${l.stage_status==="called"?`<span class="tag gold">On stage</span>`:""}
+        <span class="noprint">${l.stage_status==="waiting"?`<button class="sbtn p" data-sg="${l.id}" data-s="called">Call</button>`:""}
+        ${l.stage_status==="called"?`<button class="sbtn c" data-sg="${l.id}" data-s="done">✓ Crossed</button>`:""}
+        ${l.stage_status==="done"?`<button class="sbtn n" data-sg="${l.id}" data-s="waiting">Undo</button>`:""}</span></div>`;
+    });
+    html += `</div>`;
+  }
+  html += `</div>`;
+  main.innerHTML = html; wireBanner();
+  const pat = $("#printAllTags"); if (pat) pat.onclick = () => { if (P.length && confirm(`Print ${P.length} name tags?`)) printTags(P); };
+  $$("[data-sg]").forEach(b => b.onclick = () => act("grad_stage", {p_learner:b.dataset.sg, p_stage:b.dataset.s}));
+  const cn = $("#callNext"); if (cn) cn.onclick = async () => {
+    cn.disabled = true;
+    for (const l of called) await rpc("grad_stage", {p_code:CODE,p_pin:S.pin,p_actor:S.me,p_learner:l.id,p_stage:"done"}).catch(()=>{});
+    const nxt = waiting[0]; if (nxt) await act("grad_stage", {p_learner:nxt.id, p_stage:"called"}); else await pull(true);
+  };
+  const uc = $("#undoCall"); if (uc) uc.onclick = async () => { for (const l of called) await rpc("grad_stage",{p_code:CODE,p_pin:S.pin,p_actor:S.me,p_learner:l.id,p_stage:"waiting"}).catch(()=>{}); pull(true); };
+}
+
+/* ---------- FEED ---------- */
+const ICON = {announcement:"📣", roadblock:"⚠", checkin:"✓", stage:"🎓", status:"↻", task:"📝", comment:"💬", update:"ℹ"};
+function feedItem(f){
+  const task = f.ref_type==="task" ? S.data.tasks.find(t=>t.id===f.ref_id) : null;
+  return `<div class="feed-item ${f.kind}"><div class="ic">${ICON[f.kind]||"•"}</div><div style="flex:1"><div class="t"><b>${esc(f.actor||"")}</b>${f.role==="manager"?` <span class="tag gold">Manager</span>`:""} ${f.kind==="comment"&&task?`on <i>${esc(task.title)}</i>: `:""}${esc(f.text)}</div><div class="w">${ago(f.created_at)} · ${fmtTime(f.created_at)}</div></div></div>`;
+}
+function viewFeed(){
+  S.unseen = 0; $("#bFeed").classList.add("hidden");
+  if (!$("#fdView")){
+    main.innerHTML = `<div id="bn"></div><div class="card" id="fdView">
+      <h2>Team updates</h2>
+      <div class="noprint"><textarea id="fdTxt" placeholder="${S.role==="manager"?"Write a comment or announcement for the whole team":"Write an update for the team"}"></textarea>
+      <div class="row" style="margin-top:8px">${S.role==="manager"?`<label class="row small" style="gap:6px;cursor:pointer"><input type="checkbox" id="fdAnn" checked> Send as announcement (alert and banner for everyone)</label>`:""}
+      <span class="spacer"></span><button class="btn" id="fdSend">Post</button></div></div>
+      <div class="chips" id="fdChips" style="margin:14px 0 6px"></div><div id="fdList"></div>
+      <div class="row noprint" style="margin-top:10px"><button class="btn ghost sm" id="notifBtn">🔔 Enable phone/desktop alerts</button></div></div>`;
+    $("#fdSend").onclick = async () => {
+      const v = $("#fdTxt").value.trim(); if (!v) return;
+      const ann = $("#fdAnn") && $("#fdAnn").checked;
+      $("#fdSend").disabled = true;
+      if (await act("grad_post", {p_text:v, p_kind: ann?"announcement":"comment", p_ref_type:null, p_ref_id:null}, ann?"Announcement sent to everyone":"Posted")) $("#fdTxt").value = "";
+      $("#fdSend").disabled = false;
+    };
+    $("#notifBtn").onclick = async () => { try { const p = await Notification.requestPermission(); toast(p==="granted"?"Alerts enabled on this device":"Alerts were not allowed"); } catch { toast("This browser does not support alerts"); } };
+  }
+  $("#bn").innerHTML = bannerHTML(); wireBanner();
+  const kinds = {All:()=>true, Announcements:f=>f.kind==="announcement", Roadblocks:f=>f.kind==="roadblock", Comments:f=>f.kind==="comment", Tasks:f=>["status","task","roadblock"].includes(f.kind), "Check-ins":f=>f.kind==="checkin", Stage:f=>f.kind==="stage"};
+  $("#fdChips").innerHTML = Object.keys(kinds).map(k=>`<button class="chip ${S.f.feedKind===k?"on":""}" data-k="${k}">${k}</button>`).join("");
+  $$("#fdChips .chip").forEach(b => b.onclick = () => { S.f.feedKind = b.dataset.k; viewFeed(); });
+  const list = S.data.feed.filter(kinds[S.f.feedKind]);
+  $("#fdList").innerHTML = list.map(feedItem).join("") || `<div class="empty">Nothing here yet.</div>`;
+}
+
+/* ---------- MANAGE ---------- */
+function viewManage(){
+  if (S.role !== "manager") return setTab("overview");
+  const d = S.data;
+  const link = HUB_URL + "?e=" + CODE;
+  main.innerHTML = `
+  <div class="card"><h2>Share with the team</h2>
+    <p class="small">Team members sign in with their own Camblish email and password. Add people under the <b>Users</b> tab. Web link for phones:</p>
+    <div class="row"><input type="text" readonly value="${esc(link)}" id="lnk" style="flex:1"><button class="btn sm" id="cp">Copy link</button></div></div>
+  <div class="grid g2">
+    <div class="card"><h2>Task owners</h2><p class="small muted" style="margin-top:-6px">Names that appear in the task owner list.</p>
+      <div class="list">${d.members.map(m=>`<div class="lrow"><div class="info"><div class="nm">${esc(m.name)}</div><div class="small muted">${esc(m.role_title||"")}</div></div><button class="sbtn n" data-mrm="${m.id}">Remove</button></div>`).join("") || `<div class="empty">No team members yet.</div>`}</div>
+      <div class="row" style="margin-top:10px"><input type="text" id="mn" placeholder="Full name" style="flex:2;min-width:140px"><input type="text" id="mr" placeholder="Role, e.g. Registration desk" style="flex:2;min-width:140px"><button class="btn sm" id="madd">Add</button></div></div>
+    <div class="card"><h2>Event settings</h2>
+      <label class="lbl">Event name</label><input type="text" id="en" value="${esc(d.event.name)}">
+      <div class="grid g2" style="gap:10px"><div><label class="lbl">Date</label><input type="date" id="ed" value="${esc(d.event.date||"")}"></div><div><label class="lbl">Venue</label><input type="text" id="ev" value="${esc(d.event.venue||"")}"></div>
+</div>
+      <button class="btn sm" id="esave" style="margin-top:10px">Save settings</button></div>
+  </div>
+  <div class="card"><h2>Learner list<span class="spacer"></span></h2>
+    <p class="small">Upload an Excel or CSV file to add more learners at any time. Learners already on the list are skipped automatically. The system recognises columns such as <b>First name, Middle name, Last name, Program, Client, Project Manager, Region, SETA, Contact number, Attending, Robe, Belt colour, Name tag</b> and <b>ID number</b> (only the last 4 digits are kept). The NQF level is read from the programme name (for example "EUC L3" is NQF 3) when there is no NQF column. One sheet with all programmes, or several sheets (one per programme or client) both work.</p>
+    <input type="file" id="imf" accept=".xlsx,.xls,.csv">
+    <div id="imPrev"></div>
+    <div class="row" style="margin-top:12px"><button class="btn ghost sm" id="exp">Export attendance and stage order (CSV)</button><span class="small muted">${d.learners.length} graduates loaded</span></div>
+  </div>`;
+  $("#cp").onclick = async () => { try { await navigator.clipboard.writeText(link); toast("Link copied"); } catch { $("#lnk").select(); } };
+  $$("[data-mrm]").forEach(b => b.onclick = () => act("grad_member_save", {p_name:null, p_role_title:null, p_remove_id:b.dataset.mrm}, "Removed"));
+  $("#madd").onclick = () => { const n=$("#mn").value.trim(); if(!n) return; act("grad_member_save", {p_name:n, p_role_title:$("#mr").value.trim(), p_remove_id:null}, "Added to the team"); };
+  $("#esave").onclick = () => act("grad_event_update", {p_name:$("#en").value, p_date:$("#ed").value||null, p_venue:$("#ev").value, p_team_pin:"", p_mgr_pin:""}, "Settings saved");
+  $("#imf").onchange = importPreview;
+  $("#exp").onclick = exportCsv;
+}
+const HMAP = [
+  ["first_name", /^(first\s*names?|names?|given\s*names?|learner\s*name)$/],
+  ["middle_name", /^(middle\s*names?|second\s*name)$/],
+  ["surname", /^(surname|last\s*name|family\s*name)$/],
+  ["full_name", /^(full\s*name|name\s*(and|&)\s*surname|learner|graduate)$/],
+  ["learner_ref", /(^id$|\bid\s*(no|number)|identity|learner\s*(no|number)|student\s*(no|number)|passport)/],
+  ["pm", /(project\s*manager|coordinator|\bpm\b)/],
+  ["region", /^(region|province|site|branch)$/],
+  ["seta", /^seta$/],
+  ["phone", /(contact\s*(no|number)|cell|phone|mobile)/],
+  ["rsvp", /(attending|rsvp)/],
+  ["robe", /(robe|gown)/],
+  ["belt", /belt/],
+  ["name_tag", /name\s*tag/],
+  ["programme", /(programme|program|qualification|course|learnership)/],
+  ["nqf", /(nqf|level)/],
+  ["client", /(client|company|employer|sponsor|organisation|organization)/],
+  ["cohort", /(cohort|group|class|intake)/],
+  ["notes", /(notes?|comments?|remarks?)/]
+];
+async function importPreview(e){
+  const f = e.target.files[0]; if (!f) return;
+  const out = $("#imPrev");
+  try {
+    if (typeof XLSX === "undefined") throw new Error("The spreadsheet reader did not load. Check your internet connection and try again.");
+    const wb = XLSX.read(await f.arrayBuffer(), {type:"array"});
+    const rows = [];
+    wb.SheetNames.forEach(sn => {
+      const aoa = XLSX.utils.sheet_to_json(wb.Sheets[sn], {header:1, defval:"", raw:true}).map(r => r.map(c => c === null || c === undefined ? "" : (typeof c === "number" ? String(Math.round(c) === c ? c : c) : String(c))));
+      // find header row: first row with 2+ recognised headers
+      let hi = aoa.findIndex(r => r.filter(c => HMAP.some(([,re]) => re.test(String(c).trim().toLowerCase()))).length >= 2);
+      if (hi < 0) return;
+      const map = {};
+      aoa[hi].forEach((c, i) => { const h = String(c).trim().toLowerCase(); const m = HMAP.find(([k,re]) => map[k] === undefined && re.test(h)); if (m) map[m[0]] = i; });
+      // sheet name as programme / client fallback
+      for (let r = hi+1; r < aoa.length; r++){
+        const row = aoa[r], g = k => map[k] !== undefined ? String(row[map[k]]).trim() : "";
+        let first = g("first_name"), sur = g("surname");
+        if (!first && !sur && g("full_name")){ const p = g("full_name").split(/\s+/); sur = p.pop(); first = p.join(" "); }
+        if (!first && !sur) continue;
+        let ref = g("learner_ref").replace(/\s/g,""); if (/^\d{11,13}$/.test(ref)) ref = "…" + ref.slice(-4);
+        let prog = g("programme").replace(/\s+/g," ") || (map.programme===undefined && wb.SheetNames.length>1 ? sn : "");
+        let nqf = g("nqf"); if (!/\d/.test(nqf)){ const m = prog.match(/(?:\bNQF\s*|\bLevel\s*|\bL\s*)(\d{1,2})\b/i); if (m) nqf = m[1]; }
+        let phone = g("phone").replace(/\s/g,""); phone = phone.split("/").map(x => /^\d{9}$/.test(x) ? "0"+x : x).join(" / ");
+        rows.push({ first_name:first, middle_name:g("middle_name"), surname:sur, learner_ref:ref, programme:prog, nqf, client:g("client"), cohort:g("cohort"), notes:g("notes"),
+          pm:g("pm"), region:g("region"), seta:g("seta"), phone, rsvp:g("rsvp"), robe:g("robe"), belt:g("belt"), name_tag:g("name_tag") });
+      }
+    });
+    if (!rows.length) throw new Error("No learners found. Make sure the sheet has a heading row with at least First name and Surname.");
+    const missing = rows.filter(r=>!r.programme || !String(r.nqf).match(/\d/)).length;
+    out.innerHTML = `<div class="okm">Found ${rows.length} graduates in ${esc(f.name)}.</div>
+      ${missing?`<div class="err">${missing} row(s) have no programme or NQF level. They will be placed at the end of the stage order until fixed in the file.</div>`:""}
+      <div class="scroll" style="max-height:260px;overflow:auto;margin-top:10px"><table class="t"><thead><tr><th>Name</th><th>Programme</th><th>NQF</th><th>Client</th><th>Project manager</th><th>Region</th></tr></thead><tbody>
+      ${rows.slice(0,50).map(r=>`<tr><td>${esc(r.first_name+" "+r.surname)}</td><td>${esc(r.programme)}</td><td>${esc(r.nqf)}</td><td>${esc(r.client)}</td><td>${esc(r.pm)}</td><td>${esc(r.region)}</td></tr>`).join("")}</tbody></table></div>
+      ${rows.length>50?`<p class="small muted">Showing first 50.</p>`:""}
+      <div class="row" style="margin-top:10px"><label class="row small" style="gap:6px"><input type="checkbox" id="imRep"> Replace the whole list instead of adding (attendance already captured will be cleared)</label><span class="spacer"></span><button class="btn" id="imGo">Import ${rows.length} graduates</button></div>`;
+    $("#imGo").onclick = async () => {
+      const rep = $("#imRep").checked;
+      if (rep && S.data.learners.some(l=>l.status!=="expected") && !confirm("Some graduates are already checked in. Replace the list anyway?")) return;
+      $("#imGo").disabled = true;
+      if (await act("grad_import", {p_rows:rows, p_replace:rep}, `Upload complete`)){ out.innerHTML = `<div class="okm">Done. ${rep ? "The list was replaced." : "New learners were added; anyone already on the list was skipped."}</div>`; }
+    };
+  } catch(err){ out.innerHTML = `<div class="err">${esc(err.message)}</div>`; }
+}
+function exportCsv(){
+  const P = stageList(); const seq = new Map(P.map(l=>[l.id,l._seq]));
+  const head = ["Stage order","First name","Middle name","Surname","Programme","NQF","Client","Project manager","Region","SETA","Attendance","Arrived","Checked in by","Robe issued","Stage status","Stage time"];
+  const rows = S.data.learners.slice().sort(orderKey).map(l => [seq.get(l.id)||"", l.first_name, l.middle_name, l.surname, l.programme, l.nqf, l.client, l.pm, l.region, l.seta, l.status, fmtTime(l.arrived_at), l.checked_by, l.robe_issued?"Yes":"", l.stage_status, fmtTime(l.stage_at)]);
+  const csv = [head, ...rows].map(r => r.map(v => `"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\r\n");
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["﻿"+csv],{type:"text/csv"})); a.download = `Graduation attendance ${new Date().toISOString().slice(0,10)}.csv`; a.click();
+}
+
+/* ---------- USERS ---------- */
+async function viewUsers(){
+  if (!S.user || !["admin","manager"].includes(S.user.role)) return setTab("overview");
+  if (!$("#usView")){
+    main.innerHTML = `<div id="bn"></div><div class="grid g2" id="usView">
+      <div class="card"><h2>Add a team member</h2><p class="small muted" style="margin-top:-4px">Only @camblish.co.za addresses. A temporary password is created and the person must choose their own password when they first sign in.</p>
+        <label class="lbl">Full name</label><input type="text" id="un">
+        <label class="lbl">Camblish email</label><input type="text" id="ue" placeholder="name@camblish.co.za">
+        <label class="lbl">Role</label><select id="ur"><option value="team">Team member (tasks, check-in, stage, updates)</option><option value="manager">Manager (also users, uploads, announcements)</option>${S.user.role==="admin"?`<option value="admin">Administrator</option>`:""}</select>
+        <button class="btn gold" id="uadd" style="margin-top:12px">Create account</button><div id="uout"></div></div>
+      <div class="card"><h2>People with access<span class="spacer"></span><span class="small muted" id="ucount"></span></h2><div id="ulist"><p class="muted">Loading…</p></div></div></div>`;
+    $("#uadd").onclick = async () => {
+      const em = $("#ue").value.trim();
+      if (!/@camblish\.co\.za$/i.test(em)) return $("#uout").innerHTML = `<div class="err">Only @camblish.co.za email addresses can be added.</div>`;
+      $("#uadd").disabled = true;
+      try { const r = await rpc("hub_user_create", {p_token:S.pin, p_email:em, p_name:$("#un").value.trim(), p_role:$("#ur").value});
+        $("#un").value = ""; $("#ue").value = ""; credCard($("#uout"), r, true); drawUsers(); }
+      catch(e){ $("#uout").innerHTML = `<div class="err">${esc(e.message)}</div>`; }
+      $("#uadd").disabled = false;
+    };
+  }
+  $("#bn").innerHTML = bannerHTML(); wireBanner();
+  if (!S._usersLoaded){ S._usersLoaded = true; drawUsers(); }
+}
+async function drawUsers(){
+  let list; try { list = await rpc("hub_users_list", {p_token:S.pin}); } catch(e){ $("#ulist").innerHTML = `<div class="err">${esc(e.message)}</div>`; return; }
+  $("#ucount").textContent = `${list.filter(u=>u.active).length} active`;
+  $("#ulist").innerHTML = `<div class="list">${list.map(u => `<div class="lrow ${u.active?"":"absent"}"><div class="info">
+      <div class="nm">${esc(u.name)} <span class="rolepill ${u.role}">${u.role}</span>${u.active?"":` <span class="tag red">Deactivated</span>`}${u.must_change && u.active?` <span class="tag gold">Awaiting first sign-in</span>`:""}</div>
+      <div class="small muted">${esc(u.email)} · ${u.last_login ? "last sign-in " + ago(u.last_login) : "never signed in"}</div></div>
+      ${u.id === S.user.id ? `<span class="tag">You</span>` : `
+      <button class="sbtn p" data-ureset="${u.id}">Reset password</button>
+      ${u.role !== "admin" ? `<button class="sbtn n" data-urole="${u.id}" data-to="${u.role==="manager"?"team":"manager"}">Make ${u.role==="manager"?"team":"manager"}</button>` : ""}
+      <button class="sbtn ${u.active?"r":"c"}" data-uact="${u.id}" data-to="${u.active?0:1}">${u.active?"Deactivate":"Reactivate"}</button>`}</div>`).join("")}</div><div id="ucred"></div>`;
+  $$("[data-ureset]").forEach(b => b.onclick = async () => { if (!confirm("Create a new temporary password for this person? Their current password stops working.")) return;
+    try { const r = await rpc("hub_user_reset", {p_token:S.pin, p_user:b.dataset.ureset}); credCard($("#uout"), r, false); drawUsers(); } catch(e){ toast(e.message, "red"); } });
+  $$("[data-urole]").forEach(b => b.onclick = async () => { try { await rpc("hub_user_update", {p_token:S.pin, p_user:b.dataset.urole, p_role:b.dataset.to, p_active:null}); drawUsers(); } catch(e){ toast(e.message, "red"); } });
+  $$("[data-uact]").forEach(b => b.onclick = async () => { try { await rpc("hub_user_update", {p_token:S.pin, p_user:b.dataset.uact, p_role:"", p_active:b.dataset.to==="1"}); drawUsers(); } catch(e){ toast(e.message, "red"); } });
+}
+function credMail(r, isNew){
+  const subject = isNew ? "Your Camblish Alumni Hub account" : "Your Camblish Alumni Hub password was reset";
+  const body = `Hi ${r.name.split(" ")[0]},
+
+${isNew ? "An account has been created for you on the Camblish Alumni Hub." : "Your Camblish Alumni Hub password has been reset."}
+
+Sign in here: ${HUB_URL}
+(or open the Camblish Alumni Hub desktop app)
+
+Email: ${r.email}
+Temporary password: ${r.temp_password}
+
+You will be asked to choose your own password the first time you sign in.
+
+Kind regards,
+${S.me}
+Camblish Training Institute`;
+  return {subject, body};
+}
+function credCard(el, r, isNew){
+  const m = credMail(r, isNew);
+  el.innerHTML = `<div class="cred"><div style="font-weight:700;margin-bottom:6px">${isNew ? "Account created" : "Password reset"} for ${esc(r.name)}</div>
+    <div class="small" style="color:#c9d3f2">Email: ${esc(r.email)}</div>
+    <div style="margin:8px 0">Temporary password: <code>${esc(r.temp_password)}</code></div>
+    <div class="row"><button class="btn gold sm" id="cmail">✉ Email login details</button><button class="btn ghost sm" id="ccopy">Copy message</button></div>
+    <div class="small" style="color:#c9d3f2;margin-top:8px">The password is shown only once. Send it now.</div></div>`;
+  $("#ccopy").onclick = async () => { try { await navigator.clipboard.writeText(m.body); toast("Message copied", "green"); } catch { toast("Copy not available", "red"); } };
+  $("#cmail").onclick = async () => {
+    if (DESKTOP() && DESKTOP().send_email){
+      const res = await DESKTOP().send_email(r.email, m.subject, m.body);
+      toast(res && res.ok ? (res.method === "outlook" ? "Email sent from your Outlook" : "Email opened in your mail app. Press Send.") : "Could not open email: " + (res && res.error), res && res.ok ? "green" : "red");
+    } else {
+      location.href = `mailto:${encodeURIComponent(r.email)}?subject=${encodeURIComponent(m.subject)}&body=${encodeURIComponent(m.body)}`;
+    }
+  };
+}
+
+/* ---------- BOOT ---------- */
+function setTab(t){
+  S.tab = t; main.innerHTML = "";
+  try { history.replaceState(null, "", "?e=" + CODE + "#" + t); } catch {}
+  if (t === "users") S._usersLoaded = false;
+  render(); window.scrollTo(0,0);
+}
+$$("nav.tabs button").forEach(b => b.onclick = () => setTab(b.dataset.tab));
+async function boot(){
+  const tok = store.get(TOKEN_KEY);
+  if (!tok) return authView();
+  try { const r = await rpc("hub_me", {p_token:tok}); afterAuth(tok, r); }
+  catch(e){ store.del(TOKEN_KEY); authView(/Session/.test(e.message) ? "Your session has ended. Please sign in again." : e.message); }
+}
+boot();
+</script>
+</body>
+</html>
