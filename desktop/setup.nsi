@@ -4,7 +4,7 @@ Unicode true
 !include "LogicLib.nsh"
 
 !define APP      "Camblish Alumni Hub"
-!define VER      "1.1.0"
+!define VER      "1.2.0"
 !define EXE      "Camblish Alumni Hub.exe"
 !define UNKEY    "Software\Microsoft\Windows\CurrentVersion\Uninstall\CamblishAlumniHub"
 

@@ -191,6 +191,20 @@ def set_window_icon(title):
         pass
 
 
+def window_size():
+    """A centred window about 80% of the usable screen, in the same units pywebview uses."""
+    try:
+        import ctypes
+        from ctypes import wintypes
+        r = wintypes.RECT()
+        ctypes.windll.user32.SystemParametersInfoW(0x0030, 0, ctypes.byref(r), 0)   # work area, excludes taskbar
+        scale = ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100.0 or 1.0
+        aw, ah = (r.right - r.left) / scale, (r.bottom - r.top) / scale
+        return int(max(860, min(1320, aw * 0.8))), int(max(600, min(860, ah * 0.85)))
+    except Exception:
+        return 1200, 780
+
+
 def main():
     try:
         import ctypes
@@ -209,8 +223,10 @@ def main():
         url = HUB_URL          # always the latest version from GitHub
     except Exception:
         pass                   # offline: use the copy bundled with the app
-    webview.create_window(APP_TITLE, url=url, js_api=Bridge(), width=1440, height=920,
-                          min_size=(1080, 700), background_color="#081a45", text_select=True)
+    w, h = window_size()
+    # Opens centred at a comfortable size; Maximise fills the screen and the edges can be dragged to any size.
+    webview.create_window(APP_TITLE, url=url, js_api=Bridge(), width=w, height=h,
+                          min_size=(860, 600), resizable=True, background_color="#081a45", text_select=True)
     webview.start(http_server=url != HUB_URL, private_mode=False, storage_path=storage)
 
 
