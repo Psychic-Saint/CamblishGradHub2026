@@ -141,6 +141,16 @@ class Bridge:
         except Exception as e:
             return {"ok": False, "error": str(e)}
 
+    def print_png(self, images_b64, printer=""):
+        """Print ready-made tag images (rendered by the hub page) straight to the printer."""
+        try:
+            for b in images_b64 or []:
+                img = Image.open(io.BytesIO(base64.b64decode(b))).convert("RGB")
+                print_image(img, printer or "")
+            return {"ok": True}
+        except Exception as e:
+            return {"ok": False, "error": str(e)}
+
     def send_email(self, to, subject, body):
         try:
             import win32com.client
@@ -161,12 +171,35 @@ class Bridge:
             return {"ok": False, "error": str(e)}
 
 
+def set_window_icon(title):
+    """Give the window and taskbar the Alumni Hub icon instead of the Python one."""
+    try:
+        import ctypes
+        import time
+        user32 = ctypes.windll.user32
+        ico = resource("app.ico")
+        for _ in range(60):
+            hwnd = user32.FindWindowW(None, title)
+            if hwnd:
+                big = user32.LoadImageW(None, ico, 1, 256, 256, 0x10)
+                small = user32.LoadImageW(None, ico, 1, 32, 32, 0x10)
+                user32.SendMessageW(hwnd, 0x80, 1, big)
+                user32.SendMessageW(hwnd, 0x80, 0, small)
+                return
+            time.sleep(0.25)
+    except Exception:
+        pass
+
+
 def main():
     try:
         import ctypes
         ctypes.windll.shcore.SetProcessDpiAwareness(1)
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("Camblish.AlumniHub.1")
     except Exception:
         pass
+    import threading
+    threading.Thread(target=set_window_icon, args=(APP_TITLE,), daemon=True).start()
     storage = os.path.join(os.environ.get("APPDATA", os.path.expanduser("~")), "CamblishAlumniHub")
     os.makedirs(storage, exist_ok=True)
     url = resource("hub.html")

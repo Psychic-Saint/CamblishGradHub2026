@@ -16,3 +16,10 @@ One interface for graduations and alumni events: live check-in, stage order with
 ## Working on it
 1. Clone the repo, edit `index.html`, open it in a browser to test.
 2. Commit and push to `main`. GitHub Pages republishes in about a minute.
+
+## Latest update
+- **Colour name tags** in the Caps Off design with name, programme and NQF, client, year and the stage number. Sized for colour card printers (86 x 54 mm CR80 by default) and colour label printers. Tags print automatically at check-in on the desktop app.
+- **Access list** on the Users tab shows exactly what each person can and can't do, plus a role table.
+- **Show password** button on every password box.
+- **Stay live:** requests retry automatically if the connection drops, and a daily GitHub Action (`.github/workflows/keepalive.yml`) keeps the database awake.
+- **New app icon** (graduation cap) for the desktop app, taskbar and browser tab.
