@@ -412,6 +412,17 @@ nav.tabs .badge.green{background:var(--ok);color:#fff}
 .feed-item.mine{background:linear-gradient(90deg,#fffaf0,#fff)}
 #capSpin{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:radial-gradient(circle at 50% 40%,rgba(29,63,174,.92),rgba(8,26,69,.97));perspective:900px;transition:opacity .35s}
 #capSpin.out{opacity:0}
+.fdgrid{display:flex;flex-direction:column}.fdgrid .annscreen{order:-1}
+.actscreen .feed-item{gap:8px;padding:6px 4px}.actscreen .feed-item .ic{width:24px;height:24px;font-size:12px}
+.actscreen .feed-item .t{font-size:13px;line-height:1.35}.actscreen .feed-item .w{font-size:11px}.actscreen .tag{font-size:10px;padding:1px 6px}
+.actscreen .thr{margin-top:4px}.actscreen .thr .rp{font-size:12px;padding:3px 0}.actscreen .rlink{font-size:11.5px;padding:2px 0}
+@media (min-width:1000px){
+  .fdgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:16px;align-items:start}
+  .fdgrid .annscreen{order:0;position:sticky;top:12px;margin:0}.fdgrid .actscreen{margin-top:0}
+  .actscreen #fdList{max-height:calc(100vh - 290px);min-height:320px;overflow-y:auto;padding-right:4px;scrollbar-width:thin}
+  .annscreen .catpick{gap:6px}.annscreen .catbtn{font-size:12px;padding:6px 10px}
+  .annscreen .anncard.big .act{font-size:16px}
+}
 mark.hl{background:#fde68a;color:inherit;border-radius:3px;padding:0 1px;box-shadow:0 0 0 1px #f3d27a}
 .bestm{border:2px solid #d4af37;border-radius:14px;background:linear-gradient(180deg,#fffaf0,#fff);padding:8px 10px 4px;margin:6px 0 14px;box-shadow:0 10px 24px -18px rgba(212,175,55,.9);animation:bmin .18s ease-out}
 .bestm .bmh{display:flex;align-items:center;gap:8px;font-weight:800;color:#081a45;font-size:14px;padding:2px 4px 6px;flex-wrap:wrap}.bestm .bmh .small{font-weight:600;color:#8a6510}
@@ -500,7 +511,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202610062106";
+const BUILD = "202610062115";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -2121,15 +2132,15 @@ function annCard(f, big){
 function viewFeed(){
   S.unseen = 0; $("#bFeed").classList.add("hidden");
   if (!$("#fdView")){
-    main.innerHTML = `<div id="bn"></div><div id="fdView">
+    main.innerHTML = `<div id="bn"></div><div id="fdView" class="fdgrid">
+      <section class="actscreen card"><div class="ash"><h2>💬 Team updates</h2><span class="spacer"></span><span class="small muted">Everything that happens, newest first</span></div>
+        ${can("comment") ? `<div class="row noprint" style="margin-bottom:8px"><input type="text" id="fdTxt" placeholder="Write an update for the team" style="flex:1"><button class="btn" id="fdSend">Post</button></div>` : ""}
+        <div class="chips" id="fdChips" style="margin:4px 0 8px"></div><div id="fdList"></div>
+        <div class="row noprint" style="margin-top:10px"><button class="btn ghost sm" id="setAl">🔔 Alerts and sound settings</button></div></section>
       <section class="annscreen card"><div class="ash"><h2>📣 Announcements</h2><span class="spacer"></span><span class="small" id="annCount"></span></div>
         ${can("announce") ? `<div class="anncompose noprint"><div class="catpick" id="catPick">${Object.entries(ANN_CAT).map(([k,c]) => `<button type="button" class="catbtn ${k === (S.f.annCat || "general") ? "on" : ""}" data-cat="${k}" style="--cc:${c.c};--cb:${c.bg}">${c.icon} ${c.label}</button>`).join("")}</div>
           <div class="row" style="align-items:stretch;margin-top:8px"><textarea id="annTxt" placeholder="Write an announcement for everyone" style="flex:1;min-height:56px"></textarea><button class="btn gold" id="annSend" style="min-width:120px">Announce</button></div></div>` : ""}
-        <div id="annList"></div><button class="lnk" id="annMore" type="button"></button></section>
-      <section class="actscreen card"><div class="ash"><h2>Activity</h2><span class="spacer"></span><span class="small muted">Everything that happens, newest first</span></div>
-        ${can("comment") ? `<div class="row noprint" style="margin-bottom:8px"><input type="text" id="fdTxt" placeholder="Write an update for the team" style="flex:1"><button class="btn" id="fdSend">Post</button></div>` : ""}
-        <div class="chips" id="fdChips" style="margin:4px 0 8px"></div><div id="fdList"></div>
-        <div class="row noprint" style="margin-top:10px"><button class="btn ghost sm" id="setAl">🔔 Alerts and sound settings</button></div></section></div>`;
+        <div id="annList"></div><button class="lnk" id="annMore" type="button"></button></section></div>`;
     $$("#catPick [data-cat]").forEach(b => b.onclick = () => { S.f.annCat = b.dataset.cat; $$("#catPick [data-cat]").forEach(x => x.classList.toggle("on", x === b)); });
     const as = $("#annSend"); if (as) as.onclick = async () => { const v = $("#annTxt").value.trim(); if (!v) return $("#annTxt").focus(); as.disabled = true;
       if (await act("grad_post2", {p_text:v, p_kind:"announcement", p_category:S.f.annCat || "general", p_ref_type:null, p_ref_id:null}, `${annCat({category:S.f.annCat}).label} announcement sent to everyone`)) $("#annTxt").value = ""; as.disabled = false; };
@@ -2143,9 +2154,9 @@ function viewFeed(){
   wireThreads($("#fdView"));
   const anns = S.data.feed.filter(f => f.kind === "announcement");
   $("#annCount").textContent = anns.length ? `${anns.length} so far` : "";
-  const shown = S.f.annAll ? anns : anns.slice(0, 3);
+  const shown = S.f.annAll ? anns : anns.slice(0, 4);
   $("#annList").innerHTML = shown.length ? `<div class="annlist">${shown.map((f, i) => annCard(f, i === 0)).join("")}</div>` : `<div class="empty" style="color:#c9d3f2">No announcements yet.</div>`;
-  $("#annMore").textContent = anns.length > 3 ? (S.f.annAll ? "Show only the latest 3" : `Show all ${anns.length} announcements`) : "";
+  $("#annMore").textContent = anns.length > 4 ? (S.f.annAll ? "Show only the latest 4" : `Show all ${anns.length} announcements`) : "";
   const kinds = {All:f=>f.kind!=="announcement" && f.kind!=="reply", Roadblocks:f=>f.kind==="roadblock", Comments:f=>f.kind==="comment", Tasks:f=>["status","task","roadblock"].includes(f.kind), "Check-ins":f=>f.kind==="checkin", Robes:f=>f.kind==="robe", Stage:f=>f.kind==="stage", Certificates:f=>f.kind==="cert", Changes:f=>f.kind==="update"};
   if (!kinds[S.f.feedKind]) S.f.feedKind = "All";
   $("#fdChips").innerHTML = Object.keys(kinds).map(k=>`<button class="chip ${S.f.feedKind===k?"on":""}" data-k="${k}">${k}</button>`).join("");
