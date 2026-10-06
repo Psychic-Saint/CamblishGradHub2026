@@ -296,7 +296,7 @@ class Tray:
                 pass
             self.hwnd = win32gui.CreateWindow(wc.lpszClassName, "Camblish Alumni Hub", 0, 0, 0, 0, 0, 0, 0, wc.hInstance, None)
             try:
-                self.hicon = win32gui.LoadImage(0, resource("app.ico"), win32con.IMAGE_ICON, 0, 0, win32con.LR_LOADFROMFILE | win32con.LR_DEFAULTSIZE)
+                self.hicon = win32gui.LoadImage(0, resource("app_gold.ico"), win32con.IMAGE_ICON, 0, 0, win32con.LR_LOADFROMFILE | win32con.LR_DEFAULTSIZE)
             except Exception:
                 self.hicon = win32gui.LoadIcon(0, win32con.IDI_APPLICATION)
             win32gui.Shell_NotifyIcon(win32gui.NIM_ADD, (self.hwnd, 0, win32gui.NIF_ICON | win32gui.NIF_MESSAGE | win32gui.NIF_TIP,
@@ -354,7 +354,7 @@ def set_window_icon(title):
         import ctypes
         import time
         user32 = ctypes.windll.user32
-        ico = resource("app.ico")
+        ico = resource("app_gold.ico")
         for _ in range(60):
             hwnd = user32.FindWindowW(None, title)
             if hwnd:
