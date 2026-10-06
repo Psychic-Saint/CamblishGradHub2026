@@ -412,6 +412,11 @@ nav.tabs .badge.green{background:var(--ok);color:#fff}
 .feed-item.mine{background:linear-gradient(90deg,#fffaf0,#fff)}
 #capSpin{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:radial-gradient(circle at 50% 40%,rgba(29,63,174,.92),rgba(8,26,69,.97));perspective:900px;transition:opacity .35s}
 #capSpin.out{opacity:0}
+.thr{margin-top:8px;border-left:2px solid #e3e8f3;padding-left:10px}.thr.dk{border-left-color:rgba(29,63,174,.25)}
+.thr .rp{display:flex;gap:8px;align-items:flex-start;padding:5px 0;font-size:13px}.thr .rp .w{font-size:11px;color:var(--muted)}
+.thr .rpa{flex:0 0 auto;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#eef2fb;color:#1d3fae;font-weight:800;font-size:11px}.thr .rp.mine .rpa{background:#fdf3d6;color:#8a6510}
+.rlink{background:none;border:0;padding:4px 0;color:#1d3fae;font-weight:700;font-size:12.5px;cursor:pointer}.rlink:hover{text-decoration:underline}
+.rform{display:flex;gap:6px;margin-top:6px}.rform input{flex:1;min-width:0;padding:7px 10px;font-size:13px}
 #capSpin .coin{animation:coinflip 3.2s ease-in-out infinite;margin-bottom:6px}
 #capSpin .captxt{color:#f3d27a;font-weight:800;letter-spacing:.6px;font-size:16px}
 @keyframes capshadow{0%,100%{transform:scaleX(1);opacity:.6}50%{transform:scaleX(.7);opacity:.3}}
@@ -489,7 +494,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202610062005";
+const BUILD = "202610062059";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -767,9 +772,13 @@ const ANN_CAT = {
   late:{label:"Running late", icon:"⏰", c:"#0f766e", bg:"#e6f6f4"},
   good:{label:"Good news", icon:"🎉", c:"#1e7a4f", bg:"#e7f6ee"} };
 const annCat = f => ANN_CAT[f.category] || ANN_CAT.general;
-const KIND_TITLE = { announcement:"📣 Announcement", roadblock:"⚠ Roadblock", checkin:"✓ Check-in", robe:"🎓 Robes", stage:"🎓 On stage", cert:"📜 Certificate", status:"Task update", task:"📝 Task", comment:"💬 Comment", update:"Update" };
+const KIND_TITLE = { announcement:"📣 Announcement", roadblock:"⚠ Roadblock", checkin:"✓ Check-in", robe:"🎓 Robes", stage:"🎓 On stage", cert:"📜 Certificate", status:"Task update", task:"📝 Task", comment:"💬 Comment", reply:"↩ Reply", update:"Update" };
 function announceItem(f){
   const txt = `${f.actor}: ${f.text}`;
+  if (f.kind === "reply"){ const par = S.data.feed.find(x => x.id === f.parent_id); const toMe = par && par.actor === S.me;
+    const what = par ? (par.kind === "announcement" ? "an announcement" : "a post") : "a post";
+    toast(`↩ ${f.actor} replied${toMe ? " to you" : " to " + what}: ${f.text}`, toMe ? "gold big" : "");
+    chime(toMe ? "announcement" : "default"); notify(toMe ? `↩ ${f.actor} replied to you` : `↩ Reply to ${what}`, `${f.actor}: ${f.text}`); return; }
   if (f.kind === "announcement"){ const c = annCat(f);
     toast(`${c.icon} ${c.label.toUpperCase()} · ${txt}`, ["disaster","urgent","client","unattended"].includes(f.category) ? "red big" : "gold big");
     chime(["disaster","urgent"].includes(f.category) ? "roadblock" : "announcement"); if (f.category === "disaster") setTimeout(() => chime("roadblock"), 1300);
@@ -1863,8 +1872,44 @@ const GL_CSS = `.gl{margin:14px 0 18px;break-inside:auto}.glh{display:flex;align
     .gli{display:flex;gap:8px;align-items:center;background:#fff;border:1px solid #e9edf6;border-left:3px solid #d4af37;border-radius:8px;padding:6px 8px;break-inside:avoid;page-break-inside:avoid}
     .gli b{display:block;font-size:12.5px;line-height:1.25}.gli small{display:block;font-size:10px;color:#5b6785;margin-top:1px}
     .gnum{flex:0 0 auto;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#eef2fb;color:#1d3fae;font-weight:800;font-size:11px}`;
+const SO_CSS = `.sok{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px}.sok div{background:#f6f8fd;border-radius:12px;padding:10px 14px;border-top:3px solid #d4af37}.sok b{display:block;font-size:24px;color:#081a45}.sok span{font-size:11px;color:#5b6785;text-transform:uppercase;letter-spacing:.4px}
+    .sog{margin:18px 0 6px;break-inside:auto}.sot{width:100%;border-collapse:separate;border-spacing:0;border:1px solid #e3e8f3;border-top:0;border-radius:0 0 12px 12px;overflow:hidden;font-size:13px}
+    .sot th{background:#f1f4fa;color:#5b6785;font-size:10px;text-transform:uppercase;letter-spacing:.5px;padding:6px 10px;text-align:left}
+    .sot td{padding:8px 10px;border-bottom:1px solid #eef1f7;vertical-align:middle}.sot tr:last-child td{border-bottom:0}.sot tr:nth-child(even) td{background:#fbfcff}
+    .sot .no{width:40px;color:#8a93a8;font-weight:700}.sot .cd{width:70px}.sot .cd span{display:inline-block;min-width:46px;text-align:center;background:#081a45;color:#f3d27a;border-radius:99px;padding:3px 8px;font-weight:800;font-size:12px}
+    .sot .nm{font-weight:800;font-size:15px;color:#081a45}.sot .cl{color:#5b6785}.sot .se{width:80px;font-weight:700;color:#1d3fae}.sot .stt{width:110px;text-align:right}
+    .pill{display:inline-block;border-radius:99px;padding:2px 10px;font-size:11px;font-weight:800}.p-done{background:#e6f4ea;color:#1e7b3a}.p-called{background:#fdf3d6;color:#8a6510}.p-wait{background:#eef2fb;color:#1d3fae}.p-late{background:#fde8e6;color:#b3261e}
+    .sot tr.done td{opacity:.55}.sot tr.done .nm{text-decoration:line-through;text-decoration-color:rgba(8,26,69,.35)}
+    .sonote{font-size:12px;color:#5b6785;margin-top:8px}`;
+function stageOrderHTML(Lf){
+  const ids = new Set(Lf.map(l => l.id));
+  const P = stageList().filter(l => l.robe_issued && ids.has(l.id));
+  const notYetBy = {}; Lf.filter(l => l.status === "expected").forEach(l => { const g = groupOf(l); notYetBy[g] = (notYetBy[g] || 0) + 1; });
+  const robing = Lf.filter(l => l.status === "present" && !l.robe_issued).length;
+  const cnt = s => P.filter(l => l.stage_status === s).length;
+  const groups = []; P.forEach(l => { const g = l._late ? "Late arrivals · end of ceremony" : groupOf(l); let G = groups.find(x => x.g === g); if (!G) groups.push(G = {g, items:[]}); G.items.push(l); });
+  let n = 0;
+  const st = l => l._late && l.stage_status === "waiting" ? `<span class="pill p-late">Late arrival</span>` : l.stage_status === "done" ? `<span class="pill p-done">✓ Crossed</span>` : l.stage_status === "called" ? `<span class="pill p-called">On stage</span>` : `<span class="pill p-wait">Waiting</span>`;
+  return `<div class="sok"><div><b>${P.length}</b><span>In the stage line</span></div><div><b>${cnt("done")}</b><span>Crossed</span></div><div><b>${cnt("called")}</b><span>On stage now</span></div><div><b>${cnt("waiting")}</b><span>Still to cross</span></div></div>
+    <p class="sonote">Programmes go up by NQF level, lowest first. Within a programme it is first come, first on stage.${robing ? ` ${robing} graduate${robing === 1 ? " is" : "s are"} still being robed and will join the line.` : ""}</p>
+    ${groups.length ? groups.map(G => { const m = G.g.match(/^NQF (\S+) · (.*)$/); const done = G.items.filter(l => l.stage_status === "done").length;
+      return `<section class="sog"><div class="glh"><span class="gln">${esc(m ? m[2] : G.g)}</span>${m ? `<span class="glq">NQF ${esc(m[1])}</span>` : ""}<span class="sp"></span><span class="glq">${done} of ${G.items.length} crossed</span>${notYetBy[G.g] ? `<span class="glq">${notYetBy[G.g]} not yet arrived</span>` : ""}<span class="glc">${G.items.length} in line</span></div>
+      <table class="sot"><thead><tr><th>#</th><th>Code</th><th>Graduate</th><th>Client</th><th>Seat</th><th style="text-align:right">Status</th></tr></thead><tbody>
+      ${G.items.map(l => `<tr class="${l.stage_status}"><td class="no">${++n}</td><td class="cd"><span>${esc(l._code || "")}</span></td><td class="nm">${esc(fullName(l))}</td><td class="cl">${esc([l.client, l.cohort].filter(Boolean).join(" · "))}</td><td class="se">${esc(l.seat || "–")}</td><td class="stt">${st(l)}</td></tr>`).join("")}
+      </tbody></table></section>`; }).join("") : `<p class="muted" style="font-size:13px">Nobody is in the stage line yet. Graduates join once their robe is issued.</p>`}`;
+}
+function stageDialog(){
+  modal(`<h3>Stage order for the MC</h3><p class="small muted">A branded, printable list of everyone in the stage line, grouped by programme in calling order, with stage codes, seats and who has crossed. ${fActive() ? "<b>Your current filters apply.</b>" : ""}</p>
+    <div class="row" style="margin-top:12px;flex-wrap:wrap"><button class="btn gold" id="sPrint">🖨 Print</button><button class="btn ghost" id="sPdf">⬇ Download PDF</button><span class="spacer"></span><button class="btn ghost" id="mc">Close</button></div><div id="sMsg" class="small" style="margin-top:8px"></div>`,
+    (m, close) => { $("#mc",m).onclick = close;
+      const base = `Stage order ${S.data.event.name} ${new Date().toISOString().slice(0,10)}`.replace(/[\\/:*?"<>|]/g, "");
+      $("#sPdf",m).onclick = async () => { $("#sPdf",m).disabled = true; $("#sMsg",m).textContent = "Building the PDF…"; const ok = await reportPdf(base + ".pdf", buildReport("stage")); $("#sPdf",m).disabled = false; $("#sMsg",m).textContent = ok ? "Done." : ""; };
+      $("#sPrint",m).onclick = () => { const f = document.createElement("iframe"); f.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0"; f.srcdoc = buildReport("stage"); document.body.appendChild(f);
+        f.onload = () => setTimeout(() => { try { f.contentWindow.focus(); f.contentWindow.print(); } catch(e){ toast("Could not open printing: " + e.message, "red"); } setTimeout(() => f.remove(), 60000); }, 500); };
+    });
+}
 function buildReport(mode){
-  const listOnly = mode === "list";
+  const listOnly = mode === "list", stageMode = mode === "stage";
   const d = S.data, L = applyF(d.learners), J = journey(L), P = L.filter(l => l.status === "present");
   const fmt = ts => ts ? new Date(ts).toLocaleTimeString("en-ZA",{hour:"2-digit",minute:"2-digit"}) : "–";
   const pct = (a,b) => b ? Math.round(100*a/b) : 0;
@@ -1903,14 +1948,15 @@ function buildReport(mode){
     .mb{display:inline-block;width:70px;height:7px;background:#e3e8f3;border-radius:4px;overflow:hidden;vertical-align:middle}.mb i{display:block;height:100%;background:${RAMP.robe}}
     .kp{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}.kp div{background:#f6f8fd;border-radius:12px;padding:12px}.kp b{display:block;font-size:22px}.kp span{font-size:11px;color:#5b6785}
     .ann{padding:8px 0;border-bottom:1px solid #e6eaf3;font-size:13px}.ann small{color:#5b6785}
-    .foot{text-align:center;color:#8a93a8;font-size:11px;margin-top:30px}.foot .c{font-size:5px;opacity:.25}
+    .foot{text-align:center;color:#8a93a8;font-size:11px;margin-top:30px}.foot .c{font-size:8px;opacity:.4}
     ${GL_CSS}
+    ${SO_CSS}
     @media print{body{background:#fff}.page{box-shadow:none;max-width:none}h2{break-after:avoid}.pb,.fr,tr,.kp,.rings,.ann{break-inside:avoid}.newpage{break-before:page}}`;
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${listOnly ? "Graduate list" : "Graduation report"} · ${esc(d.event.name)}</title>
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${stageMode ? "Stage order" : listOnly ? "Graduate list" : "Graduation report"} · ${esc(d.event.name)}</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=swap" rel="stylesheet"><style>${css}</style></head><body><div class="page">
-    <div class="cover"><img src="${document.querySelector('.top img').src}" alt="Camblish crest"><div class="tag">${listOnly ? "Graduate list" : "Graduation day report"}</div><h1>${esc(d.event.name)}</h1>
+    <div class="cover"><img src="${document.querySelector('.top img').src}" alt="Camblish crest"><div class="tag">${stageMode ? "Stage order · for the MC" : listOnly ? "Graduate list" : "Graduation day report"}</div><h1>${esc(d.event.name)}</h1>
       <p>${esc([dateTxt, d.event.venue].filter(Boolean).join(" · "))}</p><p style="font-size:12px">Prepared ${new Date().toLocaleString("en-ZA",{day:"numeric",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"})} by ${esc(S.me)}${fActive() ? " · filtered view" : ""}</p></div>
-    <div class="in">${listOnly ? `
+    <div class="in">${stageMode ? stageOrderHTML(L) : listOnly ? `
       <div class="story">${J.cert} graduate${J.cert === 1 ? "" : "s"} received their certificates${J.total ? ` (${Math.round(100*J.cert/J.total)}% of the ${J.total} expected)` : ""}, listed by programme in the order they were capped.</div>
       ${gradListHTML(L)}` : `
       <div class="story">${story} ${peak}</div>
@@ -1961,7 +2007,7 @@ function viewStage(){
     </div>
   </div>
   ${late.length?`<div class="err noprint" style="margin-top:12px">${late.length} late arrival${late.length>1?"s":""} after their programme had finished: ${late.map(l=>esc(fullName(l))).join(", ")}. They have been moved to the end of the ceremony.</div>`:""}
-  <div class="card" style="margin-top:14px"><h2>Full stage order<span class="spacer"></span><button class="btn ghost sm noprint" id="printAllTags">Reprint all tags</button><button class="btn ghost sm noprint" onclick="window.print()">Print for MC</button></h2>
+  <div class="card" style="margin-top:14px"><h2>Full stage order<span class="spacer"></span><button class="btn ghost sm noprint" id="printAllTags">Reprint all tags</button><button class="btn gold sm noprint" onclick="stageDialog()">🖨 Print for MC</button></h2>
     <p class="small muted noprint">Graduates join this line once their robe is issued. Programmes go up by NQF level (lowest first); within a programme it is first come, first on stage. After crossing they move to the <b>Certificates</b> tab.</p>${filterBar()}<div id="stList">`;
   const PF = applyF(P);
   if (!PF.length && P.length) html += `<div class="empty">No graduate in the line matches these filters.</div>`;
@@ -1998,15 +2044,40 @@ function viewStage(){
 }
 
 /* ---------- FEED ---------- */
-const ICON = {announcement:"📣", roadblock:"⚠", checkin:"✓", robe:"🎓", cert:"📜", stage:"🎤", status:"↻", task:"📝", comment:"💬", update:"ℹ"};
+const ICON = {reply:"↩", announcement:"📣", roadblock:"⚠", checkin:"✓", robe:"🎓", cert:"📜", stage:"🎤", status:"↻", task:"📝", comment:"💬", update:"ℹ"};
+const CAN_REPLY = f => ["announcement","comment","roadblock"].includes(f.kind) && !f.parent_id;
+function thread(f, dark){
+  if (!CAN_REPLY(f)) return "";
+  const rs = S.data.feed.filter(r => r.kind === "reply" && r.parent_id === f.id).sort((a,b) => a.id - b.id);
+  const open = S.replyOpen === f.id;
+  return `<div class="thr${dark ? " dk" : ""}">${rs.map(r => `<div class="rp${r.actor === S.me ? " mine" : ""}"><span class="rpa">${esc((r.actor || "?").trim().charAt(0).toUpperCase())}</span><div><b>${esc(r.actor || "")}</b> <span class="w">${fmtTime(r.created_at)}</span><div>${esc(r.text)}</div></div></div>`).join("")}
+    ${can("comment") ? (open ? `<div class="rform"><input type="text" data-rin="${f.id}" maxlength="1000" placeholder="Reply to ${esc(f.actor || "this post")}…"><button class="btn sm" data-rsend="${f.id}">Reply</button><button class="btn ghost sm" data-rx="${f.id}">✕</button></div>`
+      : `<button type="button" class="rlink" data-rp="${f.id}">↩ Reply${rs.length ? ` · ${rs.length} repl${rs.length === 1 ? "y" : "ies"}` : ""}</button>`) : (rs.length ? "" : "")}</div>`;
+}
+function wireThreads(root){
+  root.onclick = async e => {
+    const t = e.target.closest("[data-rp],[data-rx],[data-rsend]"); if (!t) return;
+    if (t.dataset.rp){ S.replyOpen = +t.dataset.rp; viewFeed(); const i = $(`[data-rin="${t.dataset.rp}"]`); if (i){ i.value = (S.replyDraft || {})[t.dataset.rp] || ""; i.focus(); } return; }
+    if (t.dataset.rx){ S.replyOpen = null; viewFeed(); return; }
+    if (t.dataset.rsend) sendReply(+t.dataset.rsend);
+  };
+  root.onkeydown = e => { const i = e.target.closest && e.target.closest("[data-rin]"); if (!i) return; if (e.key === "Enter") sendReply(+i.dataset.rin); if (e.key === "Escape"){ S.replyOpen = null; viewFeed(); } };
+  root.oninput = e => { const i = e.target.closest && e.target.closest("[data-rin]"); if (i){ S.replyDraft = S.replyDraft || {}; S.replyDraft[i.dataset.rin] = i.value; } };
+}
+async function sendReply(id){
+  const i = $(`[data-rin="${id}"]`), v = i ? i.value.trim() : ""; if (!v) return i && i.focus();
+  i.disabled = true;
+  if (await act("grad_reply", {p_parent:id, p_text:v}, "Reply posted")){ if (S.replyDraft) delete S.replyDraft[id]; S.replyOpen = null; viewFeed(); }
+  else i.disabled = false;
+}
 function feedItem(f){
   const task = f.ref_type==="task" ? S.data.tasks.find(t=>t.id===f.ref_id) : null;
-  return `<div class="feed-item ${f.kind}"><div class="ic">${ICON[f.kind]||"•"}</div><div style="flex:1"><div class="t"><b>${esc(f.actor||"")}</b>${f.role==="manager"?` <span class="tag gold">Manager</span>`:""}${f.kind==="announcement"?` <span class="anncat" style="background:${annCat(f).c}">${annCat(f).icon} ${annCat(f).label}</span>`:""} ${f.kind==="comment"&&task?`on <i>${esc(task.title)}</i>: `:""}${esc(f.text)}</div><div class="w">${ago(f.created_at)} · ${fmtTime(f.created_at)}</div></div></div>`;
+  return `<div class="feed-item ${f.kind}"><div class="ic">${ICON[f.kind]||"•"}</div><div style="flex:1"><div class="t"><b>${esc(f.actor||"")}</b>${f.role==="manager"?` <span class="tag gold">Manager</span>`:""}${f.kind==="announcement"?` <span class="anncat" style="background:${annCat(f).c}">${annCat(f).icon} ${annCat(f).label}</span>`:""} ${f.kind==="comment"&&task?`on <i>${esc(task.title)}</i>: `:""}${esc(f.text)}</div><div class="w">${ago(f.created_at)} · ${fmtTime(f.created_at)}</div>${thread(f)}</div></div>`;
 }
 function annCard(f, big){
   const c = annCat(f);
   return `<div class="anncard ${big ? "big" : ""} cat-${f.category || "general"}" style="--cc:${c.c};--cb:${c.bg}"><div class="ach"><span class="anncat" style="background:${c.c}">${c.icon} ${c.label}</span><span class="spacer"></span><span class="small muted">${ago(f.created_at)} · ${fmtTime(f.created_at)}</span></div>
-    <div class="act">${esc(f.text)}</div><div class="small muted">From <b>${esc(f.actor || "")}</b></div></div>`;
+    <div class="act">${esc(f.text)}</div><div class="small muted">From <b>${esc(f.actor || "")}</b></div>${thread(f, true)}</div>`;
 }
 function viewFeed(){
   S.unseen = 0; $("#bFeed").classList.add("hidden");
@@ -2028,18 +2099,22 @@ function viewFeed(){
     $("#setAl").onclick = () => openSettings("alerts");
     $("#annMore").onclick = () => { S.f.annAll = !S.f.annAll; viewFeed(); };
   }
-  $("#bn").innerHTML = ""; 
+  $("#bn").innerHTML = "";
+  const ae = document.activeElement, keep = ae && ae.dataset && ae.dataset.rin ? {id: ae.dataset.rin, v: ae.value, pos: ae.selectionStart} : null;
+  wireThreads($("#fdView"));
   const anns = S.data.feed.filter(f => f.kind === "announcement");
   $("#annCount").textContent = anns.length ? `${anns.length} so far` : "";
   const shown = S.f.annAll ? anns : anns.slice(0, 3);
   $("#annList").innerHTML = shown.length ? `<div class="annlist">${shown.map((f, i) => annCard(f, i === 0)).join("")}</div>` : `<div class="empty" style="color:#c9d3f2">No announcements yet.</div>`;
   $("#annMore").textContent = anns.length > 3 ? (S.f.annAll ? "Show only the latest 3" : `Show all ${anns.length} announcements`) : "";
-  const kinds = {All:f=>f.kind!=="announcement", Roadblocks:f=>f.kind==="roadblock", Comments:f=>f.kind==="comment", Tasks:f=>["status","task","roadblock"].includes(f.kind), "Check-ins":f=>f.kind==="checkin", Robes:f=>f.kind==="robe", Stage:f=>f.kind==="stage", Certificates:f=>f.kind==="cert", Changes:f=>f.kind==="update"};
+  const kinds = {All:f=>f.kind!=="announcement" && f.kind!=="reply", Roadblocks:f=>f.kind==="roadblock", Comments:f=>f.kind==="comment", Tasks:f=>["status","task","roadblock"].includes(f.kind), "Check-ins":f=>f.kind==="checkin", Robes:f=>f.kind==="robe", Stage:f=>f.kind==="stage", Certificates:f=>f.kind==="cert", Changes:f=>f.kind==="update"};
   if (!kinds[S.f.feedKind]) S.f.feedKind = "All";
   $("#fdChips").innerHTML = Object.keys(kinds).map(k=>`<button class="chip ${S.f.feedKind===k?"on":""}" data-k="${k}">${k}</button>`).join("");
   $$("#fdChips .chip").forEach(b => b.onclick = () => { S.f.feedKind = b.dataset.k; viewFeed(); });
   const list = S.data.feed.filter(kinds[S.f.feedKind]).slice(0, 150);
   $("#fdList").innerHTML = list.map(f => feedItem(f).replace('class="feed-item', `class="feed-item${f.actor === S.me ? " mine" : ""}`)).join("") || `<div class="empty">Nothing here yet.</div>`;
+  if (keep){ const i = $(`[data-rin="${keep.id}"]`); if (i){ i.value = keep.v; i.focus(); try { i.setSelectionRange(keep.pos, keep.pos); } catch {} } }
+  else if (S.replyOpen){ const i = $(`[data-rin="${S.replyOpen}"]`); if (i && !i.value) i.value = (S.replyDraft || {})[S.replyOpen] || ""; }
 }
 
 /* ---------- MANAGE ---------- */
