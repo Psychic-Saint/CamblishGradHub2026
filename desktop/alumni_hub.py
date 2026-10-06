@@ -1,5 +1,5 @@
 """
-Camblish Alumni Hub V1.0 (desktop)
+Camblish Alumni Hub (desktop)
 Author: Eddie Bila
 
 Windows desktop app for the Camblish Alumni Hub. It opens the same live system as the web link in its
@@ -10,6 +10,8 @@ import io
 import json
 import os
 import sys
+import re
+import threading
 import urllib.parse
 
 import webview
@@ -151,6 +153,35 @@ class Bridge:
         except Exception as e:
             return {"ok": False, "error": str(e)}
 
+    def notify(self, title, message):
+        """Windows pop-up (bottom right) plus a flashing taskbar button, even when the app is in the background."""
+        try:
+            TRAY.show(str(title), str(message))
+            flash_window(APP_TITLE)
+            return {"ok": True}
+        except Exception as e:
+            return {"ok": False, "error": str(e)}
+
+    def save_file(self, name, content, open_after=True):
+        """Save a report or export to the Downloads folder and open it."""
+        try:
+            folder = os.path.join(os.path.expanduser("~"), "Downloads")
+            os.makedirs(folder, exist_ok=True)
+            safe = re.sub(r'[\\/:*?"<>|]', "", str(name)).strip()[:150] or "Alumni Hub export.html"
+            path = os.path.join(folder, safe)
+            base, ext = os.path.splitext(path)
+            i = 1
+            while os.path.exists(path):
+                path = f"{base} ({i}){ext}"
+                i += 1
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(content)
+            if open_after:
+                os.startfile(path)
+            return {"ok": True, "path": path}
+        except Exception as e:
+            return {"ok": False, "error": str(e)}
+
     def send_email(self, to, subject, body):
         try:
             import win32com.client
@@ -169,6 +200,101 @@ class Bridge:
             return {"ok": True, "method": "mailto"}
         except Exception as e:
             return {"ok": False, "error": str(e)}
+
+
+def find_window(title):
+    try:
+        import ctypes
+        return ctypes.windll.user32.FindWindowW(None, title)
+    except Exception:
+        return 0
+
+
+def flash_window(title):
+    """Flash the taskbar button until the window is opened (only when it is not already in front)."""
+    try:
+        import ctypes
+        from ctypes import wintypes
+        hwnd = find_window(title)
+        if not hwnd or ctypes.windll.user32.GetForegroundWindow() == hwnd:
+            return
+
+        class FLASHWINFO(ctypes.Structure):
+            _fields_ = [("cbSize", wintypes.UINT), ("hwnd", wintypes.HWND), ("dwFlags", wintypes.DWORD),
+                        ("uCount", wintypes.UINT), ("dwTimeout", wintypes.DWORD)]
+        fi = FLASHWINFO(ctypes.sizeof(FLASHWINFO), hwnd, 0x3 | 0xC, 6, 0)   # caption + tray, until focused
+        ctypes.windll.user32.FlashWindowEx(ctypes.byref(fi))
+    except Exception:
+        pass
+
+
+def bring_to_front(title):
+    try:
+        import ctypes
+        hwnd = find_window(title)
+        if hwnd:
+            ctypes.windll.user32.ShowWindow(hwnd, 9)
+            ctypes.windll.user32.SetForegroundWindow(hwnd)
+    except Exception:
+        pass
+
+
+class Tray:
+    """A small Alumni Hub icon in the notification area, used to show Windows pop-up notifications."""
+    WM_TRAY = 0x0400 + 20
+
+    def __init__(self):
+        self.hwnd = None
+        self.hicon = None
+        self.ready = threading.Event()
+        threading.Thread(target=self._run, daemon=True).start()
+
+    def _run(self):
+        try:
+            import win32con
+            import win32gui
+            wc = win32gui.WNDCLASS()
+            wc.hInstance = win32gui.GetModuleHandle(None)
+            wc.lpszClassName = "CamblishAlumniHubTray"
+            wc.lpfnWndProc = {self.WM_TRAY: self._on_tray}
+            try:
+                win32gui.RegisterClass(wc)
+            except Exception:
+                pass
+            self.hwnd = win32gui.CreateWindow(wc.lpszClassName, "Camblish Alumni Hub", 0, 0, 0, 0, 0, 0, 0, wc.hInstance, None)
+            try:
+                self.hicon = win32gui.LoadImage(0, resource("app.ico"), win32con.IMAGE_ICON, 0, 0, win32con.LR_LOADFROMFILE | win32con.LR_DEFAULTSIZE)
+            except Exception:
+                self.hicon = win32gui.LoadIcon(0, win32con.IDI_APPLICATION)
+            win32gui.Shell_NotifyIcon(win32gui.NIM_ADD, (self.hwnd, 0, win32gui.NIF_ICON | win32gui.NIF_MESSAGE | win32gui.NIF_TIP,
+                                                        self.WM_TRAY, self.hicon, "Camblish Alumni Hub"))
+            self.ready.set()
+            win32gui.PumpMessages()
+        except Exception:
+            self.ready.set()
+
+    def _on_tray(self, hwnd, msg, wparam, lparam):
+        if lparam in (0x0202, 0x0203, 0x0405):   # click, double-click or clicking the pop-up
+            bring_to_front(APP_TITLE)
+        return 0
+
+    def show(self, title, message):
+        import win32gui
+        if not self.ready.wait(3) or not self.hwnd:
+            return
+        win32gui.Shell_NotifyIcon(win32gui.NIM_MODIFY, (self.hwnd, 0, win32gui.NIF_INFO, self.WM_TRAY, self.hicon,
+                                                        "Camblish Alumni Hub", message[:250], 10, title[:60], win32gui.NIIF_INFO))
+
+    def remove(self):
+        try:
+            import win32gui
+            if self.hwnd:
+                win32gui.Shell_NotifyIcon(win32gui.NIM_DELETE, (self.hwnd, 0))
+        except Exception:
+            pass
+
+
+TRAY = None
 
 
 def centre_window(hwnd):
@@ -231,8 +357,11 @@ def main():
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("Camblish.AlumniHub.1")
     except Exception:
         pass
-    import threading
     threading.Thread(target=set_window_icon, args=(APP_TITLE,), daemon=True).start()
+    global TRAY
+    TRAY = Tray()
+    import atexit
+    atexit.register(TRAY.remove)
     storage = os.path.join(os.environ.get("APPDATA", os.path.expanduser("~")), "CamblishAlumniHub")
     os.makedirs(storage, exist_ok=True)
     url = resource("hub.html")

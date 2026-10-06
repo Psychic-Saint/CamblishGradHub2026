@@ -29,3 +29,12 @@ One interface for graduations and alumni events: live check-in, stage order with
 2. Compile `desktop\setup.nsi` with NSIS (makensis) to get `Camblish Alumni Hub Setup.exe`.
 3. Give managers the setup file. It installs for the signed-in user without admin rights, adds desktop and Start menu shortcuts, and appears in Windows Apps for uninstalling.
 The installed app loads this GitHub page, so changes to index.html reach every laptop without reinstalling. Only changes to the desktop code need a new installer.
+
+## Graduation day flow (v1.3)
+Check-in → Robes → Stage → Certificates. Each tab shows only the graduates at that step, and every learner tab can be filtered by programme, NQF level, project manager and client, with live search by name, ID number or seat.
+
+- **Seating:** Manage → Seating plan assigns seats for the Great Hall: lower section rows AA–LL first (left block rows AA–CC kept for clients), programmes kept together in stage order, overflow continues upstairs from row A. Seats print on the name tags.
+- **Overview:** charts for present, robes, crossed and certificates, the journey funnel, arrivals every 15 minutes and progress per programme.
+- **Graduation report:** Overview → Graduation report downloads a visual report of the day (print or save as PDF).
+- **Live sync:** devices tell each other instantly when something changes, with a 2.5 second check as a back-up. Only changes are downloaded, so 20+ people can work at once.
+- **Alerts:** sound, pop-up, a shaking Updates tab and Windows notifications in the desktop app.
