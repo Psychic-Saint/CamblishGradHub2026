@@ -412,14 +412,11 @@ nav.tabs .badge.green{background:var(--ok);color:#fff}
 .feed-item.mine{background:linear-gradient(90deg,#fffaf0,#fff)}
 #capSpin{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:radial-gradient(circle at 50% 40%,rgba(29,63,174,.92),rgba(8,26,69,.97));perspective:900px;transition:opacity .35s}
 #capSpin.out{opacity:0}
-#capSpin .capstage{position:relative;width:170px;height:170px;transform-style:preserve-3d}
-#capSpin img{width:170px;height:170px;border-radius:24%;box-shadow:0 20px 40px -12px rgba(0,0,0,.6),0 0 0 4px rgba(243,210,122,.55);animation:capspin 1.4s cubic-bezier(.45,.05,.55,.95) infinite}
-#capSpin .capshadow{position:absolute;left:20%;right:20%;bottom:-26px;height:14px;border-radius:50%;background:rgba(0,0,0,.35);filter:blur(6px);animation:capshadow 1.4s ease-in-out infinite}
+#capSpin .coin{animation:spin 3.2s ease-in-out infinite;margin-bottom:6px}
 #capSpin .captxt{color:#f3d27a;font-weight:800;letter-spacing:.6px;font-size:16px}
-@keyframes capspin{0%{transform:rotateY(0) translateY(0)}50%{transform:rotateY(180deg) translateY(-14px)}100%{transform:rotateY(360deg) translateY(0)}}
 @keyframes capshadow{0%,100%{transform:scaleX(1);opacity:.6}50%{transform:scaleX(.7);opacity:.3}}
 #confetti{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:9999}
-@media (prefers-reduced-motion: reduce){#capSpin img{animation:none}}
+@media (prefers-reduced-motion: reduce){#capSpin .coin{animation:none}}
 .ciReset{color:var(--bad)!important;border-color:#f3c3bd!important}
 .dangerzone{border:1px solid #f3c3bd;background:linear-gradient(180deg,#fff,#fff6f5)}
 .btn.red{background:linear-gradient(180deg,#e0483d,#b3261e);color:#fff;box-shadow:0 3px 0 #7d1a14}
@@ -618,6 +615,7 @@ let unread = 0; const baseTitle = document.title;
 function notify(title, body){
   const away = document.hidden || !document.hasFocus();
   if (away){ unread++; document.title = `(${unread}) ${title} · Alumni Hub`; }
+  if (store.get("hub_nonotify")) return;
   try { if (DESKTOP() && DESKTOP().notify){ if (away) DESKTOP().notify(title, body); return; } } catch {}
   try { if (away && "Notification" in window && Notification.permission === "granted"){ const n = new Notification(title, {body, icon:"icon-192.png", tag:"hub-" + Date.now()}); n.onclick = () => { window.focus(); n.close(); }; } } catch {}
   try { navigator.vibrate && navigator.vibrate([90,60,90]); } catch {}
@@ -631,9 +629,10 @@ function capSpin(on){
   let o = $("#capSpin");
   if (!on){ if (o){ o.classList.add("out"); setTimeout(() => o.remove(), 350); } return; }
   if (o) return;
-  const src = (document.querySelector("img.capico") || {}).src || "";
+  const coin = document.querySelector(".hero .coin");
   o = document.createElement("div"); o.id = "capSpin";
-  o.innerHTML = `<div class="capstage"><img src="${src}" alt=""><div class="capshadow"></div></div><div class="captxt">Signing you in…</div>`;
+  if (coin) S._coin = coin.outerHTML;
+  o.innerHTML = `${S._coin || ""}<div class="captxt">Signing you in…</div>`;
   document.body.appendChild(o);
 }
 function popSound(){
@@ -2301,12 +2300,18 @@ function setAlerts(body){
   body.innerHTML = `<div class="card"><h2>Alerts and sound</h2><p class="small muted" style="margin-top:-4px">These settings are for this device only.</p>
     <div class="setrow"><div><b>Alert sounds</b><div class="small muted">Bells for updates, a fanfare for announcements and an alarm for roadblocks.</div></div><label class="switch"><input type="checkbox" id="alSnd" ${store.get("hub_mute") ? "" : "checked"}><i></i></label></div>
     <div class="setrow"><div><b>Test the sounds</b></div><div class="row"><button class="btn ghost sm" data-snd="default">Update</button><button class="btn ghost sm" data-snd="announcement">Announcement</button><button class="btn ghost sm" data-snd="roadblock">Roadblock</button></div></div>
-    <div class="setrow"><div><b>Pop-up notifications</b><div class="small muted">${DESKTOP() ? "The desktop app shows Windows notifications and flashes the taskbar automatically." : perm === "granted" ? "On. You'll get a pop-up when this tab is in the background." : perm === "denied" ? "Blocked in this browser. Allow notifications for this site in the browser settings." : perm === "unsupported" ? "This browser does not support pop-ups." : "Off. Turn on to get pop-ups when this tab is in the background."}</div></div>${!DESKTOP() && perm === "default" ? `<button class="btn sm" id="alNot">Turn on</button>` : `<span class="tag ${perm === "granted" || DESKTOP() ? "green" : ""}">${DESKTOP() || perm === "granted" ? "On" : "Off"}</span>`}</div>
+    <div class="setrow"><div><b>Desktop and phone notifications</b><div class="small muted">${store.get("hub_nonotify") ? "Off. You won't get pop-ups on this device." : DESKTOP() ? "On. When you're in another program or the app is minimised, Windows shows a pop-up and the taskbar button flashes." : perm === "granted" ? "On. When you're in another tab, another program or your phone is locked, you get a pop-up." : perm === "denied" ? "Blocked by this browser. Allow notifications for this site in the browser's site settings, then switch this on." : perm === "unsupported" ? "This browser can't show pop-ups. Use the desktop app or Chrome/Edge." : "Switch on, then click Allow when the browser asks."} No pop-ups appear while you're looking at the Alumni Hub.</div></div><label class="switch"><input type="checkbox" id="alNot" ${store.get("hub_nonotify") || (!DESKTOP() && perm !== "granted") ? "" : "checked"}><i></i></label></div>
+    <div class="setrow"><div><b>Test a notification</b><div class="small muted">Click, then switch to another window within 5 seconds.</div></div><button class="btn ghost sm" id="alTest">Send test in 5 s</button></div>
     <div class="setrow"><div><b>Shake the Updates tab</b><div class="small muted">The tab bounces when something new happens.</div></div><label class="switch"><input type="checkbox" id="alShake" ${store.get("hub_noshake") ? "" : "checked"}><i></i></label></div></div>`;
   $("#alSnd").onchange = e => { if (e.target.checked){ store.del("hub_mute"); chime("default"); } else store.set("hub_mute", 1); };
   $$("[data-snd]").forEach(b => b.onclick = () => { const m = store.get("hub_mute"); store.del("hub_mute"); chime(b.dataset.snd); if (m) store.set("hub_mute", 1); });
   $("#alShake").onchange = e => { if (e.target.checked) store.del("hub_noshake"); else store.set("hub_noshake", 1); };
-  const an = $("#alNot"); if (an) an.onclick = async () => { try { await Notification.requestPermission(); } catch {} S._setDrawn = null; viewSettings(); };
+  $("#alNot").onchange = async e => {
+    if (!e.target.checked){ store.set("hub_nonotify", 1); toast("Notifications off on this device"); }
+    else { store.del("hub_nonotify"); if (!DESKTOP() && "Notification" in window && Notification.permission !== "granted"){ try { await Notification.requestPermission(); } catch {} } toast("Notifications on", "green"); }
+    S._setDrawn = null; viewSettings();
+  };
+  $("#alTest").onclick = () => { toast("Switch to another window now…"); setTimeout(() => notify("Alumni Hub test", "Notifications are working on this device."), 5000); };
 }
 function setTags(body){
   const p = tagPrefs();
