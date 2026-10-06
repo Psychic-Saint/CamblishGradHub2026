@@ -23,3 +23,9 @@ One interface for graduations and alumni events: live check-in, stage order with
 - **Show password** button on every password box.
 - **Stay live:** requests retry automatically if the connection drops, and a daily GitHub Action (`.github/workflows/keepalive.yml`) keeps the database awake.
 - **New app icon** (graduation cap) for the desktop app, taskbar and browser tab.
+
+## Installing on other laptops
+1. Run `desktop\build.bat` on a PC with Python to build the app folder.
+2. Compile `desktop\setup.nsi` with NSIS (makensis) to get `Camblish Alumni Hub Setup.exe`.
+3. Give managers the setup file. It installs for the signed-in user without admin rights, adds desktop and Start menu shortcuts, and appears in Windows Apps for uninstalling.
+The installed app loads this GitHub page, so changes to index.html reach every laptop without reinstalling. Only changes to the desktop code need a new installer.

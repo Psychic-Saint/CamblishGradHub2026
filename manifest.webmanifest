@@ -1,0 +1,23 @@
+{
+ "name": "Camblish Alumni Hub",
+ "short_name": "Alumni Hub",
+ "start_url": "./",
+ "scope": "./",
+ "display": "standalone",
+ "background_color": "#081a45",
+ "theme_color": "#0d2a6b",
+ "description": "Graduations, check-in, stage order, tasks and announcements for the Camblish team.",
+ "icons": [
+  {
+   "src": "icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any"
+  }
+ ]
+}

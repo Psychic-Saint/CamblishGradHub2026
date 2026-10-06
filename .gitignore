@@ -3,3 +3,9 @@ desktop/dist/
 desktop/hub.html
 desktop/*.spec
 __pycache__/
+
+desktop/build/
+desktop/dist/
+desktop/*.spec
+desktop/build.log
+*.exe
