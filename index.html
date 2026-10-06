@@ -529,7 +529,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202610070004";
+const BUILD = "202610070028";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -2076,7 +2076,7 @@ function buildReport(mode){
     .newpage{page-break-before:always;break-before:page}
     .cover{background:linear-gradient(135deg,#081a45,#1d3fae);color:#fff;padding:34px 40px 30px;position:relative;overflow:hidden}
     .cover:after{content:"";position:absolute;right:-60px;top:-40px;width:260px;height:260px;border:2px solid rgba(212,175,55,.5);transform:rotate(30deg)}
-    .cover img{width:64px;height:64px;border-radius:50%;background:#fff;padding:4px;float:right}
+    .cover img{width:100px;height:100px;border-radius:50%;background:#fff;padding:7px;float:right;object-fit:contain;box-shadow:0 0 0 3px rgba(212,175,55,.75),0 8px 20px -8px rgba(0,0,0,.5);position:relative;z-index:1}
     .cover h1{margin:0;font-size:30px;letter-spacing:-.3px}.cover h1 span{color:#f3d27a}.cover p{margin:6px 0 0;color:#c9d3f2}
     .tag{display:inline-block;color:#f3d27a;font-weight:700;letter-spacing:.6px;margin-top:14px;font-size:12px;text-transform:uppercase}
     .in{padding:0 40px}h2{font-size:17px;margin:28px 0 10px;padding-bottom:6px;border-bottom:2px solid #d4af37}
