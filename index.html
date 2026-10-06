@@ -336,6 +336,10 @@ h3.ch{font-size:14px;margin:12px 0 6px}
 .smk{vertical-align:-2px;margin-right:4px}
 .stagebar{margin:10px auto 0;width:60%;text-align:center;background:#081a45;color:#f3d27a;font-weight:800;letter-spacing:4px;border-radius:0 0 40px 40px;padding:8px}
 #ulist .lrow{flex-wrap:wrap;row-gap:8px}
+.upsel{display:flex;flex-direction:column;gap:6px;font-weight:800;color:var(--navy);font-size:13px}
+.upsel select{font-size:16px;font-weight:700;padding:11px 12px;border:2px solid var(--gold);border-radius:12px;background:linear-gradient(180deg,#fffaf0,#fff);color:var(--navy)}
+.hbtn.spinning{opacity:.7}.hbtn.spinning::first-letter{display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
 .callsel{display:flex;align-items:center;gap:8px;margin-top:14px;color:#f3d27a;font-weight:700;font-size:13px;position:relative;z-index:1;flex-wrap:wrap}
 .callsel select{flex:1;min-width:200px;background:rgba(255,255,255,.95);color:var(--navy);font-weight:700;border:2px solid var(--gold);border-radius:10px;padding:8px 10px}
 .flowwrap{overflow-x:auto;scrollbar-width:none;margin:-4px -4px 10px;padding:4px}
@@ -368,6 +372,7 @@ nav.tabs .badge.green{background:var(--ok);color:#fff}
 .grhero::after{content:"🎓";position:absolute;right:14px;top:-6px;font-size:70px;opacity:.12}
 .grhero .gnum{font-size:44px;font-weight:900;line-height:1;background:linear-gradient(180deg,var(--gold-2),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
 .grhero .gbar{flex:1}.grhero .gtrack{height:12px;background:rgba(255,255,255,.18);border-radius:8px;overflow:hidden;margin-bottom:6px}.grhero .gtrack i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-2));border-radius:8px}
+.ciReset{color:var(--bad)!important;border-color:#f3c3bd!important}
 .dangerzone{border:1px solid #f3c3bd;background:linear-gradient(180deg,#fff,#fff6f5)}
 .btn.red{background:linear-gradient(180deg,#e0483d,#b3261e);color:#fff;box-shadow:0 3px 0 #7d1a14}
 @media (max-width:640px){
@@ -674,10 +679,21 @@ function liveBadge(){
   const role = S.user.role === "admin" ? "Admin" : S.user.role === "manager" ? "Manager" : "Team";
   w.innerHTML = `<div><b>${esc(S.me)}</b> <span class="rolepill ${S.user.role}">${role}</span></div>
     <div class="live" style="justify-content:flex-end">${S.data ? `<span class="dot ${S.ok?"":"off"}"></span>${S.ok ? (RT && RT.status === "SUBSCRIBED" ? "Live ⚡" : "Live") + (secs!==null && secs>8 ? ` · ${secs}s ago` : "") : "Reconnecting…"}` : ""}</div>
-    <div class="acts"><button class="hbtn" id="hEv">⇄ Events</button><button class="hbtn" id="hPw">🔑 Password</button><button class="hbtn out" id="hOut">⏻ Log out</button></div>`;
+    <div class="acts"><button class="hbtn" id="hEv">⇄ Events</button>${S.data ? `<button class="hbtn" id="hRf" title="Reload everything from the server">⟳ Refresh</button>` : ""}<button class="hbtn" id="hPw">🔑 Password</button><button class="hbtn out" id="hOut">⏻ Log out</button></div>`;
   $("#hOut").onclick = () => logout();
   $("#hPw").onclick = () => changePwView(false);
   $("#hEv").onclick = () => { clearInterval(timer); eventsView(); };
+  const rf = $("#hRf"); if (rf) rf.onclick = hardRefresh;
+}
+async function hardRefresh(){
+  const rf = $("#hRf"); if (rf){ rf.disabled = true; rf.classList.add("spinning"); }
+  try {
+    if (RT && RT.client && RT.ch){ try { RT.client.removeChannel(RT.ch); } catch {} }
+    RT = null; rtConnect();
+    pulling = false; pullAgain = false;
+    await pull("full");
+    toast(S.ok ? "Refreshed. Everything is up to date." : "Still can't reach the server. Check the internet connection.", S.ok ? "green" : "red");
+  } finally { const b = $("#hRf"); if (b){ b.disabled = false; b.classList.remove("spinning"); } }
 }
 setInterval(liveBadge, 5000);
 setInterval(async () => { if (!S.pin || !S.user || document.hidden) return; try { const r = await rpc("hub_me", {p_token:S.pin}); const before = JSON.stringify(S.user.perms); S.user = r.user; if (JSON.stringify(r.user.perms) !== before && S.data){ main.innerHTML = ""; render(); } } catch(e){} }, 60000);
@@ -1203,7 +1219,7 @@ function codeOf(l){ if (!l._code) stageList(); return l._code || ""; }
 function viewCheckin(){
   if (!$("#ciView")){
     main.innerHTML = `<div id="bn"></div><div class="card" id="ciView"><div id="flow" class="flowwrap"></div>
-      <h2>Check-in<span class="spacer"></span><span id="ciSum" class="small muted"></span><button class="btn gold sm hidden" id="upl">⬆ Upload learners</button></h2>
+      <h2>Check-in<span class="spacer"></span><span id="ciSum" class="small muted"></span><button class="btn gold sm hidden" id="upl">⬆ Upload learners</button><button class="btn ghost sm hidden ciReset" id="ciRs" title="Start the whole sequence again (admin reset password needed)">↺ Reset</button></h2>
       <p class="small muted" style="margin-top:-6px">Mark graduates present as they arrive. They then move to <b>Robes</b>. Within each programme they are numbered in the order they arrive.</p>
       ${filterBar(`<button class="btn ghost sm" data-seatmap type="button">💺 Seating plan</button>`)}
       <details class="noprint" style="margin-top:8px"><summary class="small" style="cursor:pointer;color:var(--royal);font-weight:600">🖨 Name tag printer</summary>
@@ -1226,6 +1242,7 @@ function viewCheckin(){
   }
   $("#bn").innerHTML = bannerHTML(); wireBanner();
   $("#upl").classList.toggle("hidden", !can("upload"));
+  $("#ciRs").classList.toggle("hidden", !can("manage_event")); $("#ciRs").onclick = () => resetDialog({progress:true});
   drawCheckin();
 }
 function drawCheckin(){
@@ -1355,26 +1372,32 @@ function drawGrads(){
 /* ======================================================================
    ADMIN RESET
    ====================================================================== */
-function resetDialog(){
-  if (!S.user || S.user.role !== "admin") return toast("Only an administrator can reset the event", "red");
-  modal(`<h3 style="color:var(--bad)">Start this event again</h3><p class="small">Choose what to clear for <b>${esc(S.data.event.name)}</b>. Everyone using the system sees the change straight away.</p>
+function resetDialog(defaults){
+  if (!can("manage_event")) return toast("Only managers and administrators can reset the event", "red");
+  const d = defaults || {progress:true};
+  modal(`<h3 style="color:var(--bad)">↺ Reset and start again</h3><p class="small">Choose what to clear for <b>${esc(S.data.event.name)}</b>. Everyone using the system sees the change straight away, so never do this while the ceremony is running.</p>
     <div class="permgrid" id="rsg" style="grid-template-columns:1fr">
-      <label><input type="checkbox" value="progress" checked><span>Attendance, robes, stage and certificates<small>Everyone goes back to "not arrived". The learner list stays.</small></span></label>
-      <label><input type="checkbox" value="seats"><span>Seats<small>Clears every seat so you can assign again.</small></span></label>
-      <label><input type="checkbox" value="feed"><span>Updates feed<small>Hides earlier updates and announcements.</small></span></label>
+      <label><input type="checkbox" value="progress" ${d.progress?"checked":""}><span>Attendance, robes, stage and certificates<small>Everyone goes back to "not arrived". The learner list stays.</small></span></label>
+      <label><input type="checkbox" value="seats" ${d.seats?"checked":""}><span>Seats<small>Clears every seat so you can assign again.</small></span></label>
+      <label><input type="checkbox" value="feed" ${d.feed?"checked":""}><span>Updates feed<small>Hides earlier updates and announcements.</small></span></label>
       <label><input type="checkbox" value="tasks"><span>Tasks<small>Removes all tasks for this event.</small></span></label>
       <label><input type="checkbox" value="learners"><span>The whole learner list<small>Removes every learner so you can upload a fresh list.</small></span></label></div>
-    <label class="lbl">Type RESET to confirm</label><input type="text" id="rsc" autocomplete="off" placeholder="RESET">
-    <div class="row" style="margin-top:12px"><span class="spacer"></span><button class="btn ghost" id="mc">Cancel</button><button class="btn red" id="mo">Reset event</button></div><div id="me"></div>`,
-    (m, close) => { $("#mc",m).onclick = close;
+    <label class="lbl">Admin reset password</label><input type="password" id="rsp" autocomplete="off" placeholder="Required to reset">
+    <div class="row" style="margin-top:12px"><span class="spacer"></span><button class="btn ghost" id="mc">Cancel</button><button class="btn red" id="mo">Reset</button></div><div id="me"></div>`,
+    (m, close) => { $("#mc",m).onclick = close; setTimeout(() => $("#rsp",m) && $("#rsp",m).focus(), 50);
+      $("#rsp",m).addEventListener("keydown", e => { if (e.key === "Enter") $("#mo",m).click(); });
       $("#mo",m).onclick = async () => {
         const v = new Set(pickedPerms($("#rsg",m)));
         if (!v.size) return $("#me",m).innerHTML = `<div class="err">Tick at least one item.</div>`;
-        if ($("#rsc",m).value.trim().toUpperCase() !== "RESET") return $("#me",m).innerHTML = `<div class="err">Type RESET to confirm.</div>`;
-        $("#mo",m).disabled = true;
-        try { S.lastActAt = Date.now(); await rpc("grad_reset", {p_code:CODE, p_pin:S.pin, p_actor:S.me, p_progress:v.has("progress"), p_seats:v.has("seats"), p_feed:v.has("feed"), p_tasks:v.has("tasks"), p_learners:v.has("learners")});
-          close(); toast("The event was reset", "green"); rtPing(); await pull("full"); }
-        catch(e){ $("#me",m).innerHTML = `<div class="err">${esc(e.message)}</div>`; $("#mo",m).disabled = false; }
+        const pw = $("#rsp",m).value;
+        if (!pw) return $("#me",m).innerHTML = `<div class="err">Enter the admin reset password.</div>`;
+        $("#mo",m).disabled = true; $("#mo",m).textContent = "Checking…";
+        try { S.lastActAt = Date.now();
+          const r = await rpc("grad_reset2", {p_code:CODE, p_pin:S.pin, p_actor:S.me, p_password:pw, p_progress:v.has("progress"), p_seats:v.has("seats"), p_feed:v.has("feed"), p_tasks:v.has("tasks"), p_learners:v.has("learners")});
+          $("#rsp",m).value = "";
+          if (!r || !r.ok){ $("#me",m).innerHTML = `<div class="err">${esc((r && r.error) || "Nothing was reset.")}</div>`; $("#mo",m).disabled = false; $("#mo",m).textContent = "Reset"; return; }
+          close(); toast("The event was reset", "green"); rtPing(); S.f.collapsed = {}; await pull("full"); }
+        catch(e){ $("#me",m).innerHTML = `<div class="err">${esc(e.message)}</div>`; $("#mo",m).disabled = false; $("#mo",m).textContent = "Reset"; }
       };
     });
 }
@@ -1677,14 +1700,14 @@ function viewStage(){
   <div class="stagebox noprint">
     <div class="now"><div class="l">Now on stage</div>
       ${called.length ? called.map(l=>`<div class="big">${esc(fullName(l))}</div><div class="pr">${l.seat?"Seat "+esc(l.seat)+" · ":""}Tag ${l._code} · #${l._seq} · NQF ${esc(l.nqf??"?")} · ${esc(l.programme||"")}${l.client?" · "+esc(l.client):""}</div>`).join("") : `<div class="big" style="opacity:.7">Nobody called yet</div><div class="pr">${P.length} arrived graduates in the line-up</div>`}
-      <label class="callsel">Calling <select id="stProg" aria-label="Programme to call"><option value="">All programmes, in stage order</option>${progOpts}</select></label>
       <div class="row" style="margin-top:12px;position:relative;z-index:1">
         <button class="btn gold lg" id="callNext" ${queue.length || called.length ? "" : "disabled"}>${called.length ? (queue.length ? "✓ Done, call next" : "✓ Done") : "▶ Call first graduate"}</button>
         ${called.length?`<button class="btn ghost sm" id="undoCall">Back to waiting</button>`:""}
       </div>
       <div class="small" style="margin-top:10px;color:#c9d3f2">${done} of ${P.length} crossed · ${robing} still getting robes · ${notYet.length} not yet arrived</div>
     </div>
-    <div class="card" style="margin:0"><h2>Up next${sel ? ` <span class="tag gold">${esc(sel)}</span>` : ""}</h2>
+    <div class="card upnext" style="margin:0"><label class="upsel"><span>Programme up next</span><select id="stProg" aria-label="Programme up next"><option value="">All programmes, in stage order</option>${progOpts}</select></label>
+      <h2 style="margin-top:12px">Up next${sel ? ` <span class="tag gold">${esc(sel)}</span>` : ""}<span class="spacer"></span><span class="small muted">${queue.length} waiting</span></h2>
       ${nextUp.length ? nextUp.map((l,i)=>`<div class="row" style="padding:6px 0;border-bottom:1px solid var(--line)"><span class="seq" style="width:auto;min-width:30px;height:30px;font-size:12px;padding:0 6px;border-radius:15px">${l._code}</span><div style="flex:1"><b>${esc(fullName(l))}</b><div class="small muted">${esc(l.programme||"")}${l.client?" · "+esc(l.client):""}</div></div>${l._late?`<span class="tag red">Late arrival</span>`:""}${i===0?`<span class="tag gold">Next</span>`:""}</div>`).join("") : `<div class="empty">No one waiting.</div>`}
     </div>
   </div>
@@ -1789,8 +1812,8 @@ function viewManage(){
     <div id="imPrev"></div>
     <div class="row" style="margin-top:12px"><button class="btn ghost sm" id="exp">Export attendance and stage order (CSV)</button><span class="small muted">${d.learners.length} graduates loaded</span></div>
   </div>
-  ${S.user && S.user.role === "admin" ? `<div class="card dangerzone"><h2>Start again <span class="tag red">Administrators only</span></h2>
-    <p class="small">Use this after a rehearsal or test run. You choose what to clear: attendance and progress, seats, updates, tasks or the whole learner list. Nothing else is touched.</p>
+  ${can("manage_event") ? `<div class="card dangerzone"><h2>Start again <span class="tag red">Needs the admin reset password</span></h2>
+    <p class="small">Use this after a rehearsal or test run. You choose what to clear: attendance and progress, seats, updates, tasks or the whole learner list. Nothing else is touched. Wrong passwords are reported to the team and lock the reset for 15 minutes after 5 tries.</p>
     <button class="btn red" id="rsBtn">↺ Reset event…</button></div>` : ""}`;
   $("#cp").onclick = async () => { try { await navigator.clipboard.writeText(link); toast("Link copied"); } catch { $("#lnk").select(); } };
   $$("[data-mrm]").forEach(b => b.onclick = () => act("grad_member_save", {p_name:null, p_role_title:null, p_remove_id:b.dataset.mrm}, "Removed"));
