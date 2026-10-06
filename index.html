@@ -372,6 +372,25 @@ nav.tabs .badge.green{background:var(--ok);color:#fff}
 .grhero::after{content:"🎓";position:absolute;right:14px;top:-6px;font-size:70px;opacity:.12}
 .grhero .gnum{font-size:44px;font-weight:900;line-height:1;background:linear-gradient(180deg,var(--gold-2),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
 .grhero .gbar{flex:1}.grhero .gtrack{height:12px;background:rgba(255,255,255,.18);border-radius:8px;overflow:hidden;margin-bottom:6px}.grhero .gtrack i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-2));border-radius:8px}
+.setwrap{display:grid;grid-template-columns:240px minmax(0,1fr);gap:16px;align-items:start}
+.setnav{position:sticky;top:120px;padding:14px}.setlink{display:flex;gap:10px;align-items:center;width:100%;border:0;background:none;text-align:left;padding:10px 12px;border-radius:10px;font-weight:700;color:var(--ink);cursor:pointer;font-size:14px}
+.setlink span{width:22px;text-align:center}.setlink:hover{background:#f1f4fa}.setlink.on{background:linear-gradient(90deg,#081a45,#1d3fae);color:#fff}
+.setbody>.card:first-child,.setbody>#bn+.grid{margin-top:0}
+.setrow{display:flex;gap:14px;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}.setrow:last-child{border-bottom:0}
+.kvs{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}.kvs div{background:#f6f8fd;border-radius:12px;padding:10px 12px}.kvs span{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}.kvs b{font-size:14px}
+.switch{position:relative;display:inline-block;width:46px;height:26px;flex:0 0 auto}.switch input{opacity:0;width:0;height:0}.switch i{position:absolute;inset:0;background:#cfd6e6;border-radius:99px;transition:.2s;cursor:pointer}
+.switch i::before{content:"";position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}.switch input:checked+i{background:var(--ok)}.switch input:checked+i::before{transform:translateX(20px)}
+.rolesel{width:auto;padding:5px 8px;font-size:12.5px;border-radius:8px}
+.rolepill.spectator{background:#eef0f4;color:#5b6785}
+@media (max-width:760px){.setwrap{grid-template-columns:1fr}.setnav{position:static;display:flex;gap:6px;overflow-x:auto;padding:8px}.setnav h2{display:none}.setlink{white-space:nowrap;width:auto;flex:0 0 auto}}
+.pwrap{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:12px;margin-top:8px;align-items:start}
+.pplan{max-height:66vh;overflow:auto;border:1px solid var(--line);border-radius:14px;background:#f4f6fb;padding:6px}
+.pside{position:sticky;top:0}.pguide{background:#fff;border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:12px;padding:12px 14px;font-size:13.5px}
+.pguide .pgn{font-weight:800;font-size:15px;margin-bottom:6px}.pguide ol{margin:6px 0 8px 18px;padding:0}.pguide li{margin:4px 0}
+.smres{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;min-height:6px}
+.pkeys{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;color:var(--muted);align-items:center}.pkeys i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-2px}
+.pkeys i.hatch{background:repeating-linear-gradient(45deg,#e3cf8e,#e3cf8e 2px,#f7efd2 2px,#f7efd2 4px)}.pkeys .sep{width:1px;height:14px;background:var(--line)}
+@media (max-width:760px){.pwrap{grid-template-columns:1fr}.pplan{max-height:55vh}}
 .ciReset{color:var(--bad)!important;border-color:#f3c3bd!important}
 .dangerzone{border:1px solid #f3c3bd;background:linear-gradient(180deg,#fff,#fff6f5)}
 .btn.red{background:linear-gradient(180deg,#e0483d,#b3261e);color:#fff;box-shadow:0 3px 0 #7d1a14}
@@ -423,8 +442,7 @@ table.t td .acc{margin:0}
   <button data-tab="certs">Certificates <span class="badge gold hidden" id="bCert"></span></button>
   <button data-tab="grads">Graduates <span class="badge green hidden" id="bGrad"></span></button>
   <button data-tab="feed">Updates <span class="badge hidden" id="bFeed"></span></button>
-  <button data-tab="users" id="tabUsers" class="hidden">Users</button>
-  <button data-tab="manage" id="tabManage" class="hidden">Manage</button>
+  <button data-tab="settings" id="tabSettings">⚙ Settings</button>
 </div></nav></div>
 <main id="main"><div class="card"><p class="muted">Loading…</p></div></main>
 <div class="toasts" id="toasts"></div>
@@ -479,7 +497,7 @@ const PERMS = [
   ["seating","Manage seating plan","Assign and change seats"],
   ["create_events","Create events",""],
   ["users","Add and manage users","Create, reset, change access"]];
-const ROLE_DEFAULT = { team:["tasks_create","tasks_update","checkin","print_tags","robes","stage","certs","comment"] };
+const ROLE_DEFAULT = { spectator:[], team:["tasks_create","tasks_update","checkin","print_tags","robes","stage","certs","comment"] };
 ROLE_DEFAULT.manager = PERMS.map(p=>p[0]); ROLE_DEFAULT.admin = ROLE_DEFAULT.manager;
 function can(p){ if (S.user) return S.user.role === "admin" || (S.user.perms || ROLE_DEFAULT[S.user.role] || []).includes(p); return (ROLE_DEFAULT[S.role] || ROLE_DEFAULT.team).includes(p); }
 function permBoxes(id, selected, allowed){
@@ -577,7 +595,7 @@ function notify(title, body){
 }
 window.addEventListener("focus", () => { unread = 0; document.title = baseTitle; });
 document.addEventListener("visibilitychange", () => { if (!document.hidden){ unread = 0; document.title = baseTitle; } });
-function bounceTab(tab){ const b = $(`nav.tabs [data-tab="${tab}"]`); if (!b) return; b.classList.remove("shake"); void b.offsetWidth; b.classList.add("shake"); setTimeout(() => b.classList.remove("shake"), 1400); }
+function bounceTab(tab){ if (store.get("hub_noshake")) return; const b = $(`nav.tabs [data-tab="${tab}"]`); if (!b) return; b.classList.remove("shake"); void b.offsetWidth; b.classList.add("shake"); setTimeout(() => b.classList.remove("shake"), 1400); }
 
 /* ---------- modal ---------- */
 function modal(html, onMount){
@@ -828,7 +846,7 @@ async function enterApp(){
   document.body.classList.remove("auth");
   store.set("hub_event", CODE);
   S.data = null; S.version = 0; S.lastFeedId = 0; S.unseen = 0; S.maxRev = 0; S.f.L = F0();
-  const h = location.hash.replace("#",""); if (["overview","tasks","checkin","robes","stage","certs","grads","feed","users","manage"].includes(h)) S.tab = h;
+  const h = location.hash.replace("#",""); if (["overview","tasks","checkin","robes","stage","certs","grads","feed","settings"].includes(h)) S.tab = h;
   try { history.replaceState(null, "", "?e=" + CODE + "#" + S.tab); } catch {}
   liveBadge();
   main.innerHTML = `<div class="card"><p class="muted">Connecting…</p></div>`;
@@ -844,14 +862,14 @@ function render(){
   $("#evName").textContent = d.event.name + "  ▾";
   $("#evName").onclick = () => { clearInterval(timer); eventsView(); };
   $("#evSub").textContent = [d.event.date ? new Date(d.event.date).toLocaleDateString("en-ZA",{weekday:"short",day:"numeric",month:"long",year:"numeric"}) : "", d.event.venue].filter(Boolean).join(" · ");
-  $("#tabUsers").classList.toggle("hidden", !can("users"));
+
   $("#tabs").classList.remove("hidden");
-  $("#tabManage").classList.toggle("hidden", !(can("manage_event") || can("upload")));
+
   const road = d.tasks.filter(t=>t.status==="Roadblock").length;
   $("#bRoad").textContent = road; $("#bRoad").classList.toggle("hidden", !road);
   $("#bFeed").textContent = S.unseen||""; $("#bFeed").classList.toggle("hidden", !S.unseen || S.tab==="feed");
   $$("nav.tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === S.tab));
-  const views = { overview:viewOverview, tasks:viewTasks, checkin:viewCheckin, robes:viewRobes, stage:viewStage, certs:viewCerts, grads:viewGrads, feed:viewFeed, manage:viewManage, users:viewUsers };
+  const views = { overview:viewOverview, tasks:viewTasks, checkin:viewCheckin, robes:viewRobes, stage:viewStage, certs:viewCerts, grads:viewGrads, feed:viewFeed, settings:viewSettings, manage:() => openSettings("event"), users:() => openSettings("users") };
   const P = d.learners.filter(l => l.status === "present"), rw = P.filter(l => !l.robe_issued).length, cw = P.filter(l => l.stage_status === "done" && !l.cert_issued).length;
   $("#bRobe").textContent = rw; $("#bRobe").classList.toggle("hidden", !rw); $("#bCert").textContent = cw; $("#bCert").classList.toggle("hidden", !cw);
   const gw = P.filter(l => l.cert_issued).length; $("#bGrad").textContent = gw; $("#bGrad").classList.toggle("hidden", !gw);
@@ -1056,7 +1074,7 @@ function taskCard(t){
     <div class="acts">${btn("Completed","c","✓ Completed")}${btn("In progress","p","In progress")}${btn("Roadblock","r","⚠ Roadblock")}${btn("On hold","h","On hold")}${btn("Not started","n","Reset")}
       <span class="spacer"></span><button class="sbtn n" data-th="${t.id}">💬 ${thread.length||""} Comments</button>${mine?`<button class="sbtn n" data-ed="${t.id}">Edit</button><button class="sbtn n" data-rm="${t.id}">Remove</button>`:""}</div>
     ${open?`<div class="thread">${thread.map(f=>`<div class="msg"><b>${esc(f.actor)}</b> <span class="small muted">${ago(f.created_at)}</span><br>${esc(f.text)}</div>`).join("")||`<div class="small muted">No comments yet.</div>`}
-      <div class="row" style="margin-top:8px"><input type="text" placeholder="Write a comment" data-cin="${t.id}" style="flex:1"><button class="btn sm" data-csend="${t.id}">Send</button></div></div>`:""}
+      ${can("comment") ? `<div class="row" style="margin-top:8px"><input type="text" placeholder="Write a comment" data-cin="${t.id}" style="flex:1"><button class="btn sm" data-csend="${t.id}">Send</button></div>` : ""}</div>`:""}
   </div>`;
 }
 function wireTasks(){
@@ -1078,7 +1096,10 @@ function wireTasks(){
 async function taskForm(t){
   t = t || {};
   const people = await loadPeople();
-  const names = [...new Set(people.map(p=>p.name).concat(S.data.members.map(m=>m.name)))].sort();
+  const team = people.filter(p => p.role !== "spectator");
+  const roleTxt = r => ({admin:"Administrator", manager:"Manager", team:"Team member"})[r] || "";
+  const others = [...new Set(S.data.members.map(m => m.name))].filter(n => !team.some(p => p.name === n)).sort();
+  const names = [...new Set(team.map(p=>p.name).concat(others))];
   let picked = owners(t);
   const dueLocal = t.due_at ? new Date(new Date(t.due_at).getTime() - new Date().getTimezoneOffset()*60000).toISOString().slice(0,16) : "";
   modal(`<h3>${t.id?"Edit task":"New task"}</h3>
@@ -1096,8 +1117,11 @@ async function taskForm(t){
       const drawAs = () => {
         $("#fas",m).innerHTML = picked.length ? picked.map((n,i) => `<span>${esc(n)}<button type="button" data-x="${i}" title="Remove">×</button></span>`).join("") : `<span class="small muted" style="background:none;padding:0">Nobody yet. Pick a person and press Add.</span>`;
         $$("[data-x]", m).forEach(b => b.onclick = () => { picked.splice(+b.dataset.x, 1); drawAs(); });
-        const left = names.filter(n => !picked.includes(n));
-        $("#fsel",m).innerHTML = `<option value="">Choose a person…</option>` + left.map(n => `<option>${esc(n)}</option>`).join("") + `<option value="__other">Someone else (type a name)</option>`;
+        const lt = team.filter(p => !picked.includes(p.name)), lo = others.filter(n => !picked.includes(n));
+        $("#fsel",m).innerHTML = `<option value="">Choose a person…</option>`
+          + (lt.length ? `<optgroup label="On the Alumni Hub (${team.length} users)">${lt.map(p => `<option value="${esc(p.name)}">${esc(p.name)} · ${roleTxt(p.role)}</option>`).join("")}</optgroup>` : "")
+          + (lo.length ? `<optgroup label="Other task owners">${lo.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join("")}</optgroup>` : "")
+          + `<option value="__other">Someone else (type a name)</option>`;
       };
       const addName = n => { n = (n||"").trim(); if (n && !picked.includes(n)) picked.push(n); drawAs(); };
       $("#fadd",m).onclick = () => { const v = $("#fsel",m).value; if (v === "__other"){ $("#fothr",m).classList.remove("hidden"); $("#fon",m).focus(); } else addName(v); };
@@ -1234,7 +1258,7 @@ function viewCheckin(){
       tp.innerHTML = `<option value="">Choose tag printer…</option>` + ps.map(p => `<option ${p===tagPrefs().printer?"selected":""}>${esc(p)}</option>`).join(""); tp.onchange = () => saveTagPrefs({printer:tp.value});
       const dr = $("#directRow"), dt = $("#directTag"); if (dr && dt){ dr.classList.remove("hidden"); dt.checked = tagPrefs().direct; dt.onchange = () => { if (dt.checked && !tagPrefs().printer){ dt.checked = false; return toast("Choose the tag printer first", "red"); } saveTagPrefs({direct:dt.checked}); }; } }); }
     $("#autoTag").checked = tagPrefs().auto; $("#autoTag").onchange = e => saveTagPrefs({auto:e.target.checked});
-    $("#testTag").onclick = () => previewTag({first_name:"Name", surname:"Surname", programme:"Technical Support L4", nqf:4, _code:"1-01", seat:"DD 18", client:"Client name"});
+    $("#testTag").onclick = () => previewTag({first_name:"Name", surname:"Surname", programme:"Technical Support L4", nqf:4, _code:"1-01", seat:"DD-18", client:"Client name"});
     $("#upl").onclick = () => modal(`<h3>Upload learners</h3><p class="small muted">Choose an Excel or CSV file. New learners are added to this event and anyone already on the list is skipped.</p>
       <input type="file" id="imf" accept=".xlsx,.xls,.csv"><div id="imPrev"></div>
       <div class="row" style="margin-top:12px"><span class="spacer"></span><button class="btn ghost" id="mc">Close</button></div>`, (m, close) => { $("#mc",m).onclick = close; $("#imf",m).onchange = importPreview; });
@@ -1413,7 +1437,7 @@ const HALL = { name:"Great Hall, Wits", sections:[
   reserved: s => s.section === "Lower" && s.block === "Left" && ["AA","BB","CC"].includes(s.row) };
 function hallSeats(){
   const out = [];
-  HALL.sections.forEach(sec => sec.rows.forEach(r => sec.blocks.forEach(b => { for (let n = b.from; n >= b.to; n--) out.push({section:sec.name, row:r, block:b.name, n, label:`${r} ${n}`}); })));
+  HALL.sections.forEach(sec => sec.rows.forEach(r => sec.blocks.forEach(b => { for (let n = b.from; n >= b.to; n--) out.push({section:sec.name, row:r, block:b.name, n, label:`${r}-${n}`}); })));
   out.forEach(s => s.reserved = HALL.reserved(s));
   return out;
 }
@@ -1430,43 +1454,157 @@ function seatPlan(){
   return { plan, unseated: Math.max(0, todo.length - free.length), lower: hallSeats().filter(s => s.section === "Lower" && !s.reserved).length };
 }
 async function assignSeats(){
-  const {plan, unseated} = seatPlan();
-  const changes = S.data.learners.filter(l => plan.has(l.id) && (l.seat||"") !== plan.get(l.id)).map(l => ({id:l.id, seat:plan.get(l.id)}));
-  if (!changes.length){ toast("Seating is already up to date", "green"); return; }
-  if (!confirm(`Update ${changes.length} seats? Graduates who are already checked in keep their seats.`)) return;
-  try { for (let i = 0; i < changes.length; i += 250) await rpc("grad_seats_save", {p_code:CODE, p_pin:S.pin, p_actor:S.me, p_seats:changes.slice(i, i+250), p_note:"assigned seats by programme"});
-    S.lastActAt = Date.now(); toast(`Seats assigned${unseated ? `. ${unseated} graduates did not fit in the hall` : ""}`, unseated ? "red" : "green"); rtPing(); await pull(true); }
-  catch(e){ toast("Could not save seats: " + e.message, "red"); }
+  if (!confirm("Assign seats by programme? Graduates who are already checked in keep their seats; absent and not-attending graduates give theirs up.")) return;
+  try { S.lastActAt = Date.now(); const r = await rpc("grad_seats_assign", {p_code:CODE, p_pin:S.pin, p_actor:S.me});
+    toast(`Seats assigned: ${r.seated} seated${r.unseated ? `, ${r.unseated} did not fit in the hall` : ""}`, r.unseated ? "red" : "green"); rtPing(); await pull(true); }
+  catch(e){ toast("Could not assign seats: " + e.message, "red"); }
 }
 function seatStats(){
   const L = S.data.learners, seated = L.filter(l => l.seat);
   const low = new Set(HALL.sections[0].rows);
-  return { seated:seated.length, lower:seated.filter(l => low.has(l.seat.split(" ")[0])).length, upper:seated.filter(l => !low.has(l.seat.split(" ")[0])).length, none:L.filter(l => !l.seat && l.status !== "absent").length };
+  return { seated:seated.length, lower:seated.filter(l => low.has(l.seat.split(/[- ]/)[0])).length, upper:seated.filter(l => !low.has(l.seat.split(/[- ]/)[0])).length, none:L.filter(l => !l.seat && l.status !== "absent").length };
 }
-function seatMap(){
-  const by = new Map(S.data.learners.filter(l => l.seat).map(l => [l.seat, l]));
-  const seats = hallSeats();
-  const st = l => !l ? "free" : l.cert_issued ? "cert" : l.stage_status === "done" ? "crossed" : l.robe_issued ? "robe" : l.status === "present" ? "arr" : "exp";
-  const progs = {}; S.data.learners.filter(l => l.seat).forEach(l => { const k = l.programme || "No programme"; (progs[k] = progs[k] || []).push(l.seat); });
-  const sec = s => {
-    const rows = s.rows.slice().reverse().map(r => `<div class="smr"><b>${r}</b>${s.blocks.map(b => `<span class="smb">${seats.filter(x => x.section === s.name && x.row === r && x.block === b.name).map(x => { const l = by.get(x.label);
-        return `<i class="sm-${x.reserved ? "res" : st(l)}" data-seat="${x.label}" title="${x.label}${x.reserved ? " · reserved for clients" : l ? " · " + esc(fullName(l)) + " · " + esc(l.programme||"") : " · empty"}"></i>`; }).join("")}</span>`).join("")}<b>${r}</b></div>`).join("");
-    return `<h4 style="margin:12px 0 4px">${s.name} section</h4><div class="smap">${rows}</div>`;
-  };
-  modal(`<h3>Seating plan · ${HALL.name}</h3>
-    <div class="row small" style="gap:10px;flex-wrap:wrap"><span><i class="smk sm-exp"></i>Seat assigned</span><span><i class="smk sm-arr"></i>Arrived</span><span><i class="smk sm-robe"></i>Robed</span><span><i class="smk sm-crossed"></i>Crossed</span><span><i class="smk sm-cert"></i>Certificate</span><span><i class="smk sm-res"></i>Clients</span><span><i class="smk sm-free"></i>Empty</span></div>
-    <input type="search" id="smq" placeholder="Find a graduate's seat" style="margin-top:10px">
-    <div id="smres" class="small" style="min-height:18px;margin-top:4px"></div>
-    <div style="overflow:auto;max-height:52vh">${sec(HALL.sections[1])}${sec(HALL.sections[0])}<div class="stagebar">STAGE</div></div>
-    <details style="margin-top:10px"><summary class="small" style="cursor:pointer;font-weight:700;color:var(--royal)">Programme blocks</summary><div class="scroll" style="max-height:200px;overflow:auto"><table class="t"><tbody>${Object.entries(progs).map(([p, ss]) => `<tr><td>${esc(p)}</td><td>${ss.length}</td><td class="small">${esc(ss[0])} to ${esc(ss[ss.length-1])}</td></tr>`).join("")}</tbody></table></div></details>
-    <div class="row" style="margin-top:12px"><span class="small muted">Upper section rows A–R, lower section rows AA–LL nearest the stage.</span><span class="spacer"></span><button class="btn ghost" id="mc">Close</button></div>`,
-    (m, close) => { m.classList.add("wide"); $("#mc",m).onclick = close;
-      $("#smq",m).oninput = e => { const q = e.target.value.toLowerCase().trim(); $$("i.hit", m).forEach(i => i.classList.remove("hit")); if (!q){ $("#smres",m).textContent = ""; return; }
-        const hits = S.data.learners.filter(l => l.seat && fullName(l).toLowerCase().includes(q)).slice(0, 6);
-        $("#smres",m).innerHTML = hits.map(l => `<b>${esc(fullName(l))}</b>: seat ${esc(l.seat)}`).join(" · ") || "No match";
-        hits.forEach(l => { const i = $(`i[data-seat="${l.seat}"]`, m); if (i){ i.classList.add("hit"); i.scrollIntoView({block:"nearest", inline:"center"}); } }); };
+/* ======================================================================
+   GREAT HALL FLOOR PLAN  (interactive copy of the venue plan, with routes)
+   ====================================================================== */
+const PLAN = { cx:500, cy:2200, pitch:17, lowR:1240, upR:1509, rowH:19,
+  layout:{ Lower:[["Left",11],[null,2],["Centre",13],[null,2],["Right",11]], Upper:[["Left",12],[null,2],["Centre left",10],[null,1.5],["Centre right",11],[null,2],["Right",11]] } };
+function planRowR(sec, ri){ return (sec === "Lower" ? PLAN.lowR : PLAN.upR) + ri * PLAN.rowH; }
+function planUnits(sec){ return PLAN.layout[sec].reduce((a, b) => a + b[1], 0); }
+function planAngle(sec, u, r){ return -Math.PI / 2 + (u - planUnits(sec) / 2) * PLAN.pitch / r; }
+function planXY(r, th){ return [PLAN.cx + r * Math.cos(th), PLAN.cy + r * Math.sin(th)]; }
+function planBlockStart(sec, block){ let u = 0; for (const [b, n] of PLAN.layout[sec]){ if (b === block) return u; u += n; } return 0; }
+// every seat with its drawing position
+function planSeats(){
+  const out = [];
+  HALL.sections.forEach(sec => sec.rows.forEach((row, ri) => {
+    const r = planRowR(sec.name, ri);
+    sec.blocks.forEach(b => { const u0 = planBlockStart(sec.name, b.name); let i = 0;
+      for (let n = b.from; n >= b.to; n--, i++){ const th = planAngle(sec.name, u0 + i + .5, r); const [x, y] = planXY(r, th);
+        out.push({section:sec.name, row, block:b.name, n, label:`${row}-${n}`, x, y, deg:th * 180 / Math.PI + 90, r, u:u0 + i + .5, reserved:HALL.reserved({section:sec.name, row, block:b.name}) }); } });
+  }));
+  return out;
+}
+function planAt(sec, u, ri){ const r = planRowR(sec, ri); return planXY(r, planAngle(sec, u, r)); }
+function usherList(){
+  const LU = planUnits("Lower"), UU = planUnits("Upper"), mid = (sec, b) => planBlockStart(sec, b) + PLAN.layout[sec].find(x => x[0] === b)[1] / 2;
+  const P = (sec, u, ri) => planAt(sec, u, ri).map(v => Math.round(v));
+  return [
+    ["U1","Main entrance usher (guests)","red",500,352],
+    ["U2","Rear left usher","red", ...P("Upper", -1.8, 16)],["U3","Rear right usher","red", ...P("Upper", UU + 1.8, 16)],
+    ["U4","Left aisle usher","green", ...P("Upper", -2.6, 8)],["U5","Upper centre (left block)","green", ...P("Upper", mid("Upper","Centre left"), 8)],
+    ["U6","Upper centre (right block)","green", ...P("Upper", mid("Upper","Centre right"), 8)],["U7","Right aisle usher","green", ...P("Upper", UU + 2.6, 8)],
+    ["U8","Lower left usher","blue", ...P("Lower", mid("Lower","Left"), 6)],["U9","Lower centre usher","blue", ...P("Lower", mid("Lower","Centre"), 6)],["U10","Lower right usher","blue", ...P("Lower", mid("Lower","Right"), 6)],
+    ["U11","Stage left usher","purple",290,1065],["U12","Stage right usher","purple",710,1065]];
+}
+const USH_COL = {red:"#c62828", green:"#2e7d32", blue:"#1d4fb8", purple:"#6a1b9a"};
+function usherFor(s){
+  if (s.section === "Lower") return s.block === "Left" ? "U8" : s.block === "Centre" ? "U9" : "U10";
+  return s.block === "Left" ? "U4" : s.block === "Centre left" ? "U5" : s.block === "Centre right" ? "U6" : "U7";
+}
+function doorFor(s){ return (s.section === "Lower" && s.block === "Left") || (s.section === "Upper" && (s.block === "Left" || s.block === "Centre left")) ? "left" : "right"; }
+// the walking route: door → aisle → up the aisle to the row → along the row to the seat
+function planRoute(s){
+  const door = doorFor(s), LU = planUnits("Lower"), UU = planUnits("Upper");
+  const pts = [door === "left" ? [140, 1040] : [860, 1040]];
+  const lowAisle = s.section === "Lower" ? (s.block === "Left" ? -0.8 : s.block === "Centre" ? planBlockStart("Lower","Right") - 1 : LU + 0.8) : (door === "left" ? -0.8 : LU + 0.8);
+  const rFront = PLAN.lowR - 26, rTopLow = s.section === "Lower" ? s.r : PLAN.upR - 30;
+  for (let i = 0; i <= 8; i++){ const r = rFront + (rTopLow - rFront) * i / 8; pts.push(planXY(r, planAngle("Lower", lowAisle, r))); }
+  let rowAisleU = lowAisle;
+  if (s.section === "Upper"){ rowAisleU = door === "left" ? -0.8 : UU + 0.8;
+    for (let i = 0; i <= 8; i++){ const r = PLAN.upR - 30 + (s.r - PLAN.upR + 30) * i / 8; pts.push(planXY(r, planAngle("Upper", rowAisleU, r))); } }
+  const thA = planAngle(s.section, rowAisleU, s.r), thS = planAngle(s.section, s.u, s.r);
+  for (let i = 1; i <= 12; i++) pts.push(planXY(s.r, thA + (thS - thA) * i / 12));
+  return {pts, door};
+}
+function planSVG(sel){
+  const seats = planSeats(), by = new Map(S.data.learners.filter(l => l.seat).map(l => [l.seat, l]));
+  const fill = (s, l) => s.reserved ? "url(#resv)" : !l ? "#eef1f7" : l.cert_issued ? "#0f2462" : l.stage_status === "done" ? "#2a47a8" : l.robe_issued ? "#5577d8" : l.status === "present" ? "#9db3ec" : "#cfd8ef";
+  const hit = sel && sel.seat ? seats.find(s => s.label === sel.seat) : null;
+  const rows = [];
+  HALL.sections.forEach(sec => sec.rows.forEach((row, ri) => { const r = planRowR(sec.name, ri);
+    [[-1.4, "end"], [planUnits(sec.name) + 1.4, "start"]].forEach(([u]) => { const [x, y] = planXY(r, planAngle(sec.name, u, r)); rows.push(`<text x="${x.toFixed(1)}" y="${(y + 4).toFixed(1)}" class="prow" text-anchor="middle">${row}</text>`); }); }));
+  const seatEls = seats.map(s => { const l = by.get(s.label); const on = hit && hit.label === s.label;
+    return `<rect class="pseat${on ? " on" : ""}" data-seat="${s.label}" x="${(s.x - 7).toFixed(1)}" y="${(s.y - 6.5).toFixed(1)}" width="14" height="13" rx="3" transform="rotate(${s.deg.toFixed(1)} ${s.x.toFixed(1)} ${s.y.toFixed(1)})" fill="${fill(s, l)}"><title>${s.label}${s.reserved ? " · reserved for clients" : l ? " · " + esc(fullName(l)) + " · " + esc(l.programme || "") : " · empty"}</title></rect>`; }).join("");
+  const route = hit ? planRoute(hit) : null;
+  const ush = usherList().map(([id, label, c, x, y]) => { const mine = hit && usherFor(hit) === id; return `<g class="push${mine ? " mine" : ""}"><circle cx="${x}" cy="${y}" r="${mine ? 17 : 13}" fill="${USH_COL[c]}" stroke="#fff" stroke-width="2.5"/><text x="${x}" y="${y + 4}" text-anchor="middle" class="push-t">${id}</text><title>${id} · ${label}</title></g>`; }).join("");
+  const blockLabel = (sec, block, ri, txt) => { const u0 = planBlockStart(sec, block), n = PLAN.layout[sec].find(b => b[0] === block)[1], r = planRowR(sec, ri), [x, y] = planXY(r, planAngle(sec, u0 + n / 2, r)); return `<text x="${x.toFixed(0)}" y="${y.toFixed(0)}" class="pblk" text-anchor="middle">${txt}</text>`; };
+  const arc = (r, a) => { const pts = []; for (let i = 0; i <= 40; i++) pts.push(planXY(r, -Math.PI / 2 - a + 2 * a * i / 40)); return pts; };
+  const top = arc(1865, .249), hallPath = `M 40 1130 L 40 ${top[0][1].toFixed(0)} ` + top.map(p => `L ${p[0].toFixed(0)} ${p[1].toFixed(0)}`).join(" ") + ` L 960 ${top[40][1].toFixed(0)} L 960 1130 Z`;
+  const divR = PLAN.lowR + 11 * PLAN.rowH + 30, div = arc(divR, .29), divPath = "M " + div.map(p => p[0].toFixed(0) + " " + p[1].toFixed(0)).join(" L ");
+  return `<svg viewBox="0 286 1000 950" class="hallsvg" role="img" aria-label="Great Hall seating plan">
+    <defs><pattern id="resv" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" fill="#f7efd2"/><rect width="2.5" height="5" fill="#e3cf8e"/></pattern>
+      <marker id="arw" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#d4af37"/></marker>
+      <marker id="arwR" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#c62828"/></marker>
+      <marker id="arwB" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#1d4fb8"/></marker></defs>
+    <path d="${hallPath}" fill="#fbfcff" stroke="#0d1b3e" stroke-width="3"/>
+    <path d="${divPath}" fill="none" stroke="#0d1b3e" stroke-width="2"/>
+    <!-- guest entrances and flows -->
+    <rect x="395" y="292" width="210" height="26" rx="6" fill="#c62828"/><text x="500" y="310" text-anchor="middle" class="plbl w">GUEST ENTRANCE (main, rear)</text>
+    <path d="M 450 332 L 330 360" class="pflow r" marker-end="url(#arwR)"/><path d="M 550 332 L 670 360" class="pflow r" marker-end="url(#arwR)"/>
+    <rect x="4" y="340" width="92" height="38" rx="6" fill="#fde4e4" stroke="#e8a3a3"/><text x="50" y="356" text-anchor="middle" class="plbl rd">GUESTS</text><text x="50" y="370" text-anchor="middle" class="plbl rd s">from foyer</text>
+    <rect x="904" y="340" width="92" height="38" rx="6" fill="#fde4e4" stroke="#e8a3a3"/><text x="950" y="356" text-anchor="middle" class="plbl rd">GUESTS</text><text x="950" y="370" text-anchor="middle" class="plbl rd s">from foyer</text>
+    ${rows.join("")}
+    ${seatEls}
+    <!-- stage -->
+    <path d="M 330 1030 Q 500 1012 670 1030 L 650 1046 Q 500 1030 350 1046 Z" fill="#e8ecf4" stroke="#8a93a8"/><text x="500" y="1032" text-anchor="middle" class="plbl s">LIFT</text>
+    <path d="M 250 1052 Q 500 1028 750 1052 L 790 1130 L 210 1130 Z" fill="#c9cfdb" stroke="#0d1b3e" stroke-width="2"/>
+    <text x="500" y="1100" text-anchor="middle" class="plbl stg">STAGE</text>
+    <rect x="390" y="1134" width="220" height="18" fill="#fff" stroke="#0d1b3e"/><text x="500" y="1147" text-anchor="middle" class="plbl s">SCREEN</text>
+    <rect x="395" y="1180" width="210" height="44" rx="8" fill="#e7efff" stroke="#9bb3e6"/><text x="500" y="1198" text-anchor="middle" class="plbl bl">VIP ENTRANCE</text><text x="500" y="1214" text-anchor="middle" class="plbl bl s">MD, VIPs, speakers, special guests</text>
+    <path d="M 500 1178 L 500 1158" class="pflow b" marker-end="url(#arwB)"/>
+    <!-- learner entrances -->
+    <rect x="4" y="1030" width="128" height="50" rx="8" fill="#fff4cf" stroke="#d4af37" stroke-width="2" class="${route && route.door === "left" ? "pdoor on" : "pdoor"}"/><text x="68" y="1050" text-anchor="middle" class="plbl gd">LEARNER ENTRANCE</text><text x="68" y="1068" text-anchor="middle" class="plbl gd">LEFT · stage-left door</text>
+    <rect x="868" y="1030" width="128" height="50" rx="8" fill="#fff4cf" stroke="#d4af37" stroke-width="2" class="${route && route.door === "right" ? "pdoor on" : "pdoor"}"/><text x="932" y="1050" text-anchor="middle" class="plbl gd">LEARNER ENTRANCE</text><text x="932" y="1068" text-anchor="middle" class="plbl gd">RIGHT · stage-right door</text>
+    ${route ? "" : `<path d="M 136 1030 L 165 990 L 170 880" class="pflow g" marker-end="url(#arw)"/><path d="M 864 1030 L 835 990 L 830 880" class="pflow g" marker-end="url(#arw)"/>`}
+    ${ush}
+    ${route ? `<polyline points="${route.pts.map(p => p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" ")}" class="proute" marker-end="url(#arw)"/>
+      <circle cx="${hit.x.toFixed(1)}" cy="${hit.y.toFixed(1)}" r="16" class="ppulse"/><circle cx="${hit.x.toFixed(1)}" cy="${hit.y.toFixed(1)}" r="9" fill="none" stroke="#d93025" stroke-width="3"/>` : ""}
+  </svg>`;
+}
+function planGuide(l){
+  if (!l || !l.seat) return "";
+  const s = planSeats().find(x => x.label === l.seat); if (!s) return `<div class="err">Seat ${esc(l.seat)} is not on the hall plan.</div>`;
+  const u = usherFor(s), uu = usherList().find(x => x[0] === u), door = doorFor(s);
+  const blockTxt = `${s.section === "Lower" ? "lower section (blue)" : "upper section"} · ${s.block.toLowerCase()} block`;
+  return `<div class="pguide"><div class="pgn">${esc(fullName(l))} <span class="seat">💺 ${esc(l.seat)}</span></div>
+    <ol><li>Enter through the <b>Learner Entrance ${door === "left" ? "Left (stage-left door)" : "Right (stage-right door)"}</b>.</li>
+      <li>Go up the ${s.section === "Lower" ? (s.block === "Centre" ? "aisle between the centre and right blocks" : s.block === "Left" ? "left aisle" : "right aisle") : door === "left" ? "left aisle to the upper section" : "right aisle to the upper section"}. Usher <b style="color:${USH_COL[uu[2]]}">${u}</b> (${uu[1].toLowerCase()}) will help.</li>
+      <li>Row <b>${esc(s.row)}</b>, seat <b>${s.n}</b> in the ${blockTxt}.</li></ol>
+    <div class="small muted">${esc(l.programme || "")}${l.client ? " · " + esc(l.client) : ""}${l._code ? " · stage number " + esc(l._code) : ""}</div></div>`;
+}
+function seatMap(preselect){
+  stageList();
+  let sel = preselect || null;
+  modal(`<h3>Great Hall · seating plan and entrance flow</h3>
+    <div class="row" style="gap:8px;flex-wrap:wrap"><input type="search" id="smq" placeholder="Find a graduate and show them the way to their seat" style="flex:1;min-width:220px" autocomplete="off"><button class="btn ghost sm" id="smPrint">🖨 Print plan</button></div>
+    <div id="smres" class="smres"></div>
+    <div class="pwrap"><div id="pplan" class="pplan"></div><div id="pside" class="pside"></div></div>
+    <div class="pkeys small"><span><i style="background:#cfd8ef"></i>Seat assigned</span><span><i style="background:#9db3ec"></i>Arrived</span><span><i style="background:#5577d8"></i>Robed</span><span><i style="background:#2a47a8"></i>Crossed</span><span><i style="background:#0f2462"></i>Certificate</span><span><i class="hatch"></i>Clients</span><span><i style="background:#eef1f7;border:1px solid #d6dcea"></i>Empty</span>
+      <span class="sep"></span><span><b style="color:${USH_COL.red}">●</b> Entrance/rear ushers U1–U3</span><span><b style="color:${USH_COL.green}">●</b> Upper ushers U4–U7</span><span><b style="color:${USH_COL.blue}">●</b> Lower ushers U8–U10</span><span><b style="color:${USH_COL.purple}">●</b> Stage ushers U11–U12</span></div>
+    <div class="row" style="margin-top:10px"><span class="small muted">Tap any seat to see who sits there. Gold arrows show the learner route; red the guest route; blue the VIP route.</span><span class="spacer"></span><button class="btn ghost" id="mc">Close</button></div>`,
+    (m, close) => { m.classList.add("wide");
+      const draw = () => { $("#pplan", m).innerHTML = planSVG(sel); $("#pside", m).innerHTML = sel ? planGuide(sel) : `<div class="pguide muted small">Search for a graduate, or tap a seat, to see their route from the learner entrance, the usher to look for, and their row and seat.</div>`;
+        $$(".pseat", m).forEach(r => r.onclick = () => { const l = S.data.learners.find(x => x.seat === r.dataset.seat); if (l){ sel = l; draw(); } else toast(r.dataset.seat + (r.getAttribute("fill") === "url(#resv)" ? " is reserved for clients" : " is empty")); });
+        const on = $(".pseat.on", m); if (on && on.scrollIntoView) on.scrollIntoView({block:"center", inline:"center", behavior:"smooth"}); };
+      $("#mc", m).onclick = close;
+      $("#smPrint", m).onclick = () => { const w = window.open("", "_blank"); if (!w) return toast("Allow pop-ups to print the plan", "red"); w.document.write(`<title>Great Hall seating plan</title><style>body{margin:0;font-family:Arial}svg{width:100%;height:auto}${PLAN_CSS}</style>${planSVG(sel)}${sel ? planGuide(sel) : ""}<script>setTimeout(()=>print(),400)<\/script>`); w.document.close(); };
+      $("#smq", m).oninput = e => { const q = e.target.value.toLowerCase().trim(); if (!q){ $("#smres", m).innerHTML = ""; return; }
+        const hits = S.data.learners.filter(l => l.seat && (fullName(l).toLowerCase().includes(q) || (l.seat || "").toLowerCase() === q)).slice(0, 8);
+        $("#smres", m).innerHTML = hits.map(l => `<button class="chip" data-pick="${l.id}">${esc(fullName(l))} · ${esc(l.seat)}</button>`).join("") || `<span class="small muted">No graduate with a seat matches.</span>`;
+        $$("[data-pick]", m).forEach(b => b.onclick = () => { sel = S.data.learners.find(x => x.id === b.dataset.pick); draw(); }); };
+      draw();
     });
 }
+const PLAN_CSS = `.hallsvg{width:100%;height:auto;display:block}.pseat{cursor:pointer;stroke:#fff;stroke-width:.8}.pseat:hover{stroke:#0d1b3e;stroke-width:1.5}.pseat.on{stroke:#d93025;stroke-width:2.5}
+  .prow{font:700 9px Montserrat,Arial,sans-serif;fill:#5b6785}.pblk{font:800 12px Montserrat,Arial;fill:#8a93a8}.plbl{font:800 11px Montserrat,Arial,sans-serif;fill:#0d1b3e}.plbl.s{font-size:9px;font-weight:700}.plbl.w{fill:#fff}.plbl.rd{fill:#b3261e}.plbl.bl{fill:#1d4fb8}.plbl.gd{fill:#7a5a00;font-size:9.5px}.plbl.stg{font-size:22px;letter-spacing:4px}
+  .pflow{fill:none;stroke-width:4;stroke-linecap:round}.pflow.r{stroke:#c62828}.pflow.b{stroke:#1d4fb8}.pflow.g{stroke:#d4af37}
+  .push-t{font:800 10px Montserrat,Arial;fill:#fff}.push.mine circle{stroke:#f3d27a;stroke-width:4}
+  .proute{fill:none;stroke:#d4af37;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:10 7;animation:pdash 1s linear infinite;filter:drop-shadow(0 1px 1px rgba(0,0,0,.35))}
+  @keyframes pdash{to{stroke-dashoffset:-17}}.ppulse{fill:rgba(217,48,37,.25);animation:ppulse 1.4s ease-out infinite;transform-box:fill-box;transform-origin:center}
+  @keyframes ppulse{0%{transform:scale(.6);opacity:1}100%{transform:scale(1.8);opacity:0}}.pdoor.on{stroke:#d93025;stroke-width:4}`;
+
+document.head.insertAdjacentHTML("beforeend", "<style>" + PLAN_CSS + "</style>");
 
 /* ======================================================================
    CHARTS  (sequential royal-blue ramp: each step further along the day)
@@ -1704,10 +1842,11 @@ function viewStage(){
         <button class="btn gold lg" id="callNext" ${queue.length || called.length ? "" : "disabled"}>${called.length ? (queue.length ? "✓ Done, call next" : "✓ Done") : "▶ Call first graduate"}</button>
         ${called.length?`<button class="btn ghost sm" id="undoCall">Back to waiting</button>`:""}
       </div>
+      <label class="callsel"><span>Programme up next</span><select id="stProg" aria-label="Programme up next"><option value="">All programmes, in stage order</option>${progOpts}</select></label>
       <div class="small" style="margin-top:10px;color:#c9d3f2">${done} of ${P.length} crossed · ${robing} still getting robes · ${notYet.length} not yet arrived</div>
     </div>
-    <div class="card upnext" style="margin:0"><label class="upsel"><span>Programme up next</span><select id="stProg" aria-label="Programme up next"><option value="">All programmes, in stage order</option>${progOpts}</select></label>
-      <h2 style="margin-top:12px">Up next${sel ? ` <span class="tag gold">${esc(sel)}</span>` : ""}<span class="spacer"></span><span class="small muted">${queue.length} waiting</span></h2>
+    <div class="card upnext" style="margin:0">
+      <h2>Up next${sel ? ` <span class="tag gold">${esc(sel)}</span>` : ""}<span class="spacer"></span><span class="small muted">${queue.length} waiting</span></h2>
       ${nextUp.length ? nextUp.map((l,i)=>`<div class="row" style="padding:6px 0;border-bottom:1px solid var(--line)"><span class="seq" style="width:auto;min-width:30px;height:30px;font-size:12px;padding:0 6px;border-radius:15px">${l._code}</span><div style="flex:1"><b>${esc(fullName(l))}</b><div class="small muted">${esc(l.programme||"")}${l.client?" · "+esc(l.client):""}</div></div>${l._late?`<span class="tag red">Late arrival</span>`:""}${i===0?`<span class="tag gold">Next</span>`:""}</div>`).join("") : `<div class="empty">No one waiting.</div>`}
     </div>
   </div>
@@ -1759,7 +1898,7 @@ function viewFeed(){
   if (!$("#fdView")){
     main.innerHTML = `<div id="bn"></div><div class="card" id="fdView">
       <h2>Team updates</h2>
-      <div class="noprint"><textarea id="fdTxt" placeholder="${can("announce")?"Write a comment or announcement for the whole team":"Write an update for the team"}"></textarea>
+      <div class="noprint ${can("comment") || can("announce") ? "" : "hidden"}"><textarea id="fdTxt" placeholder="${can("announce")?"Write a comment or announcement for the whole team":"Write an update for the team"}"></textarea>
       <div class="row" style="margin-top:8px">${can("announce")?`<label class="row small" style="gap:6px;cursor:pointer"><input type="checkbox" id="fdAnn" checked> Send as announcement (alert and banner for everyone)</label>`:""}
       <span class="spacer"></span><button class="btn" id="fdSend">Post</button></div></div>
       <div class="chips" id="fdChips" style="margin:14px 0 6px"></div><div id="fdList"></div>
@@ -1785,12 +1924,12 @@ function viewFeed(){
 
 /* ---------- MANAGE ---------- */
 function viewManage(){
-  if (!(can("manage_event") || can("upload"))) return setTab("overview");
+  if (!(can("manage_event") || can("upload"))) return;
   const d = S.data;
   const link = HUB_URL + "?e=" + CODE;
-  main.innerHTML = `
+  ($("#setBody") || main).innerHTML = `
   <div class="card"><h2>Share with the team</h2>
-    <p class="small">Team members sign in with their own Camblish email and password. Add people under the <b>Users</b> tab. Web link for phones:</p>
+    <p class="small">Team members sign in with their own Camblish email and password. Add people under <b>Settings → Users and access</b>. Web link for phones:</p>
     <div class="row"><input type="text" readonly value="${esc(link)}" id="lnk" style="flex:1"><button class="btn sm" id="cp">Copy link</button></div></div>
   <div class="grid g2">
     <div class="card"><h2>Task owners</h2><p class="small muted" style="margin-top:-6px">Names that appear in the task owner list.</p>
@@ -1812,9 +1951,7 @@ function viewManage(){
     <div id="imPrev"></div>
     <div class="row" style="margin-top:12px"><button class="btn ghost sm" id="exp">Export attendance and stage order (CSV)</button><span class="small muted">${d.learners.length} graduates loaded</span></div>
   </div>
-  ${can("manage_event") ? `<div class="card dangerzone"><h2>Start again <span class="tag red">Needs the admin reset password</span></h2>
-    <p class="small">Use this after a rehearsal or test run. You choose what to clear: attendance and progress, seats, updates, tasks or the whole learner list. Nothing else is touched. Wrong passwords are reported to the team and lock the reset for 15 minutes after 5 tries.</p>
-    <button class="btn red" id="rsBtn">↺ Reset event…</button></div>` : ""}`;
+`;
   $("#cp").onclick = async () => { try { await navigator.clipboard.writeText(link); toast("Link copied"); } catch { $("#lnk").select(); } };
   $$("[data-mrm]").forEach(b => b.onclick = () => act("grad_member_save", {p_name:null, p_role_title:null, p_remove_id:b.dataset.mrm}, "Removed"));
   $("#madd").onclick = () => { const n=$("#mn").value.trim(); if(!n) return; act("grad_member_save", {p_name:n, p_role_title:$("#mr").value.trim(), p_remove_id:null}, "Added to the team"); };
@@ -1900,26 +2037,26 @@ function exportCsv(){
 const ACCESS_OLD = [["Overview",["admin","manager","team"]],["Tasks",["admin","manager","team"]],["Check-in",["admin","manager","team"]],["Print tags",["admin","manager","team"]],["Stage order",["admin","manager","team"]],["Updates",["admin","manager","team"]],
   ["Announcements",["admin","manager"]],["Upload learners",["admin","manager"]],["Manage event",["admin","manager"]],["Create events",["admin","manager"]],["Add and reset users",["admin","manager"]],["Manage admins",["admin"]]];
 function accessMatrix(){
-  const roles = [["admin","Administrator"],["manager","Manager"],["team","Team member"]];
+  const roles = [["admin","Administrator"],["manager","Manager"],["team","Team member"],["spectator","Spectator"]];
   return `<div class="scroll"><table class="t"><thead><tr><th>Access</th>${roles.map(r=>`<th>${r[1]}</th>`).join("")}</tr></thead><tbody>
-    <tr><td>View overview, tasks, check-in, stage order and updates</td><td>✅</td><td>✅</td><td>✅</td></tr>
-    ${PERMS.map(([k,l]) => `<tr><td>${l}</td>${roles.map(r => `<td>${r[0]==="admin" ? "✅" : ROLE_DEFAULT[r[0]].includes(k) ? "✅ <span class='small muted'>default</span>" : "<span class='small muted'>optional</span>"}</td>`).join("")}</tr>`).join("")}
-    <tr><td>Manage administrators</td><td>✅</td><td>✕</td><td>✕</td></tr></tbody></table></div>`;
+    <tr><td>See every tab, live progress and announcements</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+    ${PERMS.map(([k,l]) => `<tr><td>${l}</td>${roles.map(r => `<td>${r[0]==="admin" ? "✅" : r[0]==="spectator" ? "✕" : ROLE_DEFAULT[r[0]].includes(k) ? "✅ <span class='small muted'>default</span>" : "<span class='small muted'>optional</span>"}</td>`).join("")}</tr>`).join("")}
+    <tr><td>Manage administrators</td><td>✅</td><td>✕</td><td>✕</td><td>✕</td></tr></tbody></table></div>`;
 }
 function myGrantable(){ return S.user.role === "admin" ? PERMS.map(p=>p[0]) : PERMS.map(p=>p[0]).filter(can); }
 async function viewUsers(){
-  if (!can("users")) return setTab("overview");
+  if (!can("users")) return;
   if (!$("#usView")){
-    main.innerHTML = `<div id="bn"></div><div class="grid g2" id="usView">
+    ($("#setBody") || main).innerHTML = `<div id="bn"></div><div class="grid g2" id="usView">
       <div class="card"><h2>Add a team member</h2><p class="small muted" style="margin-top:-4px">Only @camblish.co.za addresses. A temporary password is created and the person must choose their own password when they first sign in.</p>
         <label class="lbl">Full name</label><input type="text" id="un">
         <label class="lbl">Camblish email</label><input type="text" id="ue" placeholder="name@camblish.co.za">
-        <label class="lbl">Role</label><select id="ur"><option value="team">Team member</option><option value="manager">Manager</option>${S.user.role==="admin"?`<option value="admin">Administrator (full access)</option>`:""}</select>
+        <label class="lbl">Role</label><select id="ur"><option value="team">Team member</option><option value="spectator">Spectator (view only)</option><option value="manager">Manager</option>${S.user.role==="admin"?`<option value="admin">Administrator (full access)</option>`:""}</select>
         <label class="lbl">What this person can do</label><div id="upwrap"></div>
         <button class="btn gold" id="uadd" style="margin-top:12px">Create account</button><div id="uout"></div></div>
       <div class="card"><h2>People with access<span class="spacer"></span><span class="small muted" id="ucount"></span></h2><div id="ulist"><p class="muted">Loading…</p></div></div></div>
       <div class="card"><h2>What each role can do</h2><p class="small muted" style="margin-top:-4px">Ticked items are switched on by default for that role. You can switch any of them on or off per person when you add them, or later with Change access.</p>${accessMatrix()}</div>`;
-    const drawPw = () => { const r = $("#ur").value; $("#upwrap").innerHTML = r === "admin" ? `<p class="small muted">Administrators can do everything.</p>` : permBoxes("upg", ROLE_DEFAULT[r].filter(p => myGrantable().includes(p)), myGrantable()); };
+    const drawPw = () => { const r = $("#ur").value; $("#upwrap").innerHTML = r === "admin" ? `<p class="small muted">Administrators can do everything.</p>` : r === "spectator" ? `<div class="okm" style="margin:4px 0">👁 Spectators can see every tab, the live progress and all announcements, but get no buttons: they can't check anyone in, issue robes or certificates, run the stage, edit tasks or post. You can give them access later with Change access.</div>` : permBoxes("upg", ROLE_DEFAULT[r].filter(p => myGrantable().includes(p)), myGrantable()); };
     $("#ur").onchange = drawPw; drawPw();
     $("#uadd").onclick = async () => {
       const em = $("#ue").value.trim();
@@ -1938,13 +2075,13 @@ async function drawUsers(){
   let list; try { list = await rpc("hub_users_list", {p_token:S.pin}); } catch(e){ $("#ulist").innerHTML = `<div class="err">${esc(e.message)}</div>`; return; }
   $("#ucount").textContent = `${list.filter(u=>u.active).length} active`;
   $("#ulist").innerHTML = `<div class="list">${list.map(u => `<div class="lrow ${u.active?"":"absent"}"><div class="info">
-      <div class="nm">${esc(u.name)} <span class="rolepill ${u.role}">${u.role}</span>${u.active?"":` <span class="tag red">Deactivated</span>`}${u.must_change && u.active?` <span class="tag gold">Awaiting first sign-in</span>`:""}</div>
+      <div class="nm">${esc(u.name)} <span class="rolepill ${u.viewer ? "spectator" : u.role}">${u.viewer ? "spectator" : u.role}</span>${u.active?"":` <span class="tag red">Deactivated</span>`}${u.must_change && u.active?` <span class="tag gold">Awaiting first sign-in</span>`:""}</div>
       <div class="small muted">${esc(u.email)} · ${u.last_login ? "last sign-in " + ago(u.last_login) : "never signed in"}${u.created_by ? " · added by " + esc(u.created_by) : ""}</div>
       <div class="acc">${u.active ? PERMS.filter(([k]) => (u.perms||[]).includes(k)).map(([k,l]) => `<span>${l}</span>`).join("") || `<span class="no">View only</span>` : `<span class="no">No access (deactivated)</span>`}${u.custom && u.role !== "admin" ? `<span style="background:#fff6dd;color:#8a6200">Custom access</span>` : ""}</div>${u.active && u.role !== "admin" && PERMS.some(([k]) => !(u.perms||[]).includes(k)) ? `<div class="noacc">Can't: ${PERMS.filter(([k]) => !(u.perms||[]).includes(k)).map(([k,l]) => l.toLowerCase()).join(", ")}</div>` : ""}</div>
       ${u.id === S.user.id ? `<span class="tag">You</span>` : `
       <button class="sbtn p" data-ureset="${u.id}">Reset password</button>
       ${u.role !== "admin" && u.active ? `<button class="btn gold sm" data-uperm="${u.id}">🔑 Change access</button>` : ""}
-      ${u.role !== "admin" ? `<button class="sbtn n" data-urole="${u.id}" data-to="${u.role==="manager"?"team":"manager"}">Make ${u.role==="manager"?"team":"manager"}</button>` : ""}
+      ${u.role !== "admin" ? `<select class="rolesel" data-urole="${u.id}" aria-label="Role for ${esc(u.name)}">${[["team","Team member"],["spectator","Spectator (view only)"],["manager","Manager"]].map(([v,l]) => `<option value="${v}" ${(u.viewer ? "spectator" : u.role) === v ? "selected" : ""}>${l}</option>`).join("")}</select>` : ""}
       <button class="sbtn ${u.active?"r":"c"}" data-uact="${u.id}" data-to="${u.active?0:1}">${u.active?"Deactivate":"Reactivate"}</button>
       ${u.role !== "admin" || S.user.role === "admin" ? `<button class="sbtn r" data-urm="${u.id}" title="Remove this person from the system">🗑 Delete</button>` : ""}`}</div>`).join("")}</div><div id="ucred"></div>`;
   $$("[data-ureset]").forEach(b => b.onclick = async () => { if (!confirm("Create a new temporary password for this person? Their current password stops working.")) return;
@@ -1959,7 +2096,7 @@ async function drawUsers(){
     const typed = await ask("Delete " + u.name + "?", `This removes ${u.name} from the system for good. They can no longer sign in and won't appear anywhere, but past activity still shows their name. Type DELETE to confirm.`, {required:true, okText:"Delete user", okClass:"red", placeholder:"DELETE"});
     if (typed === null) return; if (typed.trim().toUpperCase() !== "DELETE") return toast("Not deleted. Type DELETE to confirm.", "red");
     try { await rpc("hub_user_remove", {p_token:S.pin, p_user:u.id}); toast(u.name + " was deleted", "green"); drawUsers(); } catch(e){ toast(e.message, "red"); } });
-  $$("[data-urole]").forEach(b => b.onclick = async () => { try { await rpc("hub_user_update", {p_token:S.pin, p_user:b.dataset.urole, p_role:b.dataset.to, p_active:null}); drawUsers(); } catch(e){ toast(e.message, "red"); } });
+  $$("[data-urole]").forEach(b => b.onchange = async () => { try { await rpc("hub_user_update", {p_token:S.pin, p_user:b.dataset.urole, p_role:b.value, p_active:null}); toast("Role updated", "green"); drawUsers(); } catch(e){ toast(e.message, "red"); } });
   $$("[data-uact]").forEach(b => b.onclick = async () => { try { await rpc("hub_user_update", {p_token:S.pin, p_user:b.dataset.uact, p_role:"", p_active:b.dataset.to==="1"}); drawUsers(); } catch(e){ toast(e.message, "red"); } });
 }
 function credMail(r, isNew){
@@ -2013,9 +2150,91 @@ function credCard(el, r, isNew){
   };
 }
 
+/* ======================================================================
+   SETTINGS (personal, event, users, system)
+   ====================================================================== */
+const SET_SECTIONS = () => [
+  ["account","👤","My account", true],
+  ["alerts","🔔","Alerts and sound", true],
+  ["tags","🖨","Name tags and printer", can("print_tags")],
+  ["event","🎓","Event, seating and learners", can("manage_event") || can("upload") || can("seating")],
+  ["users","👥","Users and access", can("users")],
+  ["system","🛠","System", S.user && S.user.role === "admin"],
+  ["reset","↺","Reset", can("manage_event")]].filter(x => x[3]);
+function openSettings(sec){ S.f.set = sec; S.tab = "settings"; main.innerHTML = ""; S._setDrawn = null; try { history.replaceState(null, "", "?e=" + CODE + "#settings"); } catch {} render(); window.scrollTo(0,0); }
+function viewSettings(){
+  const secs = SET_SECTIONS(); if (!secs.some(x => x[0] === S.f.set)) S.f.set = "account";
+  if (!$("#setView")){
+    main.innerHTML = `<div id="bn"></div><div class="setwrap" id="setView"><nav class="setnav card" aria-label="Settings sections"><h2 style="margin-bottom:8px">⚙ Settings</h2>${secs.map(([k,i,l]) => `<button class="setlink" data-set="${k}"><span>${i}</span>${l}</button>`).join("")}</nav><div id="setBody" class="setbody"></div></div>`;
+    $$("[data-set]").forEach(b => b.onclick = () => { S.f.set = b.dataset.set; S._setDrawn = null; viewSettings(); });
+  }
+  $("#bn").innerHTML = bannerHTML(); wireBanner();
+  $$("[data-set]").forEach(b => b.classList.toggle("on", b.dataset.set === S.f.set));
+  if (S._setDrawn === S.f.set) return;   // don't redraw while someone is typing
+  S._setDrawn = S.f.set;
+  const body = $("#setBody");
+  ({ account:setAccount, alerts:setAlerts, tags:setTags, event:() => { viewManage(); }, users:() => { S._usersLoaded = false; viewUsers(); }, system:setSystem, reset:setReset })[S.f.set](body);
+}
+async function setAccount(body){
+  const u = S.user, role = u.viewer ? "Spectator (view only)" : ({admin:"Administrator", manager:"Manager", team:"Team member"})[u.role];
+  body.innerHTML = `<div class="card"><h2>My account</h2>
+    <div class="kvs"><div><span>Name</span><b>${esc(u.name)}</b></div><div><span>Email</span><b>${esc(u.email)}</b></div><div><span>Role</span><b>${role}</b></div><div><span>This sign-in lasts until</span><b id="accExp">…</b></div><div><span>Devices signed in</span><b id="accDev">…</b></div></div>
+    <h3 class="ch" style="margin-top:16px">What I can do</h3><div class="acc">${PERMS.filter(([k]) => can(k)).map(([k,l]) => `<span>${l}</span>`).join("") || `<span class="no">View only</span>`}</div>
+    <div class="row" style="margin-top:16px;flex-wrap:wrap"><button class="btn" id="accPw">🔑 Change my password</button><button class="btn ghost" id="accAll">Sign out on all my devices</button></div></div>`;
+  $("#accPw").onclick = () => changePwView(false);
+  $("#accAll").onclick = async () => { if (!confirm("Sign out of the Alumni Hub on every device, including this one?")) return; try { await rpc("hub_logout_all", {p_token:S.pin}); } catch {} logout(); };
+  try { const r = await rpc("hub_my_sessions", {p_token:S.pin}); $("#accExp").textContent = r.this_expires ? new Date(r.this_expires).toLocaleString("en-ZA",{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}) : "–"; $("#accDev").textContent = r.active_sessions; } catch(e){ $("#accExp").textContent = "–"; }
+}
+function setAlerts(body){
+  const perm = "Notification" in window ? Notification.permission : "unsupported";
+  body.innerHTML = `<div class="card"><h2>Alerts and sound</h2><p class="small muted" style="margin-top:-4px">These settings are for this device only.</p>
+    <div class="setrow"><div><b>Alert sounds</b><div class="small muted">Bells for updates, a fanfare for announcements and an alarm for roadblocks.</div></div><label class="switch"><input type="checkbox" id="alSnd" ${store.get("hub_mute") ? "" : "checked"}><i></i></label></div>
+    <div class="setrow"><div><b>Test the sounds</b></div><div class="row"><button class="btn ghost sm" data-snd="default">Update</button><button class="btn ghost sm" data-snd="announcement">Announcement</button><button class="btn ghost sm" data-snd="roadblock">Roadblock</button></div></div>
+    <div class="setrow"><div><b>Pop-up notifications</b><div class="small muted">${DESKTOP() ? "The desktop app shows Windows notifications and flashes the taskbar automatically." : perm === "granted" ? "On. You'll get a pop-up when this tab is in the background." : perm === "denied" ? "Blocked in this browser. Allow notifications for this site in the browser settings." : perm === "unsupported" ? "This browser does not support pop-ups." : "Off. Turn on to get pop-ups when this tab is in the background."}</div></div>${!DESKTOP() && perm === "default" ? `<button class="btn sm" id="alNot">Turn on</button>` : `<span class="tag ${perm === "granted" || DESKTOP() ? "green" : ""}">${DESKTOP() || perm === "granted" ? "On" : "Off"}</span>`}</div>
+    <div class="setrow"><div><b>Shake the Updates tab</b><div class="small muted">The tab bounces when something new happens.</div></div><label class="switch"><input type="checkbox" id="alShake" ${store.get("hub_noshake") ? "" : "checked"}><i></i></label></div></div>`;
+  $("#alSnd").onchange = e => { if (e.target.checked){ store.del("hub_mute"); chime("default"); } else store.set("hub_mute", 1); };
+  $$("[data-snd]").forEach(b => b.onclick = () => { const m = store.get("hub_mute"); store.del("hub_mute"); chime(b.dataset.snd); if (m) store.set("hub_mute", 1); });
+  $("#alShake").onchange = e => { if (e.target.checked) store.del("hub_noshake"); else store.set("hub_noshake", 1); };
+  const an = $("#alNot"); if (an) an.onclick = async () => { try { await Notification.requestPermission(); } catch {} S._setDrawn = null; viewSettings(); };
+}
+function setTags(body){
+  const p = tagPrefs();
+  body.innerHTML = `<div class="card"><h2>Name tags and printer</h2><p class="small muted" style="margin-top:-4px">These settings are for this device only.</p>
+    <div class="setrow"><div><b>Tag size</b></div><select id="tgSize" style="max-width:300px">${Object.entries(TAG_SIZES).map(([k,v]) => `<option value="${k}" ${k===p.size?"selected":""}>${v.label}</option>`).join("")}</select></div>
+    <div class="setrow"><div><b>Orientation</b><div class="small muted">Portrait turns the tag for printers that feed cards upright.</div></div><select id="tgOr" style="max-width:220px"><option value="landscape">Landscape (wide)</option><option value="portrait">Portrait (tall)</option></select></div>
+    <div class="setrow"><div><b>Print when a graduate is marked present</b><div class="small muted">Opens the print preview straight away at check-in.</div></div><label class="switch"><input type="checkbox" id="tgAuto" ${p.auto?"checked":""}><i></i></label></div>
+    ${DESKTOP() && DESKTOP().list_printers ? `<div class="setrow"><div><b>Tag printer</b></div><select id="tgPr" style="max-width:300px"><option value="">Choose tag printer…</option></select></div>
+    <div class="setrow"><div><b>Skip the preview</b><div class="small muted">Print straight to the tag printer above.</div></div><label class="switch"><input type="checkbox" id="tgDir" ${p.direct?"checked":""}><i></i></label></div>` : ""}
+    <div class="row" style="margin-top:12px"><button class="btn gold" id="tgTest">Preview a test tag</button></div></div>`;
+  $("#tgOr").value = p.orient || "landscape";
+  $("#tgSize").onchange = e => saveTagPrefs({size:e.target.value});
+  $("#tgOr").onchange = e => saveTagPrefs({orient:e.target.value});
+  $("#tgAuto").onchange = e => saveTagPrefs({auto:e.target.checked});
+  $("#tgTest").onclick = () => previewTag({first_name:"Name", surname:"Surname", programme:"Technical Support L4", nqf:4, _code:"1-01", seat:"DD-18", client:"Client name"});
+  if ($("#tgPr")) DESKTOP().list_printers().then(ps => { const tp = $("#tgPr"); if (!tp) return; tp.innerHTML = `<option value="">Choose tag printer…</option>` + ps.map(x => `<option ${x===tagPrefs().printer?"selected":""}>${esc(x)}</option>`).join(""); tp.onchange = () => saveTagPrefs({printer:tp.value});
+    $("#tgDir").onchange = e => { if (e.target.checked && !tagPrefs().printer){ e.target.checked = false; return toast("Choose the tag printer first", "red"); } saveTagPrefs({direct:e.target.checked}); }; });
+}
+function setSystem(body){
+  const h = S.user.session_hours || 336;
+  const opts = [[8,"8 hours (one working day)"],[12,"12 hours"],[24,"24 hours"],[72,"3 days"],[168,"7 days"],[336,"14 days"],[720,"30 days"]];
+  body.innerHTML = `<div class="card"><h2>System</h2><p class="small muted" style="margin-top:-4px">Only administrators see this section.</p>
+    <div class="setrow"><div><b>How long a sign-in lasts</b><div class="small muted">After this, people are asked to sign in again. Applies to new sign-ins.</div></div><select id="syS" style="max-width:260px">${opts.map(([v,l]) => `<option value="${v}" ${v===h?"selected":""}>${l}</option>`).join("")}${opts.some(o => o[0]===h) ? "" : `<option value="${h}" selected>${h} hours</option>`}</select></div>
+    <div class="setrow"><div><b>Live connection</b><div class="small muted">Instant updates between devices, with a check every few seconds as back-up.</div></div><span class="tag ${RT && RT.status === "SUBSCRIBED" ? "green" : ""}">${RT && RT.status === "SUBSCRIBED" ? "Instant ⚡" : "Checking every 2.5 s"}</span></div>
+    <div class="setrow"><div><b>Running as</b></div><span class="small">${DESKTOP() ? "Desktop app" : "Web browser"} · Camblish Alumni Hub v1.5</span></div>
+    <div class="setrow"><div><b>Web link for phones</b></div><span class="small"><a href="${HUB_URL}" target="_blank" rel="noopener">${HUB_URL.replace("https://","")}</a></span></div></div>`;
+  $("#syS").onchange = async e => { try { await rpc("hub_settings_set", {p_token:S.pin, p_session_hours:+e.target.value}); S.user.session_hours = +e.target.value; toast("Saved. New sign-ins will last " + e.target.selectedOptions[0].textContent.toLowerCase(), "green"); } catch(err){ toast(err.message, "red"); } };
+}
+function setReset(body){
+  body.innerHTML = `<div class="card dangerzone"><h2>↺ Reset and start again <span class="tag red">Needs the admin reset password</span></h2>
+    <p class="small">Use this after a rehearsal or test run. You choose what to clear: attendance and progress, seats, updates, tasks or the whole learner list. Nothing else is touched. Wrong passwords are reported to the team and lock the reset for 15 minutes after 5 tries.</p>
+    <button class="btn red" id="rsBtn">↺ Reset event…</button></div>`;
+  $("#rsBtn").onclick = () => resetDialog({progress:true});
+}
+
 /* ---------- BOOT ---------- */
 function setTab(t){
-  S.tab = t; main.innerHTML = "";
+  if (t === "users" || t === "manage") return openSettings(t === "users" ? "users" : "event");
+  S.tab = t; main.innerHTML = ""; S._setDrawn = null;
   try { history.replaceState(null, "", "?e=" + CODE + "#" + t); } catch {}
   if (t === "users") S._usersLoaded = false;
   render(); window.scrollTo(0,0);
