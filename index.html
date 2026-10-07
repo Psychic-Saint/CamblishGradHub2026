@@ -445,13 +445,23 @@ button.ro,.btn.ro,.sbtn.ro{filter:blur(1.2px) grayscale(.6);opacity:.45;pointer-
 .stiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:6px 0 12px}
 .stile{display:grid;grid-template-columns:auto 1fr;column-gap:8px;align-items:center;text-align:left;background:#fff;border:1px solid var(--line);border-left:4px solid var(--royal);border-radius:10px;padding:6px 10px;cursor:pointer;font:inherit;color:var(--ink);transition:transform .12s}
 .stile:hover{transform:translateY(-1px)}.stile b{grid-row:span 2;font-size:20px;line-height:1;color:var(--navy);min-width:22px}.stile span{font-weight:800;font-size:12px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.stile small{font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
-.stile.hot{border:1px solid #0b1f5c;border-left:4px solid #d4af37;background:linear-gradient(120deg,#081a45,#1d3fae);animation:onstage 2.4s ease-in-out infinite}
-.stile.hot b{color:#f3d27a}.stile.hot span{color:#fff;display:flex;align-items:center;gap:6px}.stile.hot small{color:#f3d27a;font-weight:700;font-size:11.5px;white-space:normal;line-height:1.25}
-.lv{display:inline-flex;align-items:center;gap:4px;font-style:normal;font-size:9.5px;font-weight:800;letter-spacing:.6px;color:#fff;background:rgba(225,29,72,.9);border-radius:99px;padding:1px 6px 1px 5px}
-.lv i{width:6px;height:6px;border-radius:50%;background:#fff;animation:lvblink 1.1s ease-in-out infinite}
+.stile.hot{display:flex;align-items:center;gap:10px;padding:6px 8px 6px 7px;border:1.5px solid #c99a2e;border-radius:14px;position:relative;overflow:hidden;
+  background:linear-gradient(180deg,#fff3c2 0%,#f6d77a 22%,#e9b949 52%,#d9a234 78%,#f0c75e 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 -2px 4px rgba(150,100,10,.35),0 6px 16px -8px rgba(150,100,10,.7)}
+.stile.hot::before{content:"";position:absolute;top:-60%;left:-30%;width:40%;height:220%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.65),transparent);transform:rotate(18deg);animation:gshine 3.2s ease-in-out infinite}
+.gcoin{flex:0 0 auto;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:16px;color:#fff;text-shadow:0 1px 1px rgba(90,60,0,.6);
+  background:radial-gradient(circle at 35% 30%,#ffe9a8,#d9a234 55%,#9c6f12);box-shadow:0 0 0 2px #fff1c4,0 0 0 3.5px #b8861f,0 2px 4px rgba(90,60,0,.4)}
+.gtx{flex:1;min-width:0;display:flex;flex-direction:column;border-left:1.5px solid rgba(140,95,10,.35);padding-left:9px;text-align:left}
+.gtx strong{font-size:13.5px;font-weight:900;color:#2b1d00;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
+.gtx small{font-size:11px;color:#5c4300;font-weight:600;line-height:1.2}
+.glive{flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;font-style:normal;font-weight:900;font-size:11px;letter-spacing:.5px;color:#fff;padding:4px 10px 4px 8px;border-radius:99px;
+  background:linear-gradient(180deg,#f0444f,#c8102e 60%,#a50c24);box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 0 0 1.5px #e9b949,0 2px 5px rgba(120,0,20,.45)}
+.glive i{width:7px;height:7px;border-radius:50%;background:#fff;animation:lvblink 1.1s ease-in-out infinite}
 @keyframes lvblink{0%,100%{opacity:1}50%{opacity:.2}}
-@keyframes onstage{0%,100%{box-shadow:0 6px 16px -12px rgba(8,26,69,.7)}50%{box-shadow:0 0 0 3px rgba(212,175,55,.35),0 8px 20px -10px rgba(8,26,69,.8)}}
-@media (prefers-reduced-motion: reduce){.stile.hot,.lv i{animation:none}}
+.stiles:has(.hot){grid-template-columns:1fr 1fr 1.75fr 1fr 1fr}
+@media (max-width:860px){.stiles:has(.hot){grid-template-columns:repeat(2,minmax(0,1fr))}}
+@keyframes gshine{0%,55%{left:-40%}100%{left:130%}}
+@media (prefers-reduced-motion: reduce){.stile.hot::before,.glive i{animation:none}}
 @media (max-width:860px){.stiles{grid-template-columns:repeat(2,minmax(0,1fr))}.stiles .stile:nth-child(3){grid-column:1/-1}}
 .fdgrid{display:flex;flex-direction:column}.fdgrid .annscreen{order:-1}
 .actscreen .feed-item{gap:8px;padding:6px 4px}.actscreen .feed-item .ic{width:24px;height:24px;font-size:12px}
@@ -552,7 +562,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202610072104";
+const BUILD = "202610072112";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -1988,11 +1998,13 @@ function viewOverview(){
 }
 function stageTiles(J, cls=""){
   const nowOn = S.data.learners.filter(l => l.status === "present" && l.stage_status === "called");
-  const tile = (go, n, lab, sub, hot) => `<button class="stile${hot ? " hot" : ""}" data-go="${go}" type="button"><b>${n}</b><span>${lab}</span>${sub ? `<small>${sub}</small>` : ""}</button>`;
+  const tile = (go, n, lab, sub, hot) => hot
+    ? `<button class="stile hot" data-go="${go}" type="button" title="${esc(nowOn.map(fullName).join(", "))}"><span class="gcoin">${n}</span><span class="gtx"><strong>${esc(nowOn.map(fullName).join(", "))}</strong><small>Currently on stage</small></span><em class="glive"><i></i>LIVE</em></button>`
+    : `<button class="stile" data-go="${go}" type="button"><b>${n}</b><span>${lab}</span>${sub ? `<small>${sub}</small>` : ""}</button>`;
   return `<div class="stiles ${cls}">
     ${tile("robes", J.robing, "Waiting for robes", "present, not robed yet")}
     ${tile("stage", J.line, "In the stage line", "robed, waiting to be called")}
-    ${tile("stage", J.onstage, J.onstage > 0 ? `On stage now <em class="lv"><i></i>LIVE</em>` : "On stage now", nowOn.length ? esc(nowOn.map(fullName).join(", ")) : "nobody called yet", J.onstage > 0)}
+    ${tile("stage", J.onstage, "On stage now", nowOn.length ? esc(nowOn.map(fullName).join(", ")) : "nobody called yet", J.onstage > 0)}
     ${tile("stage", J.crossed, "Crossed the stage", J.arrived ? Math.round(100*J.crossed/J.arrived) + "% of those present" : "nobody yet")}
     ${tile("certs", J.certDue, "Waiting for certificates", "crossed, not capped yet")}</div>`;
 }
