@@ -412,6 +412,10 @@ nav.tabs .badge.green{background:var(--ok);color:#fff}
 .feed-item.mine{background:linear-gradient(90deg,#fffaf0,#fff)}
 #capSpin{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:radial-gradient(circle at 50% 40%,rgba(29,63,174,.92),rgba(8,26,69,.97));perspective:900px;transition:opacity .35s}
 #capSpin.out{opacity:0}
+button.ro,.btn.ro,.sbtn.ro{filter:blur(1.2px) grayscale(.6);opacity:.45;pointer-events:none;cursor:not-allowed}
+.ronote{background:#eef2fb;border:1px dashed #9db3ec;color:#1d3fae;border-radius:12px;padding:8px 12px;margin:0 0 12px;font-size:13px}
+.livebar{max-width:1150px;margin:10px auto 0;background:#fff4d6;border:2px solid #d4af37;color:#5a4200;border-radius:12px;padding:8px 14px;font-size:13.5px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.evtile.live{border:2px solid #22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.15)}.livebadge{display:inline-block;background:#22c55e;color:#fff;border-radius:99px;padding:2px 9px;font-size:11px;font-weight:800;margin-bottom:6px}
 .hbtn.pres{background:rgba(255,255,255,.12);font-weight:700;white-space:nowrap}
 .pd{display:inline-block;width:8px;height:8px;border-radius:50%;margin:0 3px 0 5px;vertical-align:0}.pd.on{background:#22c55e;box-shadow:0 0 0 2px rgba(34,197,94,.3)}.pd.aw{background:#f3c94a}.pd.of{background:#94a3b8}
 @media (max-width:700px){.hbtn.pres .pl{display:none}}
@@ -529,7 +533,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202610070041";
+const BUILD = "202610070835";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -1018,6 +1022,9 @@ async function logout(expired){
   authView(expired ? "Your session has ended. Please sign in again." : "");
 }
 function openEvent(){
+  const live = (S.events || []).find(e => e.live);
+  let picked = null; try { picked = sessionStorage.getItem("hub_pick"); } catch {}
+  if (live && !picked) CODE = live.code;
   CODE = CODE || store.get("hub_event");
   if (!CODE || !S.events.some(e => e.code === CODE)){
     if (S.events.length === 1) CODE = S.events[0].code;
@@ -1035,12 +1042,14 @@ async function eventsView(){
   $("#evName").textContent = "Choose an event"; $("#evSub").textContent = "";
   const mgr = can("create_events");
   main.innerHTML = `<div class="card"><h2>Your events</h2><p class="muted small" style="margin:0 0 10px">Pick a graduation or alumni event to work on.</p>
-    <div class="evgrid">${S.events.map(e => `<div class="evtile" data-code="${esc(e.code)}"><h3>${esc(e.name)}</h3>
+    <div class="evgrid">${S.events.map(e => `<div class="evtile${e.live ? " live" : ""}" data-code="${esc(e.code)}">${e.live ? `<span class="livebadge">● LIVE · everyone sees this</span>` : ""}<h3>${esc(e.name)}</h3>
       <div class="m">${e.date ? new Date(e.date).toLocaleDateString("en-ZA",{day:"numeric",month:"long",year:"numeric"}) : "Date to be confirmed"}${e.venue ? " · " + esc(e.venue) : ""}</div>
-      <div class="n">${e.learners} ALUMNI</div></div>`).join("")}
+      <div class="n">${e.learners} ALUMNI</div>${S.user && S.user.role === "admin" ? (e.live ? `<button class="btn ghost sm" data-live="" type="button" style="margin-top:8px">Stop being the live event</button>` : `<button class="btn gold sm" data-live="${esc(e.code)}" type="button" style="margin-top:8px">📌 Make this the live event</button>`) : ""}</div>`).join("")}
       ${mgr ? `<div class="evtile new" id="newEv">+ New event</div>` : ""}</div>
     ${!S.events.length && !mgr ? `<div class="empty">No events yet. A manager needs to create one.</div>` : ""}</div>`;
-  $$(".evtile[data-code]").forEach(t => t.onclick = () => { CODE = t.dataset.code; enterApp(); });
+  $$(".evtile[data-code]").forEach(t => t.onclick = e => { if (e.target.closest("[data-live]")) return; CODE = t.dataset.code; try { sessionStorage.setItem("hub_pick", CODE); } catch {} enterApp(); });
+  $$("[data-live]").forEach(b => b.onclick = async e => { e.stopPropagation(); const c = b.dataset.live || null;
+    try { S.events = await rpc("hub_live_event_set", {p_token:S.pin, p_code:c}); toast(c ? "Everyone will now open this event when they sign in" : "No live event set", "green"); eventsView(); } catch(err){ toast(err.message, "red"); } });
   const ne = $("#newEv"); if (ne) ne.onclick = () => modal(`<h3>New event</h3>
     <label class="lbl">Event name</label><input type="text" id="nen" placeholder="e.g. Camblish Graduation Ceremony 2027">
     <div class="grid g2" style="gap:10px"><div><label class="lbl">Date</label><input type="date" id="ned"></div><div><label class="lbl">Venue</label><input type="text" id="nev"></div></div>
@@ -1066,9 +1075,29 @@ async function enterApp(){
 /* ======================================================================
    RENDER
    ====================================================================== */
+function liveBar(){
+  let b = $("#liveBar"); const live = (S.events || []).find(e => e.live);
+  const show = live && CODE && live.code !== CODE;
+  if (!show){ if (b) b.remove(); return; }
+  if (!b){ b = document.createElement("div"); b.id = "liveBar"; b.className = "livebar noprint"; main.parentNode.insertBefore(b, main); }
+  b.innerHTML = `⚠ You're looking at <b>${esc(S.data ? S.data.event.name : "another event")}</b>, not today's live event <b>${esc(live.name)}</b>. Numbers here won't match everyone else's. <button class="btn gold sm" id="goLive" type="button">Switch to the live event</button>`;
+  $("#goLive").onclick = () => { CODE = live.code; try { sessionStorage.removeItem("hub_pick"); } catch {} enterApp(); };
+}
+/* view-only: everyone sees every list; buttons they can't use are blurred and switched off */
+const RO_MAP = [["checkin","[data-ci]"],["robes","[data-rb]"],["certs","[data-ct]"],["stage","#callNext,#undoCall,[data-sg]"],["print_tags","[data-tag],#printAllTags"]];
+function roLock(){
+  let locked = 0;
+  RO_MAP.forEach(([p, sel]) => { if (can(p)) return; $$(sel, main).forEach(b => { if (b.classList.contains("ro")) { locked++; return; } b.disabled = true; b.classList.add("ro"); b.title = "View only: ask the administrator for access"; b.setAttribute("aria-disabled", "true"); locked++; }); });
+  const tabNeeds = {checkin:"checkin", robes:"robes", stage:"stage", certs:"certs"}[S.tab];
+  const note = $("#roNote", main);
+  if (tabNeeds && !can(tabNeeds)){ if (!note){ const n = document.createElement("div"); n.id = "roNote"; n.className = "ronote noprint"; n.innerHTML = "👁 <b>View only.</b> You can follow everything live here, but the buttons are switched off for you. Ask the administrator if you need to help at this station."; const f = $(".flowcard", main); (f ? f.after(n) : main.prepend(n)); } }
+  else if (note) note.remove();
+}
+new MutationObserver(() => { if (S.data) roLock(); }).observe(main, {childList:true, subtree:true});
 function render(){
   if (!S.data) return;
   const d = S.data;
+  liveBar();
   $("#evName").textContent = d.event.name + "  ▾";
   $("#evName").onclick = () => { clearInterval(timer); eventsView(); };
   $("#evSub").textContent = [d.event.date ? new Date(d.event.date).toLocaleDateString("en-ZA",{weekday:"short",day:"numeric",month:"long",year:"numeric"}) : "", d.event.venue].filter(Boolean).join(" · ");
@@ -1473,7 +1502,7 @@ function groupedOut(el, list, rowFn, empty, tab, sortIn, redraw, numbered=true){
   $$("[data-gall]", el).forEach(b => b.onclick = () => { if (b.dataset.gall === "open") col.clear(); else keys.forEach(k => col.add(k)); redraw(); });
 }
 const posTag = (n, prog) => n ? `<span class="pos" title="${ord(n)} in ${esc(prog)}">${n}</span>` : "";
-const tagBtn = l => !can("print_tags") ? "" : l.tag_printed_at ? `<button class="btn ghost sm" data-tag="${l.id}" title="Printed at ${fmtTime(l.tag_printed_at)}" type="button">🖨 Reprint</button>` : `<button class="btn sm tagnow" data-tag="${l.id}" type="button">🖨 Print name tag</button>`;
+const tagBtn = l => l.tag_printed_at ? `<button class="btn ghost sm" data-tag="${l.id}" title="Printed at ${fmtTime(l.tag_printed_at)}" type="button">🖨 Reprint</button>` : `<button class="btn sm tagnow" data-tag="${l.id}" type="button">🖨 Print name tag</button>`;
 function wireTags(root){ $$("[data-tag]", root).forEach(b => b.onclick = () => { stageList(); const l = S.data.learners.find(x => x.id === b.dataset.tag); if (l) printTags([l]); }); }
 async function markPrinted(list){
   const ids = list.map(l => l.id).filter(Boolean); if (!ids.length || !CODE) return;
@@ -1528,9 +1557,9 @@ function drawCheckin(){
   groupedOut($("#cilist"), L.filter(l => l.status === S.f.ciFilter), (l, i, prog) => `<div class="lrow ${l.status}">${posTag(i, prog)}${lInfo(l,
       `<div class="meta" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:3px">${/^n/i.test(l.rsvp||"")?`<span class="tag red">RSVP: not attending</span>`:""}${/^y/i.test(l.robe||"")?`<span class="tag gold">Needs robe</span>`:""}${l.status!=="present"&&l.phone?`<a class="tag" href="tel:${esc(String(l.phone).split("/")[0].trim())}">📞 ${esc(l.phone)}</a>`:""}</div>
        ${l.status==="present"?`<div class="small" style="color:var(--ok)">Arrived ${fmtTime(l.arrived_at)} · by ${esc(l.checked_by||"")} · now ${l.cert_issued?"graduated":l.stage_status==="done"?"collecting certificate":l.robe_issued?"in the stage line":"at robes"}</div>`:""}`)}
-    <div class="pacts">${l.status==="present" ? `<span class="pill s-Completed">✓ Present</span><span class="tag gold" title="Stage number">${esc(codeOf(l))}</span>${tagBtn(l)}${can("checkin")?`<button class="btn ghost sm" data-ci="${l.id}" data-s="expected">Undo</button>`:""}`
-      : l.status==="absent" ? `<span class="tag">Absent</span>${can("checkin")?`<button class="btn ghost sm" data-ci="${l.id}" data-s="expected">Undo</button><button class="btn green bigbtn" data-ci="${l.id}" data-s="present">Arrived</button>`:""}`
-      : `<span class="notarr">Not arrived</span>${can("checkin")?`<button class="btn ghost sm" data-ci="${l.id}" data-s="absent">Absent</button><button class="btn green bigbtn" data-ci="${l.id}" data-s="present">✓ Mark present</button>`:""}`}</div></div>`,
+    <div class="pacts">${l.status==="present" ? `<span class="pill s-Completed">✓ Present</span><span class="tag gold" title="Stage number">${esc(codeOf(l))}</span>${tagBtn(l)}${true?`<button class="btn ghost sm" data-ci="${l.id}" data-s="expected">Undo</button>`:""}`
+      : l.status==="absent" ? `<span class="tag">Absent</span>${true?`<button class="btn ghost sm" data-ci="${l.id}" data-s="expected">Undo</button><button class="btn green bigbtn" data-ci="${l.id}" data-s="present">Arrived</button>`:""}`
+      : `<span class="notarr">Not arrived</span>${true?`<button class="btn ghost sm" data-ci="${l.id}" data-s="absent">Absent</button><button class="btn green bigbtn" data-ci="${l.id}" data-s="present">✓ Mark present</button>`:""}`}</div></div>`,
     fActive() ? "No graduate matches these filters." : S.f.ciFilter === "expected" ? "Everyone has arrived. 🎉" : "Nobody here yet.", "checkin", present ? byArrival : byName, drawCheckin, present);
   wireTags($("#cilist"));
   $$("#cilist [data-ci]").forEach(b => b.onclick = async () => {
@@ -1566,7 +1595,7 @@ function drawRobes(){
   groupedOut($("#rblist"), S.f.rb === "wait" ? wait : done, (l, i, prog) => `<div class="lrow ${l.robe_issued?"present":"expected"}">${posTag(i, prog)}${lInfo(l,
       `<div class="small" style="margin-top:2px">${/^y/i.test(l.robe||"")?`<span class="tag gold">Needs robe</span> `:""}${l.belt?`<span class="tag">Belt: ${esc(l.belt)}</span> `:""}<span class="muted">Arrived ${fmtTime(l.arrived_at)}</span>${l.robe_issued?` · <span style="color:var(--ok)">${l.robe_skip?"Own robe":"Robe issued"} ${fmtTime(l.robe_at)}${l.robe_by?" by "+esc(l.robe_by):""}</span>`:""}</div>`)}
     <div class="pacts"><span class="tag gold" title="Stage number">${esc(codeOf(l))}</span>${tagBtn(l)}
-      ${can("robes") ? (l.robe_issued ? `<span class="pill s-Completed">✓ ${l.robe_skip?"Own robe":"Robed"}</span><button class="btn ghost sm" data-rb="${l.id}" data-v="0">Undo</button>`
+      ${true ? (l.robe_issued ? `<span class="pill s-Completed">✓ ${l.robe_skip?"Own robe":"Robed"}</span><button class="btn ghost sm" data-rb="${l.id}" data-v="0">Undo</button>`
         : `<button class="btn ghost sm" data-rb="${l.id}" data-v="1" data-skip="1" title="Has their own robe or does not need one">Own robe</button><button class="btn gold bigbtn" data-rb="${l.id}" data-v="1">🎓 Robe issued</button>`) : ""}</div></div>`,
     fActive() ? "No graduate matches these filters." : S.f.rb === "wait" ? "Nobody waiting for a robe right now." : "No robes issued yet.", "robes", byArrival, drawRobes);
   wireTags($("#rblist"));
@@ -1597,7 +1626,7 @@ function drawCerts(){
   const byStage = (a, b) => new Date(a.stage_at || 0) - new Date(b.stage_at || 0);
   groupedOut($("#ctlist"), S.f.ct === "due" ? due : notYet, (l, i, prog) => `<div class="lrow ${l.stage_status==="done"?"called":"expected"}">${posTag(i, prog)}${lInfo(l,
       `<div class="small muted" style="margin-top:2px">${l.stage_status==="done"?`Crossed ${fmtTime(l.stage_at)}`:l.robe_issued?"In the stage line":"Waiting for robe"}</div>`)}
-    <div class="pacts"><span class="tag gold">${esc(codeOf(l))}</span>${tagBtn(l)}${can("certs") && l.stage_status === "done" ? `<button class="btn green bigbtn" data-ct="${l.id}" data-v="1">📜 Certificate issued</button>` : ""}</div></div>`,
+    <div class="pacts"><span class="tag gold">${esc(codeOf(l))}</span>${tagBtn(l)}${l.stage_status === "done" ? `<button class="btn green bigbtn" data-ct="${l.id}" data-v="1">📜 Certificate issued</button>` : ""}</div></div>`,
     fActive() ? "No graduate matches these filters." : S.f.ct === "due" ? "No certificates waiting right now." : "Nobody waiting to go on stage.", "certs", S.f.ct === "due" ? byStage : byArrival, drawCerts);
   wireTags($("#ctlist"));
   $$("#ctlist [data-ct]").forEach(b => b.onclick = async () => { b.disabled = true; const l = S.data.learners.find(x=>x.id===b.dataset.ct);
@@ -1633,7 +1662,7 @@ function drawGrads(){
   const byCert = (a, b) => new Date(a.cert_at || 0) - new Date(b.cert_at || 0);
   groupedOut($("#grlist"), G, (l, i, prog) => `<div class="lrow grad">${posTag(i, prog)}${lInfo(l,
       `<div class="small" style="margin-top:2px;color:var(--ok)">🎓 Graduated ${fmtTime(l.cert_at)}${l.cert_by ? " · certificate from " + esc(l.cert_by) : ""} <span class="muted">· crossed ${fmtTime(l.stage_at)}</span></div>`)}
-    <div class="pacts"><span class="tag gold">${esc(codeOf(l))}</span>${tagBtn(l)}${can("certs") ? `<button class="btn ghost sm" data-ct="${l.id}" title="Move back to Certificates">Undo</button>` : ""}</div></div>`,
+    <div class="pacts"><span class="tag gold">${esc(codeOf(l))}</span>${tagBtn(l)}${true ? `<button class="btn ghost sm" data-ct="${l.id}" title="Move back to Certificates">Undo</button>` : ""}</div></div>`,
     fActive() ? "No graduate matches these filters." : "No graduates yet. They appear here once their certificate is issued.", "grads", byCert, drawGrads);
   wireTags($("#grlist"));
   $$("#grlist [data-ct]").forEach(b => b.onclick = async () => { const l = S.data.learners.find(x=>x.id===b.dataset.ct); if (!confirm(`Move ${fullName(l)} back to Certificates?`)) return; b.disabled = true; await act("grad_cert", {p_learner:l.id, p_issued:false}, null); });
@@ -2174,7 +2203,7 @@ function viewStage(){
   if (keepQ){ const q = $(".fbar [data-fk=q]"); if (q){ q.focus(); q.setSelectionRange(q.value.length, q.value.length); } }
   const pat = $("#printAllTags"); if (pat) pat.onclick = () => { if (P.length && confirm(`Print ${P.length} name tags?`)) printTags(P); };
   $$(".stiles [data-go]", main).forEach(b => b.onclick = () => setTab(b.dataset.go));
-  if (!can("stage")) $$("#callNext,#undoCall,[data-sg]").forEach(b => b.remove());
+  roLock();
   $$("[data-sg]").forEach(b => b.onclick = () => act("grad_stage", {p_learner:b.dataset.sg, p_stage:b.dataset.s}));
   const cn = $("#callNext"); if (cn) cn.onclick = async () => {
     cn.disabled = true;
