@@ -412,6 +412,12 @@ nav.tabs .badge.green{background:var(--ok);color:#fff}
 .feed-item.mine{background:linear-gradient(90deg,#fffaf0,#fff)}
 #capSpin{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:radial-gradient(circle at 50% 40%,rgba(29,63,174,.92),rgba(8,26,69,.97));perspective:900px;transition:opacity .35s}
 #capSpin.out{opacity:0}
+.lnotes{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:4px;font-size:12px}
+.nbtn{background:none;border:1px dashed #9db3ec;color:#1d3fae;border-radius:99px;padding:1px 9px;font-size:11.5px;font-weight:700;cursor:pointer}.nbtn:hover{background:#eef2fb}
+.nq.open{background:#fde8e6;color:#b3261e;border-radius:99px;padding:1px 8px;font-weight:800;font-size:11px}
+.nlast{color:var(--muted);max-width:100%;overflow:hidden;text-overflow:ellipsis}.nlast i{font-style:normal;opacity:.8}
+.nrow{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;padding:8px 10px;border-radius:10px;margin-bottom:6px;background:#f6f8fd;border-left:4px solid #9db3ec;font-size:13px}
+.nrow.open.k-name,.nrow.open.k-query{background:#fdf1ef;border-left-color:#b3261e}.nrow.res{opacity:.8}
 button.ro,.btn.ro,.sbtn.ro{filter:blur(1.2px) grayscale(.6);opacity:.45;pointer-events:none;cursor:not-allowed}
 .ronote{background:#eef2fb;border:1px dashed #9db3ec;color:#1d3fae;border-radius:12px;padding:8px 12px;margin:0 0 12px;font-size:13px}
 .livebar{max-width:1150px;margin:10px auto 0;background:#fff4d6;border:2px solid #d4af37;color:#5a4200;border-radius:12px;padding:8px 14px;font-size:13.5px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
@@ -533,7 +539,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202610070835";
+const BUILD = "202610072023";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -1450,9 +1456,36 @@ function matchScore(l){
 }
 function chipsHTML(id, opts, cur){ return `<div class="chips" id="${id}" style="margin:10px 0">${opts.map(([k,label,n]) => `<button class="chip ${cur===k?"on":""}" data-c="${k}">${label} (${n})</button>`).join("")}</div>`; }
 const seatTag = l => l.seat ? `<span class="seat" title="Seat">💺 ${hl(l.seat)}</span>` : "";
+/* ---------- learner notes & queries (travel with the learner to the graduate list) ---------- */
+const NOTE_KIND = {name:["✏️","Name correction"], query:["⚠","Query"], note:["💬","Note"]};
+const notesOf = l => Array.isArray(l.queries) ? l.queries : [];
+const openQ = l => notesOf(l).filter(n => !n.resolved);
+const notesTxt = l => notesOf(l).map(n => `${NOTE_KIND[n.kind] ? NOTE_KIND[n.kind][1] : "Note"}${n.resolved && n.kind !== "note" ? " (resolved)" : ""}: ${n.text} (${n.by})`).join(" | ");
+function notesLine(l){
+  const N = notesOf(l), o = openQ(l), last = N[N.length - 1];
+  return `<div class="lnotes">${o.length ? `<span class="nq open">⚠ ${o.length} open quer${o.length === 1 ? "y" : "ies"}</span>` : ""}${last ? `<span class="nlast">${NOTE_KIND[last.kind][0]} ${esc(last.text.length > 70 ? last.text.slice(0, 70) + "…" : last.text)} <i>· ${esc(last.by)}</i></span>` : ""}<button type="button" class="nbtn" data-note="${l.id}">${N.length ? `💬 Notes (${N.length})` : "💬 Add note"}</button></div>`;
+}
+function noteDialog(id){
+  const l = S.data.learners.find(x => x.id === id); if (!l) return;
+  const draw = () => { const L2 = S.data.learners.find(x => x.id === id) || l; const N = notesOf(L2).slice().reverse();
+    return N.length ? N.map(n => `<div class="nrow ${n.resolved ? "res" : "open"} k-${n.kind}"><div><b>${NOTE_KIND[n.kind][0]} ${NOTE_KIND[n.kind][1]}</b>${n.kind !== "note" ? (n.resolved ? ` <span class="tag">Resolved${n.resolved_by ? " by " + esc(n.resolved_by) : ""}</span>` : ` <span class="tag red">Open</span>`) : ""}<div>${esc(n.text)}</div><div class="small muted">${esc(n.by)} · ${fmtTime(n.at)}</div></div>${!n.resolved && can("comment") ? `<button class="btn ghost sm" data-nres="${n.id}" type="button">✓ Resolved</button>` : ""}</div>`).join("") : `<p class="small muted">No notes yet.</p>`; };
+  modal(`<h3>Notes for ${esc(fullName(l))}</h3><p class="small muted">${esc(l.programme || "")}${l.seat ? " · Seat " + esc(l.seat) : ""}. Notes follow this graduate through every tab and print on the graduate list.</p>
+    <div id="nlist">${draw()}</div>
+    ${can("comment") ? `<label class="lbl">Add a note</label><div class="row" style="gap:6px;flex-wrap:wrap"><select id="nk" style="max-width:210px"><option value="name">✏️ Name correction on certificate</option><option value="query">⚠ Query (needs follow-up)</option><option value="note">💬 General note</option></select>
+      <input type="text" id="nt" maxlength="500" placeholder="e.g. Surname spelt Mokoena, should be Mokwena" style="flex:1;min-width:200px"></div>` : `<p class="small muted">View only.</p>`}
+    <div class="row" style="margin-top:12px"><span class="spacer"></span><button class="btn ghost" id="mc">Close</button>${can("comment") ? `<button class="btn gold" id="mo">Save note</button>` : ""}</div><div id="me"></div>`,
+    (m, close) => { $("#mc", m).onclick = close;
+      const wireRes = () => $$("[data-nres]", m).forEach(b => b.onclick = async () => { b.disabled = true; if (await act("grad_note", {p_learner:id, p_text:null, p_kind:null, p_resolve:b.dataset.nres}, "Marked as resolved")){ $("#nlist", m).innerHTML = draw(); wireRes(); } });
+      wireRes();
+      const save = async () => { const t = $("#nt", m).value.trim(); if (!t) return $("#nt", m).focus(); $("#mo", m).disabled = true;
+        if (await act("grad_note", {p_learner:id, p_text:t, p_kind:$("#nk", m).value, p_resolve:null}, "Note saved")){ $("#nt", m).value = ""; $("#nlist", m).innerHTML = draw(); wireRes(); }
+        $("#mo", m).disabled = false; };
+      const mo = $("#mo", m); if (mo){ mo.onclick = save; $("#nt", m).addEventListener("keydown", e => { if (e.key === "Enter") save(); }); setTimeout(() => $("#nt", m).focus(), 50); } });
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-note]"); if (b && S.data){ e.preventDefault(); noteDialog(b.dataset.note); } });
 function lInfo(l, extra=""){
   return `<div class="info"><div class="nm">${hl(fullName(l))} ${seatTag(l)}</div>
-    <div class="small muted">NQF ${esc(l.nqf ?? "?")} · ${hl(l.programme||"")}${l.client?" · "+hl(l.client):""}${l.pm?" · PM: "+hl(l.pm):""}${l.learner_ref && qWords().some(w => String(l.learner_ref).toLowerCase().includes(w)) ? " · ID " + hl(l.learner_ref) : ""}</div>${extra}</div>`;
+    <div class="small muted">NQF ${esc(l.nqf ?? "?")} · ${hl(l.programme||"")}${l.client?" · "+hl(l.client):""}${l.pm?" · PM: "+hl(l.pm):""}${l.learner_ref && qWords().some(w => String(l.learner_ref).toLowerCase().includes(w)) ? " · ID " + hl(l.learner_ref) : ""}</div>${extra}${notesLine(l)}</div>`;
 }
 function listOut(el, list, rowFn, empty){
   const shown = list.slice(0, 150);
@@ -1646,8 +1679,8 @@ function viewGrads(){
     $("#grPdf").onclick = async () => { const b = $("#grPdf"); b.disabled = true; b.textContent = "Building…"; await reportPdf(`Graduate list ${S.data.event.name} ${new Date().toISOString().slice(0,10)}.pdf`.replace(/[\\/:*?"<>|]/g, ""), buildReport("list")); b.disabled = false; b.textContent = "⬇ Graduate list (PDF)"; };
     $("#grCsv").onclick = () => {
       const G = applyF(S.data.learners.filter(l => l.cert_issued)).sort((a,b) => progKey(a).localeCompare(progKey(b)) || new Date(a.cert_at) - new Date(b.cert_at));
-      const head = ["Programme","NQF","Position","First name","Middle name","Surname","Client","Project manager","Seat","Arrived","Robe","Crossed the stage","Certificate issued","Certificate by"];
-      const pos = {}; const rows = G.map(l => { const k = progKey(l); pos[k] = (pos[k]||0) + 1; return [l.programme, l.nqf, pos[k], l.first_name, l.middle_name, l.surname, l.client, l.pm, l.seat, fmtTime(l.arrived_at), l.robe_skip ? "Own robe" : fmtTime(l.robe_at), fmtTime(l.stage_at), fmtTime(l.cert_at), l.cert_by]; });
+      const head = ["Programme","NQF","Position","First name","Middle name","Surname","Client","Project manager","Seat","Arrived","Robe","Crossed the stage","Certificate issued","Certificate by","Open queries","Notes"];
+      const pos = {}; const rows = G.map(l => { const k = progKey(l); pos[k] = (pos[k]||0) + 1; return [l.programme, l.nqf, pos[k], l.first_name, l.middle_name, l.surname, l.client, l.pm, l.seat, fmtTime(l.arrived_at), l.robe_skip ? "Own robe" : fmtTime(l.robe_at), fmtTime(l.stage_at), fmtTime(l.cert_at), l.cert_by, openQ(l).length || "", notesTxt(l)]; });
       const csv = [head, ...rows].map(r => r.map(v => `"${String(v ?? "").replace(/"/g,'""')}"`).join(",")).join("\r\n");
       saveFile(`Graduates ${S.data.event.name} ${new Date().toISOString().slice(0,10)}.csv`.replace(/[\\/:*?"<>|]/g, ""), "﻿" + csv);
     };
@@ -2030,7 +2063,7 @@ function gradListHTML(L){
   return keys.map(k => { const [nq, prog] = k.split("|"); const items = g[k].sort((a,b) => new Date(a.cert_at||0) - new Date(b.cert_at||0));
     const tot = L.filter(l => progKey(l) === k).length;
     return `<section class="gl"><div class="glh"><span class="gln">${esc(prog)}</span><span class="glq">NQF ${nq === "099" ? "?" : +nq}</span><span class="sp"></span><span class="glc">${items.length} graduated<small> of ${tot}</small></span></div>
-      <div class="glg">${(() => { const cards = items.map((l, i) => `<div class="gli"><span class="gnum">${i+1}</span><div><b>${esc(fullName(l))}</b><small>${esc([l.client, l.seat ? "Seat " + l.seat : "", "🎓 " + fmtTime(l.cert_at)].filter(Boolean).join(" · "))}</small></div></div>`);
+      <div class="glg">${(() => { const cards = items.map((l, i) => `<div class="gli"><span class="gnum">${i+1}</span><div><b>${esc(fullName(l))}</b><small>${esc([l.client, l.seat ? "Seat " + l.seat : "", "🎓 " + fmtTime(l.cert_at)].filter(Boolean).join(" · "))}</small>${notesOf(l).filter(n => n.kind !== "note" || true).map(n => `<em class="gq ${n.resolved ? "r" : "o"}">${NOTE_KIND[n.kind][0]} ${esc(n.text)}${n.kind !== "note" ? (n.resolved ? " · resolved" : " · OPEN") : ""}</em>`).join("")}</div></div>`);
         const rows = []; for (let r = 0; r < cards.length; r += 3) rows.push(`<div class="glr">${cards.slice(r, r + 3).join("")}${"<div></div>".repeat(Math.max(0, 3 - cards.slice(r, r + 3).length))}</div>`); return rows.join(""); })()}</div></section>`; }).join("");
 }
 const GL_CSS = `.gl{margin:14px 0 18px;break-inside:auto}.glh{display:flex;align-items:center;gap:10px;background:linear-gradient(90deg,#081a45,#1d3fae);color:#fff;border-radius:12px 12px 0 0;padding:10px 14px;break-after:avoid;page-break-after:avoid}
@@ -2040,6 +2073,7 @@ const GL_CSS = `.gl{margin:14px 0 18px;break-inside:auto}.glh{display:flex;align
     .glg{border:1px solid #e3e8f3;border-top:0;border-radius:0 0 12px 12px;padding:10px;background:#fbfcff}
     .gli{display:flex;gap:8px;align-items:center;background:#fff;border:1px solid #e9edf6;border-left:3px solid #d4af37;border-radius:8px;padding:6px 8px;break-inside:avoid;page-break-inside:avoid}
     .gli b{display:block;font-size:12.5px;line-height:1.25}.gli small{display:block;font-size:10px;color:#5b6785;margin-top:1px}
+    .gq{display:block;font-style:normal;font-size:9.5px;margin-top:3px;padding:2px 5px;border-radius:5px;line-height:1.3}.gq.o{background:#fde8e6;color:#9b1c14;font-weight:700}.gq.r{background:#eef2fb;color:#35457a}
     .gnum{flex:0 0 auto;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#eef2fb;color:#1d3fae;font-weight:800;font-size:11px}`;
 const SO_CSS = `.sok{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px}.sok div{background:#f6f8fd;border-radius:12px;padding:10px 14px;border-top:3px solid #d4af37}.sok b{display:block;font-size:24px;color:#081a45}.sok span{font-size:11px;color:#5b6785;text-transform:uppercase;letter-spacing:.4px}
     .sog{margin:18px 0 6px;break-inside:auto}.sot{width:100%;border-collapse:separate;border-spacing:0;border:1px solid #e3e8f3;border-top:0;border-radius:0 0 12px 12px;overflow:hidden;font-size:13px}
@@ -2126,6 +2160,7 @@ function buildReport(mode){
     <div class="cover"><img src="${document.querySelector('.top img').src}" alt="Camblish crest"><div class="tag">${stageMode ? "Stage order · for the MC" : listOnly ? "Graduate list" : "Graduation day report"}</div><h1>${esc(d.event.name)}</h1>
       <p>${esc([dateTxt, d.event.venue].filter(Boolean).join(" · "))}</p><p style="font-size:12px">Prepared ${new Date().toLocaleString("en-ZA",{day:"numeric",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"})} by ${esc(S.me)}${fActive() ? " · filtered view" : ""}</p></div>
     <div class="in">${stageMode ? stageOrderHTML(L) : listOnly ? `
+      ${(() => { const Q = L.filter(l => l.cert_issued && openQ(l).length); return Q.length ? `<div class="story" style="border-left-color:#b3261e;background:#fdf1ef"><b>⚠ ${Q.length} graduate${Q.length === 1 ? " has" : "s have"} an open query</b> (marked in red below): ${Q.map(l => esc(fullName(l))).join(", ")}.</div>` : ""; })()}
       <div class="story">${J.cert} graduate${J.cert === 1 ? "" : "s"} received their certificates${J.total ? ` (${Math.round(100*J.cert/J.total)}% of the ${J.total} expected)` : ""}, listed by programme in the order they were capped.</div>
       ${gradListHTML(L)}` : `
       <div class="story">${story} ${peak}</div>
@@ -2137,7 +2172,7 @@ function buildReport(mode){
       <h2 class="newpage">Team and tasks</h2><div class="kp"><div><b>${tDone}/${T.length}</b><span>Tasks completed</span></div><div><b>${roads}</b><span>Roadblocks raised</span></div><div><b>${anns.length}</b><span>Announcements</span></div><div><b>${new Set(d.feed.map(f => f.actor)).size}</b><span>Team members active</span></div></div>
       ${T.filter(t => t.status !== "Completed").length ? `<p style="font-size:13px"><b>Still open:</b> ${T.filter(t => t.status !== "Completed").map(t => esc(t.title) + ` (${esc(t.status)})`).join("; ")}</p>` : ""}
       ${anns.length ? `<h2>Announcements</h2>${anns.map(a => `<div class="ann"><small>${fmt(a.created_at)} · ${esc(a.actor)}</small><br>${esc(a.text)}</div>`).join("")}` : ""}
-      <h2 class="newpage">Graduate list</h2>${gradListHTML(L)}`}
+      <h2 class="newpage">Graduate list</h2>${(() => { const Q = L.filter(l => l.cert_issued && openQ(l).length); return Q.length ? `<div class="story" style="border-left-color:#b3261e;background:#fdf1ef"><b>⚠ ${Q.length} open quer${Q.length === 1 ? "y" : "ies"}:</b> ${Q.map(l => esc(fullName(l))).join(", ")}.</div>` : ""; })()}${gradListHTML(L)}`}
       <div class="foot">Camblish Training Institute · Taking the Lead, Shaping the Future<br><span class="c">Designed and developed by Eddie Bila</span></div>
     </div></div></body></html>`;
 }
@@ -2188,7 +2223,7 @@ function viewStage(){
       const gg = l._late ? "Late arrivals (end of ceremony)" : groupOf(l);
       if (gg !== g){ g = gg; const inG = P.filter(x=>(x._late ? "Late arrivals (end of ceremony)" : groupOf(x))===gg); html += `<div class="group-h">${esc(gg)}<span class="spacer"></span><span class="tag">${inG.length} present</span>${notYetBy[gg]?`<span class="tag">${notYetBy[gg]} not yet arrived</span>`:""}</div>`; }
       html += `<div class="lrow ${l.stage_status}"><span class="seq" style="width:auto;min-width:38px;padding:0 6px;border-radius:19px">${l.stage_status==="done"?"✓ "+l._code:l._code}</span>
-        <div class="info"><div class="nm">${hl(fullName(l))} ${seatTag(l)}</div><div class="small muted">${l._late?esc(l.programme||"")+" · ":""}${esc(l.client||"")}${l.cohort?" · "+esc(l.cohort):""} · arrived ${fmtTime(l.arrived_at)}</div></div>
+        <div class="info"><div class="nm">${hl(fullName(l))} ${seatTag(l)}</div><div class="small muted">${l._late?esc(l.programme||"")+" · ":""}${esc(l.client||"")}${l.cohort?" · "+esc(l.cohort):""} · arrived ${fmtTime(l.arrived_at)}</div>${notesLine(l)}</div>
         ${l._late?`<span class="tag red">Late arrival</span>`:""}
         ${l.stage_status==="called"?`<span class="tag gold">On stage</span>`:""}
         <span class="noprint pacts">${tagBtn(l)}${l.stage_status==="waiting"?`<button class="sbtn p" data-sg="${l.id}" data-s="called">Call</button>`:""}
@@ -2395,8 +2430,8 @@ async function importPreview(e){
 }
 function exportCsv(){
   const P = stageList(); const seq = new Map(P.map(l=>[l.id,l._seq]));
-  const head = ["Stage order","Seat","First name","Middle name","Surname","Programme","NQF","Client","Project manager","Region","SETA","Attendance","Arrived","Checked in by","Robe issued","Robe time","Stage status","Stage time","Certificate issued","Certificate time"];
-  const rows = S.data.learners.slice().sort(orderKey).map(l => [seq.get(l.id)||"", l.seat||"", l.first_name, l.middle_name, l.surname, l.programme, l.nqf, l.client, l.pm, l.region, l.seta, l.status, fmtTime(l.arrived_at), l.checked_by, l.robe_issued?(l.robe_skip?"Own robe":"Yes"):"", fmtTime(l.robe_at), l.stage_status, fmtTime(l.stage_at), l.cert_issued?"Yes":"", fmtTime(l.cert_at)]);
+  const head = ["Stage order","Seat","First name","Middle name","Surname","Programme","NQF","Client","Project manager","Region","SETA","Attendance","Arrived","Checked in by","Robe issued","Robe time","Stage status","Stage time","Certificate issued","Certificate time","Open queries","Notes"];
+  const rows = S.data.learners.slice().sort(orderKey).map(l => [seq.get(l.id)||"", l.seat||"", l.first_name, l.middle_name, l.surname, l.programme, l.nqf, l.client, l.pm, l.region, l.seta, l.status, fmtTime(l.arrived_at), l.checked_by, l.robe_issued?(l.robe_skip?"Own robe":"Yes"):"", fmtTime(l.robe_at), l.stage_status, fmtTime(l.stage_at), l.cert_issued?"Yes":"", fmtTime(l.cert_at), openQ(l).length || "", notesTxt(l)]);
   const csv = [head, ...rows].map(r => r.map(v => `"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\r\n");
   saveFile(`Graduation attendance ${new Date().toISOString().slice(0,10)}.csv`, "\ufeff" + csv);
 }
