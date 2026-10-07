@@ -412,6 +412,7 @@ nav.tabs .badge.green{background:var(--ok);color:#fff}
 .feed-item.mine{background:linear-gradient(90deg,#fffaf0,#fff)}
 #capSpin{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:radial-gradient(circle at 50% 40%,rgba(29,63,174,.92),rgba(8,26,69,.97));perspective:900px;transition:opacity .35s}
 #capSpin.out{opacity:0}
+.sgh{cursor:pointer;user-select:none}.sgh .chev{display:inline-block;margin-right:8px;transition:transform .15s}.sgh.closed .chev{transform:rotate(-90deg)}.sgh:hover{filter:brightness(1.12)}
 .lnotes{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:4px;font-size:12px}
 .nbtn{background:none;border:1px dashed #9db3ec;color:#1d3fae;border-radius:99px;padding:1px 9px;font-size:11.5px;font-weight:700;cursor:pointer}.nbtn:hover{background:#eef2fb}
 .nq.open{background:#fde8e6;color:#b3261e;border-radius:99px;padding:1px 8px;font-weight:800;font-size:11px}
@@ -562,7 +563,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202610072112";
+const BUILD = "202610072140";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -752,9 +753,10 @@ function popSound(){
     [1046.5, 1318.5, 1568, 2093].forEach((fq, i) => bell(c, out, fq, t0 + .7 + i * .09, .9, .32));   // happy chime after the pops
   } catch {}
 }
-function celebrate(){
+function celebrate(quiet){
   popSound();
-  if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return toast("🎓 Welcome, " + (S.me || ""), "gold big");
+  if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return quiet ? null : toast("🎓 Welcome, " + (S.me || ""), "gold big");
+  const old = $("#confetti"); if (old) old.remove();
   const cv = document.createElement("canvas"); cv.id = "confetti"; document.body.appendChild(cv);
   const ctx = cv.getContext("2d"), dpr = Math.min(2, window.devicePixelRatio || 1);
   const size = () => { cv.width = innerWidth * dpr; cv.height = innerHeight * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }; size();
@@ -774,7 +776,7 @@ function celebrate(){
     if (t < 4.8) requestAnimationFrame(frame); else cv.remove();
   };
   requestAnimationFrame(frame);
-  toast("🎓 Welcome, " + (S.me || "") + "!", "gold big");
+  if (!quiet) toast("🎓 Welcome, " + (S.me || "") + "!", "gold big");
 }
 
 /* ---------- modal ---------- */
@@ -943,13 +945,22 @@ function presDialog(){
   presLoad();
 }
 async function hardRefresh(){
+  // refreshes only this screen: newest app version, your access, the live event and every number. Nobody else is told.
   const rf = $("#hRf"); if (rf){ rf.disabled = true; rf.classList.add("spinning"); }
   try {
+    try { const t = await (await fetch(location.pathname + "?nc=" + Date.now(), {cache:"no-store"})).text(); const m = t.match(/const BUILD = "(\d+)"/);
+      if (m && m[1] > BUILD){ try { sessionStorage.setItem("hub_refreshed", "1"); } catch {} const u = new URL(location.href); u.searchParams.set("v", m[1]); location.replace(u.toString()); return; } } catch {}
+    try { const r = await rpc("hub_me", {p_token:S.pin}); S.user = r.user; S.me = r.user.name; S.events = r.events || S.events; } catch {}
     if (RT && RT.client && RT.ch){ try { RT.client.removeChannel(RT.ch); } catch {} }
     RT = null; rtConnect();
     pulling = false; pullAgain = false;
+    S._setDrawn = null; S._usersLoaded = false; S.replyOpen = null;
+    ["#fdView","#setView","#usView"].forEach(sel => { const el = $(sel); if (el) el.remove(); });
+    main.innerHTML = "";
     await pull("full");
-    toast(S.ok ? "Refreshed. Everything is up to date." : "Still can't reach the server. Check the internet connection.", S.ok ? "green" : "red");
+    render(); liveBadge(); presLoad();
+    if (S.ok){ celebrate(true); toast("✨ Refreshed. Your screen is fully up to date.", "green"); }
+    else toast("Still can't reach the server. Check the internet connection.", "red");
   } finally { const b = $("#hRf"); if (b){ b.disabled = false; b.classList.remove("spinning"); } }
 }
 setInterval(liveBadge, 5000);
@@ -1098,6 +1109,7 @@ async function enterApp(){
   liveBadge();
   main.innerHTML = `<div class="card"><p class="muted">Connecting…</p></div>`;
   await pull(true); startSync(); presStart();
+  try { if (sessionStorage.getItem("hub_refreshed")){ sessionStorage.removeItem("hub_refreshed"); setTimeout(() => { celebrate(true); toast("✨ Updated to the newest version and refreshed.", "green"); }, 400); } } catch {}
   if (S.celebrate){ S.celebrate = false; capSpin(false); if (S.tab !== "overview") setTab("overview"); try { history.replaceState(null, "", "?e=" + CODE + "#overview"); } catch {} celebrate(); }
 }
 
@@ -2244,10 +2256,13 @@ function viewStage(){
   if (!PF.length && P.length) html += `<div class="empty">No graduate in the line matches these filters.</div>`;
   else if (!P.length) html += `<div class="empty">Nobody in the line yet. Graduates appear here once their robe is issued.</div>`;
   else {
-    let g = null; html += `<div class="list">`;
+    let g = null; const scol = S.f.collapsed.stage = S.f.collapsed.stage || new Set(); const searching = qWords().length > 0;
+    const gOf = x => x._late ? "Late arrivals (end of ceremony)" : groupOf(x); const allG = [...new Set(PF.map(gOf))];
+    html += `<div class="grp-tools small noprint"><span class="muted">${allG.length} programme${allG.length === 1 ? "" : "s"} · ${PF.length} in the line</span><span class="spacer"></span><button class="lnk" data-sgall="open" type="button">Expand all</button><button class="lnk" data-sgall="close" type="button">Collapse all</button></div><div class="list">`;
     PF.forEach(l => {
-      const gg = l._late ? "Late arrivals (end of ceremony)" : groupOf(l);
-      if (gg !== g){ g = gg; const inG = P.filter(x=>(x._late ? "Late arrivals (end of ceremony)" : groupOf(x))===gg); html += `<div class="group-h">${esc(gg)}<span class="spacer"></span><span class="tag">${inG.length} present</span>${notYetBy[gg]?`<span class="tag">${notYetBy[gg]} not yet arrived</span>`:""}</div>`; }
+      const gg = gOf(l); const closed = scol.has(gg) && !searching;
+      if (gg !== g){ g = gg; const inG = P.filter(x=>gOf(x)===gg); const dn = inG.filter(x => x.stage_status === "done").length; html += `<div class="group-h sgh${closed ? " closed" : ""}" data-sgk="${esc(gg)}" role="button" tabindex="0" aria-expanded="${!closed}"><span class="chev" aria-hidden="true">▾</span>${esc(gg)}<span class="spacer"></span><span class="tag">${dn} of ${inG.length} crossed</span><span class="tag">${inG.length} present</span>${notYetBy[gg]?`<span class="tag">${notYetBy[gg]} not yet arrived</span>`:""}</div>`; }
+      if (closed) return;
       html += `<div class="lrow ${l.stage_status}"><span class="seq" style="width:auto;min-width:38px;padding:0 6px;border-radius:19px">${l.stage_status==="done"?"✓ "+l._code:l._code}</span>
         <div class="info"><div class="nm">${hl(fullName(l))} ${seatTag(l)}</div><div class="small muted">${l._late?esc(l.programme||"")+" · ":""}${esc(l.client||"")}${l.cohort?" · "+esc(l.cohort):""} · arrived ${fmtTime(l.arrived_at)}</div>${notesLine(l)}</div>
         ${l._late?`<span class="tag red">Late arrival</span>`:""}
@@ -2262,6 +2277,8 @@ function viewStage(){
   const keepQ = document.activeElement && document.activeElement.dataset && document.activeElement.dataset.fk === "q";
   main.innerHTML = html; putFlow("stage"); wireTags(main); wireBanner(); wireFilterBar(() => { const pos = $(".fbar [data-fk=q]").selectionStart; viewStage(); const q = $(".fbar [data-fk=q]"); if (q && S.f.L.q){ q.focus(); try { q.setSelectionRange(pos, pos); } catch {} } });
   if (keepQ){ const q = $(".fbar [data-fk=q]"); if (q){ q.focus(); q.setSelectionRange(q.value.length, q.value.length); } }
+  $$("[data-sgk]", main).forEach(h => { const tog = () => { const k = h.dataset.sgk, c = S.f.collapsed.stage; c.has(k) ? c.delete(k) : c.add(k); viewStage(); }; h.onclick = tog; h.onkeydown = e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); tog(); } }; });
+  $$("[data-sgall]", main).forEach(b => b.onclick = () => { const c = S.f.collapsed.stage = S.f.collapsed.stage || new Set(); if (b.dataset.sgall === "open") c.clear(); else $$("[data-sgk]", main).forEach(h => c.add(h.dataset.sgk)); viewStage(); });
   const pat = $("#printAllTags"); if (pat) pat.onclick = () => { if (P.length && confirm(`Print ${P.length} name tags?`)) printTags(P); };
   $$(".stiles [data-go]", main).forEach(b => b.onclick = () => setTab(b.dataset.go));
   roLock();
