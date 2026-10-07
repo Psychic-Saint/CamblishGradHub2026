@@ -563,7 +563,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202610072140";
+const BUILD = "202610072145";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -2251,9 +2251,12 @@ function viewStage(){
   </div>
   ${late.length?`<div class="err noprint" style="margin-top:12px">${late.length} late arrival${late.length>1?"s":""} after their programme had finished: ${late.map(l=>esc(fullName(l))).join(", ")}. They have been moved to the end of the ceremony.</div>`:""}
   <div class="card" style="margin-top:14px"><h2>Full stage order<span class="spacer"></span><button class="btn ghost sm noprint" id="printAllTags">Reprint all tags</button><button class="btn gold sm noprint" onclick="stageDialog()">🖨 Print for MC</button></h2>
-    <p class="small muted noprint">Graduates join this line once their robe is issued. Programmes go up by NQF level (lowest first); within a programme it is first come, first on stage. After crossing they move to the <b>Certificates</b> tab.</p>${filterBar()}<div id="stList">`;
-  const PF = applyF(P);
-  if (!PF.length && P.length) html += `<div class="empty">No graduate in the line matches these filters.</div>`;
+    <p class="small muted noprint">Graduates join this line once their robe is issued. Programmes go up by NQF level (lowest first); within a programme it is first come, first on stage. Once they cross they leave this list and move to the <b>Certificates</b> tab.</p>${filterBar()}<div id="stList">`;
+  const PFall = applyF(P), doneN = PFall.filter(l => l.stage_status === "done").length;
+  const PF = S.f.stShowDone || qWords().length ? PFall : PFall.filter(l => l.stage_status !== "done");
+  html += `<div class="row noprint" style="margin:8px 0 4px;gap:8px;flex-wrap:wrap"><button class="chip ${S.f.stShowDone ? "" : "on"}" data-stdone="0" type="button">Still to cross (${PFall.length - doneN})</button><button class="chip ${S.f.stShowDone ? "on" : ""}" data-stdone="1" type="button">Everyone, incl. crossed (${PFall.length})</button>${doneN ? `<span class="small muted">${doneN} who crossed are on the <a href="#" data-go2="certs">Certificates</a> tab.</span>` : ""}</div>`;
+  if (!PF.length && PFall.length && !S.f.stShowDone) html += `<div class="empty">🎓 Everyone in the line has crossed the stage. They are now on the Certificates tab.</div>`;
+  else if (!PF.length && P.length) html += `<div class="empty">No graduate in the line matches these filters.</div>`;
   else if (!P.length) html += `<div class="empty">Nobody in the line yet. Graduates appear here once their robe is issued.</div>`;
   else {
     let g = null; const scol = S.f.collapsed.stage = S.f.collapsed.stage || new Set(); const searching = qWords().length > 0;
@@ -2278,6 +2281,8 @@ function viewStage(){
   main.innerHTML = html; putFlow("stage"); wireTags(main); wireBanner(); wireFilterBar(() => { const pos = $(".fbar [data-fk=q]").selectionStart; viewStage(); const q = $(".fbar [data-fk=q]"); if (q && S.f.L.q){ q.focus(); try { q.setSelectionRange(pos, pos); } catch {} } });
   if (keepQ){ const q = $(".fbar [data-fk=q]"); if (q){ q.focus(); q.setSelectionRange(q.value.length, q.value.length); } }
   $$("[data-sgk]", main).forEach(h => { const tog = () => { const k = h.dataset.sgk, c = S.f.collapsed.stage; c.has(k) ? c.delete(k) : c.add(k); viewStage(); }; h.onclick = tog; h.onkeydown = e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); tog(); } }; });
+  $$("[data-stdone]", main).forEach(b => b.onclick = () => { S.f.stShowDone = b.dataset.stdone === "1"; viewStage(); });
+  $$("[data-go2]", main).forEach(a => a.onclick = e => { e.preventDefault(); setTab(a.dataset.go2); });
   $$("[data-sgall]", main).forEach(b => b.onclick = () => { const c = S.f.collapsed.stage = S.f.collapsed.stage || new Set(); if (b.dataset.sgall === "open") c.clear(); else $$("[data-sgk]", main).forEach(h => c.add(h.dataset.sgk)); viewStage(); });
   const pat = $("#printAllTags"); if (pat) pat.onclick = () => { if (P.length && confirm(`Print ${P.length} name tags?`)) printTags(P); };
   $$(".stiles [data-go]", main).forEach(b => b.onclick = () => setTab(b.dataset.go));
