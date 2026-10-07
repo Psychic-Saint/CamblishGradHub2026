@@ -539,7 +539,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202610072023";
+const BUILD = "202610072050";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -2122,7 +2122,7 @@ function buildReport(mode){
   const perGrad = st.length > 1 ? Math.round((st[st.length-1]-st[0]) / 1000 / (st.length-1)) : 0;
   const dateTxt = d.event.date ? new Date(d.event.date).toLocaleDateString("en-ZA",{weekday:"long",day:"numeric",month:"long",year:"numeric"}) : "";
   const groupT = key => { const g = {}; L.forEach(l => { const k = l[key] || "Not set"; (g[k] = g[k] || []).push(l); }); return Object.entries(g).sort((a,b)=>b[1].length-a[1].length); };
-  const tbl = (title, key) => `<h2>${title}</h2><table><thead><tr><th>${title.replace("By ","")}</th><th>Graduates</th><th>Arrived</th><th>Robed</th><th>Crossed</th><th>Certificates</th><th>Attendance</th></tr></thead><tbody>
+  const tbl = (title, key, c) => `<h2>${title}</h2><table${c ? ' class="cmp"' : ""}><thead><tr><th>${title.replace("By ","")}</th><th>${c ? "Total" : "Graduates"}</th><th>Arrived</th><th>Robed</th><th>Crossed</th><th>${c ? "Certs" : "Certificates"}</th><th>${c ? "Attend." : "Attendance"}</th></tr></thead><tbody>
     ${groupT(key).map(([k,G]) => { const j = journey(G); return `<tr><td>${esc(k)}</td><td>${j.total}</td><td>${j.arrived}</td><td>${j.robed}</td><td>${j.crossed}</td><td>${j.cert}</td><td><span class="mb"><i style="width:${pct(j.arrived,j.total)}%"></i></span> ${pct(j.arrived,j.total)}%</td></tr>`; }).join("")}</tbody></table>`;
   const anns = d.feed.filter(f => f.kind === "announcement").slice().reverse();
   const roads = d.feed.filter(f => f.kind === "roadblock").length;
@@ -2134,7 +2134,8 @@ function buildReport(mode){
   const css = `@page{size:A4 landscape;margin:9mm}*{box-sizing:border-box}body{font-family:Montserrat,"Segoe UI",Arial,sans-serif;color:#0d1b3e;margin:0;background:#eef2fb}
     .page{max-width:1100px;margin:0 auto;background:#fff;padding:0 0 30px;box-shadow:0 10px 40px -20px rgba(8,26,69,.4)}
     .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}.two h2{margin-top:22px}
-    .two table{font-size:11px;table-layout:fixed}.two th{font-size:9.5px;padding:6px 4px;letter-spacing:.2px}.two td{padding:5px 4px;word-wrap:break-word}.two td:first-child,.two th:first-child{width:30%}.two .mb{width:34px}
+    .two table{font-size:11px;table-layout:fixed}.two th{font-size:8.5px;padding:6px 3px;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.two td{padding:5px 3px;word-wrap:break-word}.two td:first-child,.two th:first-child{width:31%}
+    .two th:nth-child(n+2),.two td:nth-child(n+2){text-align:center}.two th:last-child,.two td:last-child{width:19%;white-space:nowrap}.two .mb{width:26px;height:6px;margin-right:3px}
     .newpage{page-break-before:always;break-before:page;margin-top:0!important;padding-top:4px}
     .cover{background:linear-gradient(135deg,#081a45,#1d3fae);color:#fff;padding:34px 40px 30px;position:relative;overflow:hidden}
     .cover:after{content:"";position:absolute;right:-60px;top:-40px;width:260px;height:260px;border:2px solid rgba(212,175,55,.5);transform:rotate(30deg)}
@@ -2168,7 +2169,7 @@ function buildReport(mode){
       <div class="two"><div><h2>The journey through the day</h2>${funnel(J)}</div><div><h2>Arrivals at registration</h2>${arrivalsChart(L, 520, 125)}</div></div>
       <div class="kp"><div><b>${fmt(arr[0])}</b><span>First arrival</span></div><div><b>${fmt(arr[arr.length-1])}</b><span>Last arrival</span></div><div><b>${st.length ? fmt(st[0]) : "–"}</b><span>First graduate on stage</span></div><div><b>${stageMins ? stageMins + " min" : "–"}</b><span>Time on stage${perGrad ? ` · ${perGrad}s each` : ""}</span></div></div>
       <h2>Progress by programme</h2>${progBars(L, 80)}
-      <div class="newpage">${tbl("By programme","programme")}</div><div class="two"><div>${tbl("By client","client")}</div><div>${tbl("By project manager","pm")}</div></div>
+      <div class="newpage">${tbl("By programme","programme")}</div><div class="two"><div>${tbl("By client","client",1)}</div><div>${tbl("By project manager","pm",1)}</div></div>
       <h2 class="newpage">Team and tasks</h2><div class="kp"><div><b>${tDone}/${T.length}</b><span>Tasks completed</span></div><div><b>${roads}</b><span>Roadblocks raised</span></div><div><b>${anns.length}</b><span>Announcements</span></div><div><b>${new Set(d.feed.map(f => f.actor)).size}</b><span>Team members active</span></div></div>
       ${T.filter(t => t.status !== "Completed").length ? `<p style="font-size:13px"><b>Still open:</b> ${T.filter(t => t.status !== "Completed").map(t => esc(t.title) + ` (${esc(t.status)})`).join("; ")}</p>` : ""}
       ${anns.length ? `<h2>Announcements</h2>${anns.map(a => `<div class="ann"><small>${fmt(a.created_at)} · ${esc(a.actor)}</small><br>${esc(a.text)}</div>`).join("")}` : ""}
