@@ -421,7 +421,14 @@ nav.tabs .badge.green{background:var(--ok);color:#fff}
 button.ro,.btn.ro,.sbtn.ro{filter:blur(1.2px) grayscale(.6);opacity:.45;pointer-events:none;cursor:not-allowed}
 .ronote{background:#eef2fb;border:1px dashed #9db3ec;color:#1d3fae;border-radius:12px;padding:8px 12px;margin:0 0 12px;font-size:13px}
 .livebar{max-width:1150px;margin:10px auto 0;background:#fff4d6;border:2px solid #d4af37;color:#5a4200;border-radius:12px;padding:8px 14px;font-size:13.5px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.evtile.live{border:2px solid #22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.15)}.livebadge{display:inline-block;background:#22c55e;color:#fff;border-radius:99px;padding:2px 9px;font-size:11px;font-weight:800;margin-bottom:6px}
+.evtile.islive{outline:2px solid #22c55e;outline-offset:-2px}
+.livebadge{display:inline-flex;align-items:center;gap:6px;color:#86efac;font-size:12px;font-weight:800;letter-spacing:.4px;margin-bottom:6px}
+.livebadge i{width:9px;height:9px;border-radius:50%;background:#22c55e;animation:livegreen 1.4s ease-out infinite}
+@keyframes livegreen{0%{box-shadow:0 0 0 0 rgba(34,197,94,.7)}80%,100%{box-shadow:0 0 0 8px rgba(34,197,94,0)}}
+.evlive{position:absolute;top:10px;right:10px;z-index:2;background:rgba(255,255,255,.14);color:#f3d27a;border:1px solid rgba(243,210,122,.5);border-radius:99px;padding:3px 10px;font-size:11px;font-weight:800;cursor:pointer}
+.evlive:hover{background:rgba(243,210,122,.25)}
+.evtile:has(.evlive) h3{padding-right:78px}
+.evtile[data-code]{padding-bottom:40px}
 .hbtn.pres{background:rgba(255,255,255,.12);font-weight:700;white-space:nowrap}
 .pd{display:inline-block;width:8px;height:8px;border-radius:50%;margin:0 3px 0 5px;vertical-align:0}.pd.on{background:#22c55e;box-shadow:0 0 0 2px rgba(34,197,94,.3)}.pd.aw{background:#f3c94a}.pd.of{background:#94a3b8}
 @media (max-width:700px){.hbtn.pres .pl{display:none}}
@@ -438,7 +445,12 @@ button.ro,.btn.ro,.sbtn.ro{filter:blur(1.2px) grayscale(.6);opacity:.45;pointer-
 .stiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:6px 0 12px}
 .stile{display:grid;grid-template-columns:auto 1fr;column-gap:8px;align-items:center;text-align:left;background:#fff;border:1px solid var(--line);border-left:4px solid var(--royal);border-radius:10px;padding:6px 10px;cursor:pointer;font:inherit;color:var(--ink);transition:transform .12s}
 .stile:hover{transform:translateY(-1px)}.stile b{grid-row:span 2;font-size:20px;line-height:1;color:var(--navy);min-width:22px}.stile span{font-weight:800;font-size:12px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.stile small{font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
-.stile.hot{border-left-color:var(--gold);background:linear-gradient(90deg,#fff8e1,#fff)}.stile.hot b{color:#8a6510}
+.stile.hot{position:relative;border:2px solid #d4af37;border-left:5px solid #b8901f;background:linear-gradient(100deg,#fbe7a6,#fff6d8 55%,#fffdf5);animation:onstage 1.8s ease-in-out infinite}
+.stile.hot b{color:#7a5a00}.stile.hot span{color:#5c4300}.stile.hot small{color:#5c4300;font-weight:800;font-size:11.5px}
+.stile.hot::after{content:"";position:absolute;top:8px;right:9px;width:9px;height:9px;border-radius:50%;background:#e11d48;box-shadow:0 0 0 0 rgba(225,29,72,.6);animation:livedot 1.4s ease-out infinite}
+@keyframes onstage{0%,100%{box-shadow:0 0 0 0 rgba(212,175,55,.0),0 6px 16px -14px rgba(8,26,69,.6)}50%{box-shadow:0 0 0 5px rgba(212,175,55,.35),0 6px 18px -10px rgba(184,144,31,.7)}}
+@keyframes livedot{0%{box-shadow:0 0 0 0 rgba(225,29,72,.6)}80%,100%{box-shadow:0 0 0 9px rgba(225,29,72,0)}}
+@media (prefers-reduced-motion: reduce){.stile.hot,.stile.hot::after{animation:none}}
 @media (max-width:860px){.stiles{grid-template-columns:repeat(2,minmax(0,1fr))}.stiles .stile:nth-child(3){grid-column:1/-1}}
 .fdgrid{display:flex;flex-direction:column}.fdgrid .annscreen{order:-1}
 .actscreen .feed-item{gap:8px;padding:6px 4px}.actscreen .feed-item .ic{width:24px;height:24px;font-size:12px}
@@ -539,7 +551,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202610072050";
+const BUILD = "202610072056";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -1048,9 +1060,9 @@ async function eventsView(){
   $("#evName").textContent = "Choose an event"; $("#evSub").textContent = "";
   const mgr = can("create_events");
   main.innerHTML = `<div class="card"><h2>Your events</h2><p class="muted small" style="margin:0 0 10px">Pick a graduation or alumni event to work on.</p>
-    <div class="evgrid">${S.events.map(e => `<div class="evtile${e.live ? " live" : ""}" data-code="${esc(e.code)}">${e.live ? `<span class="livebadge">● LIVE · everyone sees this</span>` : ""}<h3>${esc(e.name)}</h3>
+    <div class="evgrid">${S.events.map(e => `<div class="evtile${e.live ? " islive" : ""}" data-code="${esc(e.code)}">${e.live ? `<span class="livebadge" title="Everyone opens this event when they sign in"><i></i>Live</span>` : ""}<h3>${esc(e.name)}</h3>
       <div class="m">${e.date ? new Date(e.date).toLocaleDateString("en-ZA",{day:"numeric",month:"long",year:"numeric"}) : "Date to be confirmed"}${e.venue ? " · " + esc(e.venue) : ""}</div>
-      <div class="n">${e.learners} ALUMNI</div>${S.user && S.user.role === "admin" ? (e.live ? `<button class="btn ghost sm" data-live="" type="button" style="margin-top:8px">Stop being the live event</button>` : `<button class="btn gold sm" data-live="${esc(e.code)}" type="button" style="margin-top:8px">📌 Make this the live event</button>`) : ""}</div>`).join("")}
+      <div class="n">${e.learners} ALUMNI</div>${S.user && S.user.role === "admin" ? (e.live ? `<button class="evlive" data-live="" type="button" title="Stop being the live event">Unpin</button>` : `<button class="evlive" data-live="${esc(e.code)}" type="button" title="Everyone will open this event when they sign in">📌 Make live</button>`) : ""}</div>`).join("")}
       ${mgr ? `<div class="evtile new" id="newEv">+ New event</div>` : ""}</div>
     ${!S.events.length && !mgr ? `<div class="empty">No events yet. A manager needs to create one.</div>` : ""}</div>`;
   $$(".evtile[data-code]").forEach(t => t.onclick = e => { if (e.target.closest("[data-live]")) return; CODE = t.dataset.code; try { sessionStorage.setItem("hub_pick", CODE); } catch {} enterApp(); });
@@ -1979,7 +1991,7 @@ function stageTiles(J, cls=""){
   return `<div class="stiles ${cls}">
     ${tile("robes", J.robing, "Waiting for robes", "present, not robed yet")}
     ${tile("stage", J.line, "In the stage line", "robed, waiting to be called")}
-    ${tile("stage", J.onstage, "On stage now", nowOn.length ? esc(nowOn.map(fullName).join(", ")) : "nobody called yet", J.onstage > 0)}
+    ${tile("stage", J.onstage, J.onstage > 0 ? "On stage now · LIVE" : "On stage now", nowOn.length ? esc(nowOn.map(fullName).join(", ")) : "nobody called yet", J.onstage > 0)}
     ${tile("stage", J.crossed, "Crossed the stage", J.arrived ? Math.round(100*J.crossed/J.arrived) + "% of those present" : "nobody yet")}
     ${tile("certs", J.certDue, "Waiting for certificates", "crossed, not capped yet")}</div>`;
 }
