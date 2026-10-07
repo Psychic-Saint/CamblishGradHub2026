@@ -563,7 +563,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202610072145";
+const BUILD = "202610072200";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -2154,9 +2154,15 @@ function buildReport(mode){
   const fmt = ts => ts ? new Date(ts).toLocaleTimeString("en-ZA",{hour:"2-digit",minute:"2-digit"}) : "–";
   const pct = (a,b) => b ? Math.round(100*a/b) : 0;
   const tm = k => P.map(l => l[k]).filter(Boolean).map(x => new Date(x).getTime()).sort((a,b)=>a-b);
-  const arr = tm("arrived_at"), st = L.filter(l => l.stage_status === "done").map(l => new Date(l.stage_at).getTime()).filter(Boolean).sort((a,b)=>a-b);
-  const stageMins = st.length > 1 ? Math.round((st[st.length-1]-st[0])/60000) : 0;
-  const perGrad = st.length > 1 ? Math.round((st[st.length-1]-st[0]) / 1000 / (st.length-1)) : 0;
+  // keep only the main session: ignore stray times from rehearsals or other days (a gap of more than 90 minutes starts a new session)
+  const session = ts => { if (ts.length < 2) return {t:ts, dropped:0}; const segs = [[ts[0]]]; for (let i = 1; i < ts.length; i++){ if (ts[i] - ts[i-1] > 90*60000) segs.push([]); segs[segs.length-1].push(ts[i]); }
+    const best = segs.reduce((a, b) => b.length >= a.length ? b : a); return {t:best, dropped:ts.length - best.length}; };
+  const arrS = session(tm("arrived_at")), arr = arrS.t;
+  const stS = session(L.filter(l => l.stage_status === "done").map(l => new Date(l.stage_at).getTime()).filter(Boolean).sort((a,b)=>a-b)), st = stS.t;
+  const stageMins = st.length > 1 ? Math.max(1, Math.round((st[st.length-1]-st[0])/60000)) : 0;
+  const gaps = st.slice(1).map((x, i) => (x - st[i]) / 1000).filter(g => g > 0 && g < 600).sort((a,b)=>a-b);
+  const perGrad = gaps.length ? Math.round(gaps[Math.floor(gaps.length/2)]) : 0;
+  const dropNote = (stS.dropped || arrS.dropped) ? ` (${stS.dropped + arrS.dropped} time${stS.dropped + arrS.dropped === 1 ? "" : "s"} recorded outside the main session, e.g. a rehearsal, ${stS.dropped + arrS.dropped === 1 ? "was" : "were"} left out of the timings.)` : "";
   const dateTxt = d.event.date ? new Date(d.event.date).toLocaleDateString("en-ZA",{weekday:"long",day:"numeric",month:"long",year:"numeric"}) : "";
   const groupT = key => { const g = {}; L.forEach(l => { const k = l[key] || "Not set"; (g[k] = g[k] || []).push(l); }); return Object.entries(g).sort((a,b)=>b[1].length-a[1].length); };
   const tbl = (title, key, c) => `<h2>${title}</h2><table${c ? ' class="cmp"' : ""}><thead><tr><th>${title.replace("By ","")}</th><th>${c ? "Total" : "Graduates"}</th><th>Arrived</th><th>Robed</th><th>Crossed</th><th>${c ? "Certs" : "Certificates"}</th><th>${c ? "Attend." : "Attendance"}</th></tr></thead><tbody>
@@ -2167,7 +2173,7 @@ function buildReport(mode){
   const peak = (() => { if (arr.length < 2) return ""; const step = 900000, b = {}; arr.forEach(x => { const k = Math.floor(x/step)*step; b[k] = (b[k]||0)+1; }); const [k,v] = Object.entries(b).sort((a,b)=>b[1]-a[1])[0]; return `The busiest 15 minutes at registration were from ${fmt(+k)} to ${fmt(+k+step)}, with ${v} arrivals.`; })();
   const story = `${J.arrived} of ${J.total} graduates arrived (${pct(J.arrived,J.total)}%)${J.absent ? `, ${J.absent} were marked absent` : ""}. ${J.robed} received their robes, ${J.crossed} crossed the stage and ${J.cert} received their certificates.`
     + (arr.length ? ` Registration opened with the first arrival at ${fmt(arr[0])} and the last graduate checked in at ${fmt(arr[arr.length-1])}.` : "")
-    + (st.length > 1 ? ` The ceremony ran from ${fmt(st[0])} to ${fmt(st[st.length-1])}: ${stageMins} minute${stageMins===1?"":"s"} on stage, about ${perGrad} second${perGrad===1?"":"s"} per graduate.` : "");
+    + (st.length > 1 ? ` The ceremony ran from ${fmt(st[0])} to ${fmt(st[st.length-1])}: ${stageMins} minute${stageMins===1?"":"s"} on stage, typically about ${perGrad} second${perGrad===1?"":"s"} between graduates.` : "") + dropNote;
   const css = `@page{size:A4 landscape;margin:9mm}*{box-sizing:border-box}body{font-family:Montserrat,"Segoe UI",Arial,sans-serif;color:#0d1b3e;margin:0;background:#eef2fb}
     .page{max-width:1100px;margin:0 auto;background:#fff;padding:0 0 30px;box-shadow:0 10px 40px -20px rgba(8,26,69,.4)}
     .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}.two h2{margin-top:22px}
