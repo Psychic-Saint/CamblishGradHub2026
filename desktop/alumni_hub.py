@@ -216,17 +216,45 @@ class Bridge:
             return {"ok": False, "error": str(e)}
 
     def send_email(self, to, subject, body):
-        try:
-            import win32com.client
-            outlook = win32com.client.Dispatch("Outlook.Application")
-            mail = outlook.CreateItem(0)
-            mail.To = to
-            mail.Subject = subject
-            mail.Body = body
-            mail.Send()
-            return {"ok": True, "method": "outlook"}
-        except Exception:
-            pass
+        """Send through classic Outlook only when it is open on screen; otherwise open the default mail app (new Outlook, Mail) ready to send."""
+        def classic_visible():
+            try:
+                import ctypes
+                found = []
+                EnumWindows = ctypes.windll.user32.EnumWindows
+                GetClassNameW = ctypes.windll.user32.GetClassNameW
+                IsWindowVisible = ctypes.windll.user32.IsWindowVisible
+                proto = ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.c_void_p, ctypes.c_void_p)
+                def cb(h, _):
+                    buf = ctypes.create_unicode_buffer(64)
+                    GetClassNameW(h, buf, 64)
+                    if buf.value == "rctrl_renwnd32" and IsWindowVisible(h):   # classic Outlook main window
+                        found.append(h)
+                    return True
+                EnumWindows(proto(cb), 0)
+                return bool(found)
+            except Exception:
+                return False
+        if classic_visible():
+            result = {}
+            def worker():
+                try:
+                    import pythoncom, win32com.client
+                    pythoncom.CoInitialize()
+                    outlook = win32com.client.Dispatch("Outlook.Application")
+                    mail = outlook.CreateItem(0)
+                    mail.To = to
+                    mail.Subject = subject
+                    mail.Body = body
+                    mail.Send()
+                    result["ok"] = True
+                except Exception as e:
+                    result["err"] = str(e)
+            t = threading.Thread(target=worker, daemon=True)
+            t.start()
+            t.join(12)
+            if result.get("ok"):
+                return {"ok": True, "method": "outlook"}
         try:
             url = "mailto:%s?subject=%s&body=%s" % (urllib.parse.quote(to), urllib.parse.quote(subject), urllib.parse.quote(body))
             os.startfile(url)
