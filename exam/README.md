@@ -11,6 +11,9 @@ Author: Eddie Bila
 - Pre-exam checks: Chrome on Windows or macOS, single screen, camera, microphone, full-screen share, ID photo
 - Timed exam (default 3 hours plus 15 minutes grace, then automatic submission) with a built-in Python and SQL workspace
 - Live invigilation: screen, webcam and phone side camera per learner, automatic alerts and evidence
+- Every learner gets their own question and MCQ option order, reshuffled whenever they leave the exam screen or their phone moves
+- Auto-marking of every question against the memo (key figures, concepts and code techniques), confirmed by the assessor
+- Assessor, facilitator and moderator e-signatures, printed on learner and class reports
 - Marking against the memo, results release, branded emailed reports and PDF / CSV exports
 
 ## Layout

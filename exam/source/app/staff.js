@@ -120,6 +120,9 @@ on(/^#\/exam\/([\w-]+)$/, async (id) => {
   <div class="card"><h2>6. Invigilation settings</h2>
     <div class="grid2">
       <div class="field"><label>Evidence snapshot every (seconds)</label><input id="snap" type="number" min="10" max="300" value="${exam.settings.snapshot_sec}"></div>
+      <div class="field"><label>Question order</label>
+        <label class="check"><input type="checkbox" id="shuf" ${exam.settings.shuffle !== false ? 'checked' : ''}> Give every learner a different question order and MCQ option order</label>
+        <label class="check" style="margin-top:6px"><input type="checkbox" id="reshuf" ${exam.settings.reshuffle_on_flag !== false ? 'checked' : ''}> Reshuffle the questions each time a learner leaves the exam screen or their phone moves</label></div>
       <div class="field"><label>Phone camera</label><label class="check"><input type="checkbox" id="reqphone" ${exam.settings.require_phone ? 'checked' : ''}> Learners must pair their phone as a side camera</label></div>
     </div>
     <div class="field"><label>Only allow these learner emails (optional, one per line)</label><textarea id="allowed" placeholder="Leave empty to allow any registered learner">${esc((exam.settings.allowed_emails || []).join('\n'))}</textarea></div>
@@ -171,7 +174,7 @@ on(/^#\/exam\/([\w-]+)$/, async (id) => {
       opens_at: iso(v('opens')), closes_at: iso(v('closes')),
       instructions: v('instr').split('\n').map(s => s.trim()).filter(Boolean),
       paper: exam.paper, memo: exam.memo, datasets: exam.datasets,
-      settings: { ...exam.settings, snapshot_sec: +v('snap') || 30, require_phone: $('#reqphone').checked, allowed_emails: v('allowed').split(/[\s,;]+/).map(s => s.trim().toLowerCase()).filter(Boolean) },
+      settings: { ...exam.settings, snapshot_sec: +v('snap') || 30, require_phone: $('#reqphone').checked, shuffle: $('#shuf').checked, reshuffle_on_flag: $('#reshuf').checked, allowed_emails: v('allowed').split(/[\s,;]+/).map(s => s.trim().toLowerCase()).filter(Boolean) },
     };
     if (v('total')) o.total_marks = +v('total');
     if (exam.id) o.id = exam.id;

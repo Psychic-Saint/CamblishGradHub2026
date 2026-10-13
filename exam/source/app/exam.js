@@ -174,10 +174,12 @@ on(/^#\/preview\/([\w-]+)$/, async (examId) => {
     answers: {}, dirty: new Set(), cur: 0, events: [], seenWarn: new Set(), recentWarnText: {}, ended: false, cam: null, screen: null,
   });
   PyRT.start(() => { });
+  if (shuffleOn()) orderQuestions('preview:0');
   buildRoom();
   const sb2 = $('#submitBtn'); sb2.textContent = 'Exit preview'; sb2.onclick = () => go(isAdmin(S.user) ? '#/exam/' + examId : '#/home');
   $('.xbar .title small').textContent = 'Staff preview · nothing is saved · timer and proctoring are off';
-  $('#stat').innerHTML = '<span class="pill" style="background:var(--gold);color:var(--navy)">PREVIEW</span>';
+  $('#stat').innerHTML = '<span class="pill" style="background:var(--gold);color:var(--navy)">PREVIEW</span><button class="btn xs ghost" id="simShuf" style="background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.3)">Simulate: learner leaves screen</button>';
+  $('#simShuf').onclick = () => { XS.lastShuffle = 0; reshuffle('you left the exam screen'); };
   $('.side > div:first-child').innerHTML = '<h4>Learner camera</h4><div class="notice" style="font-size:13px">In the real exam the learner sees their own webcam here.</div>';
   $('#phoneStat').innerHTML = '<span class="pill">Paired by QR in the real exam</span>';
   loadDatasets();
@@ -213,6 +215,7 @@ async function startExam() {
   // merge local backup (answers typed while offline)
   const local = store.get('ans.' + XS.attempt.id) || {};
   Object.entries(local).forEach(([k, v]) => { if (!XS.answers[k] || (v.t || 0) > (XS.answers[k].t || 0)) { XS.answers[k] = { ...(XS.answers[k] || {}), ...v }; XS.dirty.add(k); } });
+  applyStoredOrder();
   S.lockNav = true;
   window.onbeforeunload = e => { if (!XS.ended) { e.preventDefault(); e.returnValue = ''; return ''; } };
   buildRoom();
@@ -225,6 +228,41 @@ async function startExam() {
 }
 
 const Q = () => XS.paper.questions;
+
+// ---------- question order: per-learner shuffle and reshuffle on integrity events ----------
+function seededRand(seed) { let h = 2166136261; for (const ch of String(seed)) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return () => { h += 0x6D2B79F5; let t = h; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+function shuffleArr(a, rnd) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+const shuffleOn = () => !XS.examMeta || !XS.examMeta.settings || XS.examMeta.settings.shuffle !== false;
+const reshuffleOn = () => !XS.examMeta || !XS.examMeta.settings || XS.examMeta.settings.reshuffle_on_flag !== false;
+function orderQuestions(seed) {
+  // keep sections in their order (A, B, C ...) and shuffle the questions and MCQ options inside each section
+  const rnd = seededRand(seed);
+  const qs = XS.original || (XS.original = XS.paper.questions.map(q => ({ ...q, options: q.options ? q.options.slice() : undefined })));
+  const secs = [], by = {};
+  qs.forEach(q => { const s = q.section || q.id[0]; if (!by[s]) { by[s] = []; secs.push(s); } by[s].push(q); });
+  XS.paper.questions = secs.flatMap(s => shuffleArr(by[s].map(q => ({ ...q, options: q.options ? shuffleArr(q.options.slice(), rnd) : undefined })), rnd));
+}
+function applyStoredOrder() {
+  if (!shuffleOn()) return;
+  const n = (store.get('shuf.' + XS.attempt.id) || 0);
+  XS.shuffleCount = n;
+  orderQuestions(XS.attempt.id + ':' + n);
+}
+function reshuffle(reason) {
+  if (XS.ended || !reshuffleOn() || !XS.paper) return;
+  if (XS.lastShuffle && Date.now() - XS.lastShuffle < 15000) return;
+  XS.lastShuffle = Date.now();
+  const curId = Q()[XS.cur] && Q()[XS.cur].id;
+  XS.shuffleCount = (XS.shuffleCount || 0) + 1;
+  if (!XS.preview) store.set('shuf.' + XS.attempt.id, XS.shuffleCount);
+  orderQuestions(XS.attempt.id + ':' + XS.shuffleCount + ':' + Date.now());
+  const firstOpen = Q().findIndex(q => !answered(q));
+  XS.cur = firstOpen >= 0 ? firstOpen : Math.max(0, Q().findIndex(q => q.id === curId));
+  drawNav(); drawQ();
+  logEv('questions_reshuffled', 'info', { reason, count: XS.shuffleCount });
+  const box = $('#shufNote');
+  if (box) { box.innerHTML = `<b>Questions reshuffled</b> because ${esc(reason)}. Your answers are saved; use the question numbers on the left to find any question.`; box.classList.remove('hidden'); clearTimeout(XS.shufT); XS.shufT = setTimeout(() => box.classList.add('hidden'), 12000); }
+}
 function answered(q) {
   const a = XS.answers[q.id]; if (!a) return false;
   if (q.type === 'mcq') return !!a.choice;
@@ -244,7 +282,7 @@ function buildRoom() {
   </div>
   <div class="xmain">
     <aside class="qnav" id="qnav"></aside>
-    <section class="qpane" id="qpane"></section>
+    <section class="qpane"><div id="shufNote" class="notice warn hidden" style="margin-bottom:14px"></div><div id="qpane"></div></section>
     <aside class="side">
       <div><h4>Your camera</h4><video id="selfCam" autoplay muted playsinline></video></div>
       <div class="card tight"><h4>Phone side camera</h4><div id="phoneStat" class="row"></div></div>
@@ -304,7 +342,7 @@ function drawQ() {
   $('#flagQ').onchange = e => { setAns(q.id, { flag: e.target.checked }); drawNav(); };
   const area = $('#ansArea');
   if (q.type === 'mcq') {
-    area.innerHTML = `<div class="opts">${(q.options || []).map(o => `<div class="opt ${a.choice === o.key ? 'sel' : ''}" data-k="${esc(o.key)}"><span class="k">${esc(o.key)}</span><span>${esc(o.text)}</span></div>`).join('')}</div>`;
+    area.innerHTML = `<div class="opts">${(q.options || []).map((o, oi) => `<div class="opt ${a.choice === o.key ? 'sel' : ''}" data-k="${esc(o.key)}"><span class="k">${'abcdefgh'[oi]}</span><span>${esc(o.text)}</span></div>`).join('')}</div>`;
     $$('.opt', area).forEach(o => o.onclick = () => { setAns(q.id, { choice: o.dataset.k }); drawQ(); drawNav(); });
     return;
   }
@@ -581,9 +619,9 @@ function initProctoring() {
   XS.screen.getVideoTracks()[0].onended = onScreenEnded;
   watchCam();
   // focus, visibility, fullscreen
-  const onVis = () => { if (XS.ended) return; if (document.hidden) { XS.hiddenAt = Date.now(); flagWithEvidence('left_exam_tab', 'high', {}, { screen: true }); } else if (XS.hiddenAt) { logEv('returned_to_tab', 'warn', { seconds: Math.round((Date.now() - XS.hiddenAt) / 1000) }); XS.hiddenAt = null; } };
+  const onVis = () => { if (XS.ended) return; if (document.hidden) { XS.hiddenAt = Date.now(); flagWithEvidence('left_exam_tab', 'high', {}, { screen: true }); } else if (XS.hiddenAt) { logEv('returned_to_tab', 'warn', { seconds: Math.round((Date.now() - XS.hiddenAt) / 1000) }); XS.hiddenAt = null; reshuffle('you left the exam screen'); } };
   const onBlur = () => { if (XS.ended) return; XS.blurAt = Date.now(); setTimeout(() => { if (XS.blurAt && !document.hasFocus() && !document.hidden && once('blur', 20000)) flagWithEvidence('focus_left_exam', 'warn', { note: 'Clicked outside the exam (another window or app)' }, { screen: true }); }, 2500); };
-  const onFocus = () => { if (XS.blurAt) { const s = Math.round((Date.now() - XS.blurAt) / 1000); if (s >= 3) logEv('focus_returned', 'info', { seconds: s }); XS.blurAt = null; } };
+  const onFocus = () => { if (XS.blurAt) { const s = Math.round((Date.now() - XS.blurAt) / 1000); if (s >= 3) { logEv('focus_returned', 'info', { seconds: s }); reshuffle('you clicked outside the exam window'); } XS.blurAt = null; } };
   const onFs = () => { if (XS.ended) return; if (!document.fullscreenElement) { logEv('fullscreen_exit', 'warn'); } checkLocks(); };
   const onScr = () => { if (screen.isExtended && once('mon', 30000)) flagWithEvidence('second_monitor_connected', 'high', {}, { screen: true }); };
   const onResize = () => { if (once('rs', 15000) && window.outerWidth - window.innerWidth > 200) logEv('window_resized', 'info', { note: 'Possible developer tools or side panel' }); };
@@ -607,7 +645,7 @@ function initProctoring() {
   startFaceWatch();
   // live view for invigilators
   XS.live = new LiveSender({ examId: XS.examId, attemptId: XS.attempt.id, role: 'laptop', name: S.user.full_name });
-  XS.live.on('warn', p => { showWarn(p.message); }).on('extend', () => { saveNow(); toast('The invigilator changed your time', 'ok'); }).on('end', () => saveNow());
+  XS.live.on('phoneflag', p => { if (/phone_moved|picked_up|phone_page_hidden|orientation/.test(p.kind || '')) reshuffle(p.kind === 'phone_page_hidden' ? 'your phone left the camera page' : 'movement was detected on your phone'); }).on('warn', p => { showWarn(p.message); }).on('extend', () => { saveNow(); toast('The invigilator changed your time', 'ok'); }).on('end', () => saveNow());
   XS.live.setStreams({ cam: XS.cam, screen: XS.screen });
   XS.live.start().catch(e => console.warn(e));
   setTimeout(() => saveNow(), 3000);

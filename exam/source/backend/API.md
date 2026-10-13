@@ -189,3 +189,13 @@ Storage: private bucket `exam-files` (60 MB limit). Upload body limit 25 MB deco
 | `ping` | anyone | `{}` | `{ ok, server_now }` |
 
 `data_base64` may be raw base64 or a `data:...;base64,` URL.
+
+## Sign-off (added 13 Oct 2026)
+
+### exm_signoff(p_token text, p_attempt_id uuid, p_role text, p_data jsonb default null) [admin, marker]
+`p_role`: `assessor` | `facilitator` | `moderator`. `p_data`: `{ name, reg_no?, comment?, signature: "data:image/png;base64,..." }`, or null to remove that role's signature.
+Stores `{ name, reg_no, comment, signature, signed_at, signed_by, signed_by_email, total_at_signing }` in `exm_attempts.signoff[role]`. Returns `{ ok, signoff }`.
+`exm_marking_list`, `exm_report_data` and `exm_my_results` (via `exm__result_detail`) now include `signoff` (learner view omits staff ids and emails).
+
+## Auto-marking
+Runs in the browser (`grader.js`). Memo answers may carry an `auto` block of criteria (see grader.js header). Without it, figures and key words are taken from the model answer. Suggested marks are saved as drafts with `auto: true, conf, hits, misses`; the assessor confirms, finalises and signs.

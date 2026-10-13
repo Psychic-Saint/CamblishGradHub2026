@@ -39,6 +39,82 @@ function renderAnswer(q, ans) {
   return h || '<span class="muted">No answer</span>';
 }
 
+// ---------- auto-marking + sign-off helpers ----------
+const ROLE_LABEL = { assessor: 'Assessor', facilitator: 'Facilitator', moderator: 'Moderator' };
+function autoScores(exam, a, overwriteAuto = true) {
+  const g = Grader.gradeScript(exam, a.answers || {});
+  const cur = a.scores || {}, out = {};
+  (exam.paper.questions || []).forEach(q => {
+    const s = cur[q.id], r = g[q.id];
+    const manual = s && typeof s === 'object' && s.auto === false && markOf(s) != null;
+    if (manual || (!overwriteAuto && s && markOf(s) != null)) { out[q.id] = s; return; }
+    if (r && r.mark != null) out[q.id] = { mark: r.mark, auto: true, conf: r.confidence, hits: r.hits, misses: r.misses, notes: r.notes, ...(s && s.comment ? { comment: s.comment } : {}) };
+    else if (s) out[q.id] = s;
+  });
+  return out;
+}
+function cleanScores(scores) {
+  const clean = {};
+  Object.entries(scores).forEach(([k, v]) => {
+    if (v == null) return;
+    if (typeof v === 'number') { clean[k] = { mark: v }; return; }
+    if (markOf(v) == null && !v.comment) return;
+    clean[k] = { mark: markOf(v) ?? 0 };
+    ['comment', 'auto', 'conf', 'hits', 'misses', 'notes'].forEach(f => { if (v[f] != null && !(Array.isArray(v[f]) && !v[f].length) && v[f] !== '') clean[k][f] = v[f]; });
+  });
+  return clean;
+}
+function signaturePad(canvas) {
+  const ctx = canvas.getContext('2d'); let drawing = false, dirty = false, last = null;
+  ctx.lineWidth = 2.2; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#0B1F4B';
+  const pos = e => { const r = canvas.getBoundingClientRect(); return { x: (e.clientX - r.left) * canvas.width / r.width, y: (e.clientY - r.top) * canvas.height / r.height }; };
+  canvas.addEventListener('pointerdown', e => { drawing = true; last = pos(e); canvas.setPointerCapture(e.pointerId); });
+  canvas.addEventListener('pointermove', e => { if (!drawing) return; const p = pos(e); ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(p.x, p.y); ctx.stroke(); last = p; dirty = true; });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach(t => canvas.addEventListener(t, () => drawing = false));
+  return { isEmpty: () => !dirty, clear: () => { ctx.clearRect(0, 0, canvas.width, canvas.height); dirty = false; }, toDataURL: () => canvas.toDataURL('image/png') };
+}
+function signDialog(role, extra = '') {
+  return new Promise(res => {
+    const saved = store.get('sig.' + role) || {};
+    const body = el(`<div>${extra}
+      <div class="grid2" style="gap:10px"><div class="field"><label>Full name</label><input id="sgName" value="${esc(saved.name || S.user.full_name || '')}"></div>
+      <div class="field"><label>${ROLE_LABEL[role]} registration number</label><input id="sgReg" value="${esc(saved.reg_no || '')}" placeholder="e.g. ETQA / QCTO reg. no."></div></div>
+      <label>Signature</label><canvas id="sgPad" width="520" height="150" style="width:100%;height:150px;border:1px dashed #9aa6c0;border-radius:8px;background:#fff;touch-action:none;cursor:crosshair"></canvas>
+      <div class="row between" style="margin-top:6px"><small class="muted">Sign with your mouse, trackpad or finger.</small><button class="btn xs ghost" id="sgClear">Clear</button></div>
+      <div class="field" style="margin-top:10px"><label>Comment (optional)</label><input id="sgCmt" placeholder="e.g. Marks verified against the memorandum"></div>
+      <label class="check"><input type="checkbox" id="sgOk"> I confirm that I ${role === 'assessor' ? 'assessed this work against the memorandum and the marks are a true reflection of the evidence' : role === 'facilitator' ? 'facilitated this learner and the assessment was conducted under the stated conditions' : 'moderated this assessment'}.</label></div>`);
+    let done = false;
+    const pad = signaturePad($('#sgPad', body));
+    $('#sgClear', body).onclick = () => pad.clear();
+    modal({
+      title: 'Sign as ' + ROLE_LABEL[role], body, onClose: () => !done && res(null), actions: [{ label: 'Cancel', cls: 'ghost' }, {
+        label: 'Sign', cls: 'gold', onClick: () => {
+          const name = $('#sgName', body).value.trim();
+          if (!name) { toast('Enter your full name', 'bad'); return false; }
+          if (pad.isEmpty()) { toast('Draw your signature first', 'bad'); return false; }
+          if (!$('#sgOk', body).checked) { toast('Tick the confirmation', 'bad'); return false; }
+          store.set('sig.' + role, { name, reg_no: $('#sgReg', body).value.trim() });
+          done = true; res({ name, reg_no: $('#sgReg', body).value.trim(), comment: $('#sgCmt', body).value.trim(), signature: pad.toDataURL() });
+        }
+      }]
+    });
+  });
+}
+function autoTag(s) {
+  if (!s || typeof s !== 'object') return '';
+  if (s.auto) return `<span class="pill ${s.conf === 'low' ? 'warn' : 'blue'}" title="Suggested by auto-marking">Auto${s.conf ? ' · ' + esc(s.conf) : ''}</span>`;
+  if (s.auto === false && markOf(s) != null) return '<span class="pill">Assessor</span>';
+  return '';
+}
+function autoWhy(s) {
+  if (!s || !s.auto || (!s.hits && !s.misses)) return '';
+  return `<div style="margin-top:10px;font-size:12.5px;line-height:1.5">${(s.hits || []).map(h => `<div style="color:var(--ok)">✓ ${esc(h)}</div>`).join('')}${(s.misses || []).map(h => `<div style="color:var(--bad)">✗ ${esc(h)}</div>`).join('')}${(s.notes || []).map(h => `<div style="color:var(--warn)">! ${esc(h)}</div>`).join('')}</div>`;
+}
+function signBadges(so) {
+  so = so || {};
+  return ['assessor', 'facilitator', 'moderator'].filter(r => so[r]).map(r => `<span class="pill ok" title="${esc(so[r].name)} · ${fmtDT(so[r].signed_at)}">${ROLE_LABEL[r][0]} ✓</span>`).join(' ') || '<span class="muted">–</span>';
+}
+
 // ---------- marking list ----------
 on(/^#\/mark\/([\w-]+)$/, async (examId) => {
   const r = await api('exm_marking_list', { p_exam_id: examId });
@@ -46,19 +122,49 @@ on(/^#\/mark\/([\w-]+)$/, async (examId) => {
   const done = list.filter(a => a.finalised).length;
   setApp(shell('home', `
   <div class="pagehead"><div><div class="kicker">Marking · ${esc(exam.code)}</div><h1>${esc(exam.title)}</h1><p>${list.length} scripts · ${done} finalised · MCQs are marked automatically on submission.</p></div>
-    <div class="row"><a class="btn ghost" href="#/reports/${examId}">Reports</a>${isAdmin(S.user) ? '<button class="btn" id="rel">Release selected</button><button class="btn gold" id="mail">Email reports to selected</button>' : ''}</div></div>
-  <div class="card"><div class="tablewrap"><table class="t"><thead><tr><th><input type="checkbox" id="all"></th><th>Learner</th><th>Status</th><th>Mark</th><th>Result</th><th>Marking</th><th>Released</th><th>Emailed</th><th>Flags</th><th></th></tr></thead><tbody>
+    <div class="row"><a class="btn ghost" href="#/reports/${examId}">Reports</a><button class="btn navy" id="autoAll">Auto-mark all scripts</button><button class="btn ghost" id="signSel">Sign selected</button>${isAdmin(S.user) ? '<button class="btn" id="rel">Release selected</button><button class="btn gold" id="mail">Email reports to selected</button>' : ''}</div></div>
+  <div class="notice" style="margin-bottom:14px">Auto-marking scores every answer against the memo's key figures, concepts and code techniques and saves the marks as a draft. The assessor then reviews each script, adjusts where needed, finalises and signs. Learners only see results after they are released.</div>
+  <div class="card"><div class="tablewrap"><table class="t"><thead><tr><th><input type="checkbox" id="all"></th><th>Learner</th><th>Status</th><th>Mark</th><th>Result</th><th>Marking</th><th>Signed</th><th>Released</th><th>Emailed</th><th>Flags</th><th></th></tr></thead><tbody>
   ${list.map(a => `<tr><td><input type="checkbox" class="sel" value="${a.id}"></td><td><b>${esc(a.full_name)}</b><br><small>${esc(a.email)}</small></td><td>${attemptPill(a.status)}</td>
     <td>${a.total != null ? `${a.total} / ${exam.total_marks} <small>(${a.percent ?? '–'}%)</small>` : '–'}</td><td>${a.result && a.finalised ? `<span class="pill ${a.result === 'Competent' ? 'ok' : 'bad'}">${esc(a.result)}</span>` : ''}</td>
     <td>${a.finalised ? '<span class="pill ok">Finalised</span>' : a.marked_at ? '<span class="pill warn">Draft</span>' : a.status === 'in_progress' ? '<span class="muted">Writing</span>' : '<span class="pill">To mark</span>'}</td>
-    <td>${a.released_at ? fmtDT(a.released_at) : '–'}</td><td>${a.emailed_at ? fmtDT(a.emailed_at) : '–'}</td><td>${a.flags_count ? `<span class="pill ${a.flags_count > 5 ? 'bad' : 'warn'}">${a.flags_count}</span>` : '0'}</td>
-    <td>${a.status !== 'in_progress' ? `<a class="btn xs" href="#/mark/${examId}/${a.id}">${a.finalised ? 'Review' : 'Mark'}</a>` : ''}</td></tr>`).join('') || '<tr><td colspan="10">No scripts yet.</td></tr>'}
+    <td>${signBadges(a.signoff)}</td><td>${a.released_at ? fmtDT(a.released_at) : '–'}</td><td>${a.emailed_at ? fmtDT(a.emailed_at) : '–'}</td><td>${a.flags_count ? `<span class="pill ${a.flags_count > 5 ? 'bad' : 'warn'}">${a.flags_count}</span>` : '0'}</td>
+    <td>${a.status !== 'in_progress' ? `<a class="btn xs" href="#/mark/${examId}/${a.id}">${a.finalised ? 'Review' : 'Mark'}</a>` : ''}</td></tr>`).join('') || '<tr><td colspan="11">No scripts yet.</td></tr>'}
   </tbody></table></div></div>`));
   bindShell();
   $('#all').onchange = e => $$('.sel').forEach(c => c.checked = e.target.checked);
   const sel = () => $$('.sel:checked').map(c => c.value);
+  $('#autoAll').onclick = e => { const btn = e.currentTarget; busy(btn, async () => {
+    const todo = list.filter(a => a.status !== 'in_progress' && !a.finalised);
+    if (!todo.length) throw new Error('No unfinalised submitted scripts to mark');
+    if (!(exam.memo && exam.memo.answers && exam.memo.answers.length)) throw new Error('Upload the memo first (Edit exam, step 3)');
+    if (!await confirmBox('Auto-mark scripts', `Auto-mark ${todo.length} submitted script(s) against the memo? Marks you entered by hand are kept. Results stay as drafts until an assessor finalises them.`, 'Auto-mark')) return;
+    let n = 0;
+    for (const a of todo) {
+      const sc = autoScores(exam, a);
+      await api('exm_marking_save', { p_attempt_id: a.id, p_scores: cleanScores(sc), p_feedback: a.feedback || autoFeedback(exam, a, sc), p_finalise: false });
+      n++; btn.textContent = `Marked ${n} of ${todo.length}…`;
+    }
+    toast(`${n} script(s) auto-marked as drafts. Review and finalise each one.`, 'ok'); route();
+  }).catch(() => { }); };
+  $('#signSel').onclick = async () => {
+    const ids = sel(); if (!ids.length) return toast('Select learners first', 'bad');
+    const chosen = list.filter(a => ids.includes(a.id) && a.status !== 'in_progress');
+    const notFin = chosen.filter(a => !a.finalised).length;
+    const roleBody = el(`<div><p>Sign ${chosen.length} script(s) in one go.${notFin ? ` <b>${notFin} are not finalised yet</b> and will be skipped.` : ''}</p><div class="field"><label>Sign as</label><select id="rl"><option value="assessor">Assessor</option><option value="facilitator">Facilitator</option><option value="moderator">Moderator</option></select></div></div>`);
+    let role = null;
+    await new Promise(r => modal({ title: 'Sign selected scripts', body: roleBody, onClose: r, actions: [{ label: 'Cancel', cls: 'ghost' }, { label: 'Continue', onClick: () => { role = $('#rl', roleBody).value; } }] }));
+    if (!role) return;
+    const sig = await signDialog(role, `<p class="muted">This signature is applied to ${chosen.length - notFin} finalised script(s).</p>`);
+    if (!sig) return;
+    let n = 0;
+    for (const a of chosen.filter(a => a.finalised)) { try { await api('exm_signoff', { p_attempt_id: a.id, p_role: role, p_data: sig }); n++; } catch (err) { toast(a.full_name + ': ' + err.message, 'bad'); } }
+    toast(`Signed ${n} script(s) as ${ROLE_LABEL[role].toLowerCase()}`, 'ok'); route();
+  };
   if ($('#rel')) $('#rel').onclick = e => busy(e.currentTarget, async () => {
     const ids = sel(); if (!ids.length) throw new Error('Select learners first');
+    const unsigned = list.filter(a => ids.includes(a.id) && a.finalised && !(a.signoff && a.signoff.assessor));
+    if (unsigned.length && !await confirmBox('Not signed by an assessor', `${unsigned.map(a => esc(a.full_name)).join(', ')} ${unsigned.length > 1 ? 'have' : 'has'} no assessor signature yet. Release anyway?`, 'Release anyway')) return;
     const r = await api('exm_release', { p_attempt_ids: ids });
     toast(`${r.released} result(s) released${r.not_finalised ? `, ${r.not_finalised} not finalised yet` : ''}`, 'ok'); route();
   }).catch(() => { });
@@ -80,12 +186,20 @@ on(/^#\/mark\/([\w-]+)\/([\w-]+)$/, async (examId, aid) => {
   const a = list.find(x => x.id === aid); if (!a) throw new Error('Script not found');
   const idx = list.indexOf(a), next = list[idx + 1];
   const qs = exam.paper.questions || [], mm = memoMap(exam);
-  const scores = JSON.parse(JSON.stringify(a.scores || {}));
+  let scores = JSON.parse(JSON.stringify(a.scores || {}));
   const answers = a.answers || {};
+  const hasMemo = !!(exam.memo && exam.memo.answers && exam.memo.answers.length);
+  const unmarkedBefore = qs.filter(q => markOf(scores[q.id]) == null).length;
+  let autoApplied = false;
+  if (hasMemo && !a.finalised && unmarkedBefore) { scores = autoScores(exam, { ...a, scores }, false); autoApplied = true; }
+  const signoff = a.signoff || {};
   setApp(shell('home', `
   <div class="pagehead"><div><div class="kicker"><a href="#/mark/${examId}">← All scripts</a> · ${idx + 1} of ${list.length}</div><h1>${esc(a.full_name)}</h1><p>${esc(a.email)} · ${attemptPill(a.status)} · submitted ${fmtDT(a.submitted_at)}</p></div>
-    <div class="row"><button class="btn ghost" id="ev">Integrity: ${a.flags_count || 0} flags</button></div></div>
+    <div class="row"><button class="btn ghost" id="rerun" ${hasMemo ? '' : 'disabled title="Upload the memo first"'}>Re-run auto-marking</button><button class="btn ghost" id="ev">Integrity: ${a.flags_count || 0} flags</button></div></div>
+  ${autoApplied ? `<div class="notice" style="margin-bottom:14px">Auto-marking filled in suggested marks for ${unmarkedBefore} question(s). Each shows what it found and what was missing. Check them, adjust where your judgement differs, then finalise and sign.</div>` : ''}
+  ${!hasMemo ? '<div class="notice warn" style="margin-bottom:14px">No memo uploaded for this exam, so only multiple-choice answers can be auto-marked. Upload the memo in Edit exam, step 3.</div>' : ''}
   <div id="qs"></div>
+  <div class="card" id="signoff" style="margin-bottom:14px"></div>
   <div class="card" style="position:sticky;bottom:0;z-index:5;border-top:3px solid var(--gold)">
     <div class="row between"><h2 style="margin:0">Total: <span id="tot"></span></h2><span id="res"></span></div>
     <div class="field" style="margin-top:10px"><label>Overall feedback to the learner (included in the emailed report)</label><textarea id="fb" style="min-height:90px">${esc(a.feedback || '')}</textarea></div>
@@ -104,31 +218,67 @@ on(/^#\/mark\/([\w-]+)\/([\w-]+)$/, async (examId, aid) => {
     const auto = s && s.auto;
     const correct = q.type === 'mcq' && m.answer ? (answers[q.id] && answers[q.id].choice === m.answer) : null;
     return `<div class="mq" data-q="${esc(q.id)}"><div class="mh"><span class="qid">${esc(q.id)}</span><span class="grow" style="font-size:14px">${esc(q.text.slice(0, 160))}${q.text.length > 160 ? '…' : ''}</span>
-      ${correct === true ? '<span class="pill ok">Correct</span>' : correct === false ? '<span class="pill bad">Incorrect</span>' : ''}${auto ? '<span class="pill">auto</span>' : ''}
+      ${correct === true ? '<span class="pill ok">Correct</span>' : correct === false ? '<span class="pill bad">Incorrect</span>' : ''}<span class="autotag">${autoTag(s)}</span>
       <input class="markin" type="number" min="0" max="${q.marks}" step="0.5" value="${markOf(s) ?? ''}"><b>/ ${q.marks}</b></div>
       <div class="mb"><div><small class="kicker">Learner's answer</small><div class="ans">${renderAnswer(q, answers[q.id])}</div></div>
       <div><small class="kicker">Memo</small><div class="memo">${q.type === 'mcq' && m.answer ? `<b>Answer: ${esc(m.answer)}</b>\n` : ''}${esc(m.model_answer || '–')}</div>${m.marking_guide ? `<div class="memo" style="margin-top:8px"><b>Marking guide:</b> ${esc(m.marking_guide)}</div>` : ''}
+        <div class="autowhy">${autoWhy(s)}</div>
         <div class="quick" style="margin-top:10px">${Array.from({ length: Math.floor(q.marks) + 1 }, (_, i) => `<button class="btn xs ghost" data-v="${i}">${i}</button>`).join('')}</div>
         <input class="cmt" placeholder="Comment for this question (optional)" value="${esc((s && s.comment) || '')}" style="margin-top:8px"></div></div></div>`;
   }).join('');
   $$('.mq').forEach(box => {
     const id = box.dataset.q, q = qs.find(x => x.id === id), inp = $('.markin', box);
-    const set = v => { v = num(v); if (v != null) v = Math.max(0, Math.min(q.marks, v)); scores[id] = { ...(scores[id] || {}), mark: v, auto: false }; if (v == null) delete scores[id].mark; upd(); };
+    const set = v => { v = num(v); if (v != null) v = Math.max(0, Math.min(q.marks, v)); scores[id] = { ...(scores[id] || {}), mark: v, auto: false }; if (v == null) delete scores[id].mark; $('.autotag', box).innerHTML = autoTag(scores[id]); upd(); };
     inp.oninput = () => set(inp.value);
     $$('[data-v]', box).forEach(b => b.onclick = () => { inp.value = b.dataset.v; set(b.dataset.v); });
     $('.cmt', box).oninput = e => { scores[id] = { ...(scores[id] || {}), comment: e.target.value }; };
   });
   upd();
+  $('#rerun').onclick = async () => {
+    if (!await confirmBox('Re-run auto-marking', 'Recalculate the suggested marks for every question? Marks you changed by hand are kept.', 'Re-run')) return;
+    scores = autoScores(exam, { ...a, scores }, true);
+    $$('.mq').forEach(box => { const id = box.dataset.q, s = scores[id]; $('.markin', box).value = markOf(s) ?? ''; $('.autotag', box).innerHTML = autoTag(s); $('.autowhy', box).innerHTML = autoWhy(s); });
+    upd(); toast('Suggested marks updated', 'ok');
+  };
+  const drawSign = () => {
+    const box = $('#signoff');
+    const cur = total();
+    box.innerHTML = `<h2>Sign-off</h2><p class="muted" style="margin-top:-4px">The assessor signs to confirm the marks; the facilitator signs to confirm the assessment conditions. Signatures appear on the learner report and the class report.</p>
+      <div class="grid3">${['assessor', 'facilitator', 'moderator'].map(r => { const x = signoff[r];
+        return `<div class="stat" style="min-height:150px"><div class="l">${ROLE_LABEL[r]}${r === 'moderator' ? ' (optional)' : ''}</div>${x ? `
+          <img src="${x.signature}" style="max-width:100%;height:60px;object-fit:contain;display:block;margin:6px 0">
+          <div><b>${esc(x.name)}</b>${x.reg_no ? ` · ${esc(x.reg_no)}` : ''}</div><small class="muted">${fmtDT(x.signed_at)}</small>
+          ${x.total_at_signing != null && +x.total_at_signing !== +cur ? `<div class="pill warn" style="margin-top:6px">Marks changed since signing (${x.total_at_signing} → ${cur}). Sign again.</div>` : ''}
+          <div class="row" style="margin-top:8px;gap:6px"><button class="btn xs ghost" data-sign="${r}">Sign again</button><button class="btn xs ghost" data-unsign="${r}">Remove</button></div>`
+          : `<p class="muted" style="margin:8px 0 12px">Not signed</p><button class="btn sm ${r === 'assessor' ? 'gold' : 'ghost'}" data-sign="${r}">Sign as ${ROLE_LABEL[r].toLowerCase()}</button>`}</div>`; }).join('')}</div>`;
+    $$('[data-sign]', box).forEach(b => b.onclick = () => doSign(b.dataset.sign));
+    $$('[data-unsign]', box).forEach(b => b.onclick = async () => { if (!await confirmBox('Remove signature', 'Remove this signature?', 'Remove', 'danger')) return; const r2 = await api('exm_signoff', { p_attempt_id: aid, p_role: b.dataset.unsign, p_data: null }); Object.keys(signoff).forEach(k => delete signoff[k]); Object.assign(signoff, r2.signoff); drawSign(); });
+  };
+  const doSign = async role => {
+    if (role === 'assessor' && JSON.stringify(cleanScores(scores)) !== JSON.stringify(cleanScores(a.scores || {}))) {
+      if (!await confirmBox('Save marks first', 'You have unsaved mark changes. Save them as a draft before signing?', 'Save and sign')) return;
+      await save(false, true);
+    }
+    const sig = await signDialog(role); if (!sig) return;
+    try { const r2 = await api('exm_signoff', { p_attempt_id: aid, p_role: role, p_data: sig }); Object.keys(signoff).forEach(k => delete signoff[k]); Object.assign(signoff, r2.signoff); drawSign(); toast('Signed', 'ok'); }
+    catch (err) { toast(err.message, 'bad'); }
+  };
+  drawSign();
   $('#ev').onclick = () => evidenceTimeline(examId, a);
   $('#gen').onclick = () => { $('#fb').value = autoFeedback(exam, a, scores); };
-  const save = async fin => {
-    const clean = {}; Object.entries(scores).forEach(([k, v]) => { if (markOf(v) != null || (v && v.comment)) clean[k] = { mark: markOf(v) ?? 0, ...(v.comment ? { comment: v.comment } : {}), ...(v.auto ? { auto: true } : {}) }; });
+  async function save(fin, stay) {
+    const clean = cleanScores(scores);
     if (fin) { const un = qs.filter(q => markOf(scores[q.id]) == null); if (un.length && !await confirmBox('Unmarked questions', `${un.map(q => q.id).join(', ')} have no mark and will count as 0. Finalise anyway?`, 'Finalise')) return; }
     if (fin && !$('#fb').value.trim()) $('#fb').value = autoFeedback(exam, a, scores);
-    await api('exm_marking_save', { p_attempt_id: aid, p_scores: clean, p_feedback: $('#fb').value, p_finalise: !!fin });
-    toast(fin ? 'Finalised' : 'Draft saved', 'ok');
+    const r3 = await api('exm_marking_save', { p_attempt_id: aid, p_scores: clean, p_feedback: $('#fb').value, p_finalise: !!fin });
+    a.scores = clean; a.total = r3.attempt.total; drawSign();
+    if (stay) return;
+    if (fin && !signoff.assessor) {
+      toast('Finalised', 'ok');
+      if (await confirmBox('Assessor signature', 'Marks are finalised. Sign now as the assessor?', 'Sign now', 'gold')) { await doSign('assessor'); }
+    } else toast(fin ? 'Finalised' : 'Draft saved', 'ok');
     if (fin) go(next ? `#/mark/${examId}/${next.id}` : `#/mark/${examId}`);
-  };
+  }
   $('#sd').onclick = e => busy(e.currentTarget, () => save(false)).catch(() => { });
   $('#fin').onclick = e => busy(e.currentTarget, () => save(true)).catch(() => { });
 }, { staff: true });
@@ -204,8 +354,26 @@ td{padding:5px 7px;border-bottom:1px solid #dfe4ef;vertical-align:top}
 .bar{background:#eef2fb;height:8px;border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;background:#1F4FD1}
 .foot{margin-top:18px;font-size:8.5pt;color:#5d6b86;border-top:1px solid #dfe4ef;padding-top:6px}
 ul{margin:4px 0;padding-left:18px}
+.sign td{border:1px solid #c9d1e3;vertical-align:middle}.sign th{border:1px solid #c9d1e3}
 .diag{height:6px;background:repeating-linear-gradient(135deg,#C9A227 0 10px,transparent 10px 20px);opacity:.5;margin:10px 0}
 `;
+function signBlock(so, cls) {
+  so = so || {};
+  const row = r => { const x = so[r];
+    return `<tr><td style="width:18%"><b>${ROLE_LABEL[r]}</b></td><td style="width:28%">${x ? esc(x.name) : ''}</td><td style="width:16%">${x && x.reg_no ? esc(x.reg_no) : ''}</td>
+      <td style="width:22%;height:46px">${x && x.signature ? `<img src="${x.signature}" style="height:42px;max-width:100%;object-fit:contain">` : ''}</td><td style="width:16%">${x ? new Date(x.signed_at).toLocaleDateString('en-ZA') : ''}</td></tr>`; };
+  return `<div class="diag"></div><h2>Sign-off</h2>${cls ? '<p style="font-size:9.5pt;color:#5d6b86;margin:0 0 4px">Signed by hand where blank, or printed from the e-signatures captured when every script carries the same signatory.</p>' : ''}
+    <table class="sign"><tr><th>Role</th><th>Full name</th><th>Reg. no.</th><th>Signature</th><th>Date</th></tr>${['assessor', 'facilitator', 'moderator'].map(row).join('')}</table>
+    ${['assessor', 'facilitator', 'moderator'].filter(r => so[r] && so[r].comment).map(r => `<p style="font-size:9.5pt"><b>${ROLE_LABEL[r]} comment:</b> ${esc(so[r].comment)}</p>`).join('')}`;
+}
+function commonSignoff(attempts) {
+  const out = {};
+  ['assessor', 'facilitator', 'moderator'].forEach(r => {
+    const sig = attempts.filter(a => a.status !== 'in_progress').map(a => a.signoff && a.signoff[r]);
+    if (sig.length && sig.every(x => x && x.name === sig[0].name)) out[r] = sig.slice().sort((p, q) => new Date(q.signed_at) - new Date(p.signed_at))[0];
+  });
+  return out;
+}
 function printDoc(title, html) {
   const w = window.open('', '_blank');
   if (!w) return toast('Allow pop-ups for this site to export PDFs', 'bad');
@@ -229,6 +397,7 @@ function learnerPage(exam, a, staff) {
     ${a.feedback ? `<h2>Assessor feedback</h2><p style="white-space:pre-wrap">${esc(a.feedback)}</p>` : ''}
     ${lost.length ? `<h2>Ways to improve</h2><ul>${lost.slice(0, 10).map(q => `<li><b>${esc(q.id)}</b>: ${esc(mm[q.id].tip)}</li>`).join('')}</ul>` : ''}
     ${staff ? `<div class="diag"></div><h3>Invigilation record (internal)</h3><p>${a.flags_count || 0} flagged events · ${flags.high || 0} serious · ${flags.warn || 0} warnings${a.phone_paired_at ? ' · phone side camera paired' : ' · phone camera not paired'}.${a.event_counts ? ' Main events: ' + esc(Object.entries(a.event_counts).filter(([k]) => !/heartbeat|device|started|submitted|face_monitor|phone_camera_on|focus_returned|warning_ack/.test(k)).sort((x, y) => y[1] - x[1]).slice(0, 6).map(([k, n]) => evLabel(k) + ' (' + n + ')').join(', ')) : ''}</p>` : ''}
+    ${signBlock(a.signoff)}
     <div class="foot">Camblish Training Institute · Online Assessment Centre · Report generated ${fmtDT(new Date())} · Author: Eddie Bila</div></div>`;
 }
 function printReports(exam, attempts, summary, qStats) {
@@ -241,6 +410,7 @@ function printReports(exam, attempts, summary, qStats) {
       <h2>Results</h2><table><tr><th>#</th><th>Learner</th><th>ID number</th>${[...new Set((exam.paper.questions || []).map(q => q.section || q.id[0]))].map(s => `<th>${esc(s)}</th>`).join('')}<th>Total</th><th>%</th><th>Result</th><th>Flags</th></tr>
       ${attempts.slice().sort((x, y) => (x.full_name || '').localeCompare(y.full_name || '')).map((a, i) => { const secs = sectionsOf(exam, a.scores || {}); return `<tr><td>${i + 1}</td><td>${esc(a.full_name)}</td><td>${esc(a.id_number || '')}</td>${secs.map(s => `<td>${s.mark}</td>`).join('')}<td>${a.total ?? '–'}</td><td>${a.percent ?? '–'}</td><td>${a.finalised ? esc(a.result) : esc(a.status)}</td><td>${a.flags_count || 0}</td></tr>`; }).join('')}</table>
       ${qStats ? `<h2>Question analysis</h2><table><tr><th>No.</th><th>Marks</th><th style="width:55%">Average achieved</th></tr>${qStats.map(x => `<tr><td>${esc(x.q.id)}</td><td>${x.q.marks}</td><td><div class="bar"><i style="width:${x.avg || 0}%"></i></div>${x.avg == null ? '–' : x.avg + '%'}</td></tr>`).join('')}</table>` : ''}
+      ${signBlock(commonSignoff(attempts), true)}
       <div class="foot">Pass mark ${exam.pass_mark}% · C = Competent, NYC = Not Yet Competent · Generated ${fmtDT(new Date())} · Author: Eddie Bila</div></div>`;
   }
   attempts.filter(a => a.status !== 'in_progress').forEach(a => html += learnerPage(exam, a, true));
@@ -249,5 +419,5 @@ function printReports(exam, attempts, summary, qStats) {
 function printLearnerResult(x) {
   const exam = { title: x.exam_title, qualification: x.qualification, code: x.exam_code, total_marks: x.total_marks, pass_mark: x.pass_mark, paper: { questions: (x.questions || []).map(q => ({ id: q.id, section: q.section, marks: q.max })) }, memo: { answers: (x.questions || []).filter(q => q.tip).map(q => ({ id: q.id, tip: q.tip })) } };
   const scores = Object.fromEntries((x.questions || []).map(q => [q.id, { mark: q.mark }]));
-  printDoc(`${x.learner_name} - ${x.exam_code} Report`, learnerPage(exam, { full_name: x.learner_name, email: x.learner_email, total: x.total, percent: x.percent, result: x.result, finalised: true, feedback: x.feedback, scores, submitted_at: x.submitted_at, status: 'submitted' }, false));
+  printDoc(`${x.learner_name} - ${x.exam_code} Report`, learnerPage(exam, { full_name: x.learner_name, email: x.learner_email, id_number: x.learner_id_number, signoff: x.signoff, total: x.total, percent: x.percent, result: x.result, finalised: true, feedback: x.feedback, scores, submitted_at: x.submitted_at, status: 'submitted' }, false));
 }

@@ -26,6 +26,7 @@ class LiveSender {
   flag(ev) { this.send({ type: 'flag', attemptId: this.attemptId, role: this.role, name: this.name, ...ev, at: new Date().toISOString() }); }
   async onSig(p) {
     if (p.type === 'warn' && p.attemptId === this.attemptId) return this.handlers.warn && this.handlers.warn(p);
+    if (p.type === 'flag' && p.attemptId === this.attemptId && p.role === 'phone' && this.role === 'laptop') return this.handlers.phoneflag && this.handlers.phoneflag(p);
     if (p.type === 'extend' && p.attemptId === this.attemptId) return this.handlers.extend && this.handlers.extend(p);
     if (p.type === 'end' && p.attemptId === this.attemptId) return this.handlers.end && this.handlers.end(p);
     if (p.to && p.to !== this.peerId) return;

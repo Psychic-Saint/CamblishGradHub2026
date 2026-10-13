@@ -9,7 +9,7 @@ const EV_LABEL = {
   phone_page_returned: 'Returned to the phone camera page', phone_moved_or_picked_up: 'Phone moved or picked up', phone_orientation_changed: 'Phone rotated', phone_camera_stopped: 'Phone camera stopped', phone_motion_sensor_blocked: 'Phone motion sensor blocked',
   learner_message: 'Message from learner', warning_acknowledged: 'Learner acknowledged a warning', warn: 'Warning sent', note: 'Invigilator note', extend: 'Time changed', terminate: 'Exam terminated', reopen: 'Exam reopened',
   grace_started: 'Entered grace period', python_restart: 'Restarted Python', printscreen_key: 'Pressed Print Screen', developer_tools_attempt: 'Tried to open developer tools', window_resized: 'Window resized', back_online: 'Back online',
-  face_monitor_on: 'Face monitor running', face_monitor_unavailable: 'Face monitor unavailable on this laptop', heartbeat: 'Phone heartbeat',
+  questions_reshuffled: 'Questions reshuffled', face_monitor_on: 'Face monitor running', face_monitor_unavailable: 'Face monitor unavailable on this laptop', heartbeat: 'Phone heartbeat',
 };
 const evLabel = k => EV_LABEL[k] || (k || '').replace(/_clip$/, ' (video clip)').replace(/_/g, ' ');
 const evDetail = d => { if (!d) return ''; const x = []; if (d.message) x.push('"' + d.message + '"'); if (d.text) x.push(d.text); if (d.seconds) x.push(d.seconds + ' s'); if (d.minutes) x.push((d.minutes > 0 ? '+' : '') + d.minutes + ' min'); if (d.reason) x.push(d.reason); if (d.by) x.push('by ' + d.by); if (d.note) x.push(d.note); if (d.sample) x.push('pasted: "' + String(d.sample).slice(0, 60) + '"'); return x.join(' · '); };
