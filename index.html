@@ -412,12 +412,58 @@ nav.tabs .badge.green{background:var(--ok);color:#fff}
 .feed-item.mine{background:linear-gradient(90deg,#fffaf0,#fff)}
 #capSpin{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:radial-gradient(circle at 50% 40%,rgba(29,63,174,.92),rgba(8,26,69,.97));perspective:900px;transition:opacity .35s}
 #capSpin.out{opacity:0}
+.leadtag{display:inline-block;background:var(--pc);color:#fff;border-radius:99px;padding:2px 9px;font-size:11px;font-weight:900;letter-spacing:.2px;vertical-align:2px;box-shadow:0 0 0 2px #fff,0 0 0 3.5px var(--pc);max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sgh{cursor:pointer;user-select:none}.sgh .chev{display:inline-block;margin-right:8px;transition:transform .15s}.sgh.closed .chev{transform:rotate(-90deg)}.sgh:hover{filter:brightness(1.12)}
+.lnotes{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:4px;font-size:12px}
+.nbtn{background:none;border:1px dashed #9db3ec;color:#1d3fae;border-radius:99px;padding:1px 9px;font-size:11.5px;font-weight:700;cursor:pointer}.nbtn:hover{background:#eef2fb}
+.nq.open{background:#fde8e6;color:#b3261e;border-radius:99px;padding:1px 8px;font-weight:800;font-size:11px}
+.nlast{color:var(--muted);max-width:100%;overflow:hidden;text-overflow:ellipsis}.nlast i{font-style:normal;opacity:.8}
+.nrow{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;padding:8px 10px;border-radius:10px;margin-bottom:6px;background:#f6f8fd;border-left:4px solid #9db3ec;font-size:13px}
+.nrow.open.k-name,.nrow.open.k-query{background:#fdf1ef;border-left-color:#b3261e}.nrow.res{opacity:.8}
+button.ro,.btn.ro,.sbtn.ro{filter:blur(1.2px) grayscale(.6);opacity:.45;pointer-events:none;cursor:not-allowed}
+.ronote{background:#eef2fb;border:1px dashed #9db3ec;color:#1d3fae;border-radius:12px;padding:8px 12px;margin:0 0 12px;font-size:13px}
+.livebar{max-width:1150px;margin:10px auto 0;background:#fff4d6;border:2px solid #d4af37;color:#5a4200;border-radius:12px;padding:8px 14px;font-size:13.5px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.evtile.islive{outline:2px solid #22c55e;outline-offset:-2px}
+.livebadge{display:inline-flex;align-items:center;gap:6px;color:#86efac;font-size:12px;font-weight:800;letter-spacing:.4px;margin-bottom:6px}
+.livebadge i{width:9px;height:9px;border-radius:50%;background:#22c55e;animation:livegreen 1.4s ease-out infinite}
+@keyframes livegreen{0%{box-shadow:0 0 0 0 rgba(34,197,94,.7)}80%,100%{box-shadow:0 0 0 8px rgba(34,197,94,0)}}
+.evlive{position:absolute;top:10px;right:10px;z-index:2;background:rgba(255,255,255,.14);color:#f3d27a;border:1px solid rgba(243,210,122,.5);border-radius:99px;padding:3px 10px;font-size:11px;font-weight:800;cursor:pointer}
+.evlive:hover{background:rgba(243,210,122,.25)}
+.evtile:has(.evlive) h3{padding-right:78px}
+.evtile[data-code]{padding-bottom:40px}
+.hbtn.pres{background:rgba(255,255,255,.12);font-weight:700;white-space:nowrap}
+.pd{display:inline-block;width:8px;height:8px;border-radius:50%;margin:0 3px 0 5px;vertical-align:0}.pd.on{background:#22c55e;box-shadow:0 0 0 2px rgba(34,197,94,.3)}.pd.aw{background:#f3c94a}.pd.of{background:#94a3b8}
+@media (max-width:700px){.hbtn.pres .pl{display:none}}
+.prg{margin:10px 0}.prh{font-weight:800;margin-bottom:4px}.prr{display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--line)}.prr .pd{margin-top:6px}
+.stsel{font-weight:700;border:2px solid var(--royal);border-radius:10px}
+.stpill{display:inline-block;background:#eef2fb;color:#1d3fae;border-radius:99px;padding:1px 8px;font-size:11px;font-weight:800;vertical-align:1px}
+.staff{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:6px;margin:0 0 10px}
+.stf{background:#f6f8fd;border-radius:10px;padding:6px 8px;border-left:4px solid #c9d3f2}.stf b{display:block;font-size:18px;color:var(--navy)}.stf b small{font-size:11px;color:var(--muted);font-weight:600}.stf span{display:block;font-size:10.5px;font-weight:700;line-height:1.2}
+.stf.part{border-left-color:var(--gold)}.stf.ok{border-left-color:#1e7b3a;background:#eef8f1}
+
+.annscreen input,.annscreen textarea,.annscreen .rform input{color:#0d1b3e!important;background:#fff!important;caret-color:#1d3fae}.annscreen input::placeholder{color:#7a849c}
 .catsel{width:auto;max-width:165px;flex:0 0 auto;border:2px solid var(--cc,#1d3fae);background:var(--cb,#fff);color:var(--cc,#1d3fae);font-weight:800;border-radius:10px;padding:0 10px;cursor:pointer}
 @media (max-width:600px){.anncompose .row{flex-wrap:wrap!important}.anncompose .catsel{flex:1;max-width:none}}
 .stiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:6px 0 12px}
 .stile{display:grid;grid-template-columns:auto 1fr;column-gap:8px;align-items:center;text-align:left;background:#fff;border:1px solid var(--line);border-left:4px solid var(--royal);border-radius:10px;padding:6px 10px;cursor:pointer;font:inherit;color:var(--ink);transition:transform .12s}
 .stile:hover{transform:translateY(-1px)}.stile b{grid-row:span 2;font-size:20px;line-height:1;color:var(--navy);min-width:22px}.stile span{font-weight:800;font-size:12px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.stile small{font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
-.stile.hot{border-left-color:var(--gold);background:linear-gradient(90deg,#fff8e1,#fff)}.stile.hot b{color:#8a6510}
+.stile.hot{display:flex;align-items:center;gap:10px;padding:6px 8px 6px 7px;border:1.5px solid #c99a2e;border-radius:14px;position:relative;overflow:hidden;
+  background:linear-gradient(180deg,#fff3c2 0%,#f6d77a 22%,#e9b949 52%,#d9a234 78%,#f0c75e 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 -2px 4px rgba(150,100,10,.35),0 6px 16px -8px rgba(150,100,10,.7)}
+.stile.hot::before{content:"";position:absolute;top:-60%;left:-30%;width:40%;height:220%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.65),transparent);transform:rotate(18deg);animation:gshine 3.2s ease-in-out infinite}
+.gcoin{flex:0 0 auto;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:16px;color:#fff;text-shadow:0 1px 1px rgba(90,60,0,.6);
+  background:radial-gradient(circle at 35% 30%,#ffe9a8,#d9a234 55%,#9c6f12);box-shadow:0 0 0 2px #fff1c4,0 0 0 3.5px #b8861f,0 2px 4px rgba(90,60,0,.4)}
+.gtx{flex:1;min-width:0;display:flex;flex-direction:column;border-left:1.5px solid rgba(140,95,10,.35);padding-left:9px;text-align:left}
+.gtx strong{font-size:13.5px;font-weight:900;color:#2b1d00;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
+.gtx small{font-size:11px;color:#5c4300;font-weight:600;line-height:1.2}
+.glive{flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;font-style:normal;font-weight:900;font-size:11px;letter-spacing:.5px;color:#fff;padding:4px 10px 4px 8px;border-radius:99px;
+  background:linear-gradient(180deg,#f0444f,#c8102e 60%,#a50c24);box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 0 0 1.5px #e9b949,0 2px 5px rgba(120,0,20,.45)}
+.glive i{width:7px;height:7px;border-radius:50%;background:#fff;animation:lvblink 1.1s ease-in-out infinite}
+@keyframes lvblink{0%,100%{opacity:1}50%{opacity:.2}}
+.stiles:has(.hot){grid-template-columns:1fr 1fr 1.75fr 1fr 1fr}
+@media (max-width:860px){.stiles:has(.hot){grid-template-columns:repeat(2,minmax(0,1fr))}}
+@keyframes gshine{0%,55%{left:-40%}100%{left:130%}}
+@media (prefers-reduced-motion: reduce){.stile.hot::before,.glive i{animation:none}}
 @media (max-width:860px){.stiles{grid-template-columns:repeat(2,minmax(0,1fr))}.stiles .stile:nth-child(3){grid-column:1/-1}}
 .fdgrid{display:flex;flex-direction:column}.fdgrid .annscreen{order:-1}
 .actscreen .feed-item{gap:8px;padding:6px 4px}.actscreen .feed-item .ic{width:24px;height:24px;font-size:12px}
@@ -518,7 +564,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202610062231";
+const BUILD = "202610141530";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -567,6 +613,23 @@ ROLE_DEFAULT.manager = PERMS.map(p=>p[0]); ROLE_DEFAULT.admin = ROLE_DEFAULT.man
 function can(p){ if (S.user) return S.user.role === "admin" || (S.user.perms || ROLE_DEFAULT[S.user.role] || []).includes(p); return (ROLE_DEFAULT[S.role] || ROLE_DEFAULT.team).includes(p); }
 function permBoxes(id, selected, allowed){
   return `<div class="permgrid" id="${id}">${PERMS.map(([k,l,d]) => `<label><input type="checkbox" value="${k}" ${selected.includes(k)?"checked":""} ${allowed.includes(k)?"":"disabled"}><span>${l}${d?`<small>${d}</small>`:""}</span></label>`).join("")}</div>`;
+}
+/* stations: tick the right access for the job someone does on the day */
+const STATIONS = [
+  ["checkin","📋 Check-in desk", ["checkin","print_tags","tasks_update","comment"], 5],
+  ["robes","🎓 Robes table", ["robes","print_tags","tasks_update","comment"], 5],
+  ["stage","🎤 Stage caller", ["stage","print_tags","tasks_update","comment"], 2],
+  ["certs","📜 Certificates table", ["certs","tasks_update","comment"], 5],
+  ["floor","⭐ Floor team (every station)", ROLE_DEFAULT.team, 0]];
+const sameSet = (a, b) => a.length === b.length && a.every(x => b.includes(x));
+const STATION_CORE = ["checkin","robes","stage","certs"];
+const stationOf = perms => { const c = STATION_CORE.filter(k => (perms || []).includes(k)); return c.length === 1 ? c[0] : c.length === 4 ? "floor" : ""; };
+function stationSelect(id, cur){ return `<select id="${id}" class="stsel">${STATIONS.map(([k,l]) => `<option value="${k}" ${k === cur ? "selected" : ""}>${l}</option>`).join("")}<option value="" ${!cur ? "selected" : ""}>✏ Custom (tick below)</option></select>`; }
+function wireStation(sel, boxes){
+  const apply = () => { const st = STATIONS.find(x => x[0] === sel.value); if (!st) return; $$("input", boxes).forEach(i => { if (!i.disabled) i.checked = st[2].includes(i.value); }); };
+  sel.onchange = apply;
+  boxes.addEventListener("change", () => { sel.value = stationOf(pickedPerms(boxes)); });
+  return apply;
 }
 const pickedPerms = el => [...el.querySelectorAll("input:checked")].map(i => i.value);
 
@@ -691,9 +754,10 @@ function popSound(){
     [1046.5, 1318.5, 1568, 2093].forEach((fq, i) => bell(c, out, fq, t0 + .7 + i * .09, .9, .32));   // happy chime after the pops
   } catch {}
 }
-function celebrate(){
+function celebrate(quiet){
   popSound();
-  if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return toast("🎓 Welcome, " + (S.me || ""), "gold big");
+  if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return quiet ? null : toast("🎓 Welcome, " + (S.me || ""), "gold big");
+  const old = $("#confetti"); if (old) old.remove();
   const cv = document.createElement("canvas"); cv.id = "confetti"; document.body.appendChild(cv);
   const ctx = cv.getContext("2d"), dpr = Math.min(2, window.devicePixelRatio || 1);
   const size = () => { cv.width = innerWidth * dpr; cv.height = innerHeight * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }; size();
@@ -713,7 +777,7 @@ function celebrate(){
     if (t < 4.8) requestAnimationFrame(frame); else cv.remove();
   };
   requestAnimationFrame(frame);
-  toast("🎓 Welcome, " + (S.me || "") + "!", "gold big");
+  if (!quiet) toast("🎓 Welcome, " + (S.me || "") + "!", "gold big");
 }
 
 /* ---------- modal ---------- */
@@ -835,19 +899,69 @@ function liveBadge(){
   const role = S.user.role === "admin" ? "Admin" : S.user.role === "manager" ? "Manager" : "Team";
   w.innerHTML = `<div><b>${esc(S.me)}</b> <span class="rolepill ${S.user.role}">${role}</span></div>
     <div class="live" style="justify-content:flex-end">${S.data ? `<span class="dot ${S.ok?"":"off"}"></span>${S.ok ? (RT && RT.status === "SUBSCRIBED" ? "Live ⚡" : "Live") + (secs!==null && secs>8 ? ` · ${secs}s ago` : "") : "Reconnecting…"}` : ""}</div>
-    <div class="acts"><button class="hbtn" id="hEv">⇄ Events</button>${S.data ? `<button class="hbtn" id="hRf" title="Reload everything from the server">⟳ Refresh</button>` : ""}<button class="hbtn out" id="hOut">⏻ Log out</button></div>`;
+    <div class="acts">${S.user.role === "admin" ? `<button class="hbtn pres" id="hPres" title="Who is online">${presPill()}</button>` : ""}<button class="hbtn" id="hEv">⇄ Events</button>${S.data ? `<button class="hbtn" id="hRf" title="Reload everything from the server">⟳ Refresh</button>` : ""}<button class="hbtn out" id="hOut">⏻ Log out</button></div>`;
   $("#hOut").onclick = () => logout();
   $("#hEv").onclick = () => { clearInterval(timer); eventsView(); };
   const rf = $("#hRf"); if (rf) rf.onclick = hardRefresh;
+  const hp = $("#hPres"); if (hp) hp.onclick = presDialog;
+}
+/* ---------- presence: everyone pings; only the admin sees who is online ---------- */
+const PRES = { list:null, timer:null, ping:null };
+const presKind = u => u.secs != null && u.secs <= 150 ? (u.state === "away" ? "away" : "active") : "off";
+function presPill(){
+  if (!PRES.list) return `<span class="pd on"></span>…`;
+  const c = {active:0, away:0, off:0}; PRES.list.forEach(u => c[presKind(u)]++);
+  return `<span class="pd on"></span>${c.active}<span class="pl"> active</span> <span class="pd aw"></span>${c.away}<span class="pl"> away</span> <span class="pd of"></span>${c.off}<span class="pl"> offline</span>`;
+}
+async function presLoad(){
+  if (!S.user || S.user.role !== "admin") return;
+  try { PRES.list = await rpc("hub_presence", {p_token:S.pin}); } catch { return; }
+  const hp = $("#hPres"); if (hp) hp.innerHTML = presPill();
+  const m = $("#presBody"); if (m) m.innerHTML = presListHTML();
+}
+function presPing(){
+  if (!S.user || !S.pin || !/^hub_/.test(S.pin)) return;
+  const st = document.hidden || !document.hasFocus() ? "away" : "active";
+  const dev = DESKTOP() ? "desktop app" : /Mobi|Android|iPhone/i.test(navigator.userAgent) ? "phone" : "browser";
+  rpc("hub_ping", {p_token:S.pin, p_state:st, p_tab:S.data ? S.tab : "events", p_device:dev}).catch(() => {});
+}
+function presStart(){
+  clearInterval(PRES.ping); clearInterval(PRES.timer);
+  presPing(); PRES.ping = setInterval(presPing, 25000);
+  if (S.user && S.user.role === "admin"){ presLoad(); PRES.timer = setInterval(presLoad, 20000); }
+}
+["visibilitychange","focus","blur"].forEach(ev => (ev === "visibilitychange" ? document : window).addEventListener(ev, () => { clearTimeout(PRES.vt); PRES.vt = setTimeout(presPing, 400); }));
+const TAB_NAME = {overview:"Overview", tasks:"Tasks", checkin:"Check-in", robes:"Robes", stage:"Stage", certs:"Certificates", grads:"Graduates", feed:"Updates", settings:"Settings", events:"Events"};
+function presListHTML(){
+  if (!PRES.list) return `<p class="muted">Loading…</p>`;
+  const groups = [["active","🟢 Active now","Using the Alumni Hub right now"],["away","🟡 Online, away","App open in the background"],["off","⚫ Offline","Not connected"]];
+  const ago2 = u => !u.last_seen ? (u.last_login ? "last signed in " + ago(u.last_login) : "never signed in") : u.secs < 60 ? "just now" : "seen " + ago(u.last_seen);
+  return groups.map(([k, t, sub]) => { const L = PRES.list.filter(u => presKind(u) === k);
+    return `<section class="prg"><div class="prh">${t} <b>${L.length}</b><span class="small muted"> · ${sub}</span></div>${L.length ? `<div class="list">${L.map(u => { const st = u.role === "team" ? stationOf(u.perms) : "";
+      return `<div class="prr"><span class="pd ${k === "active" ? "on" : k === "away" ? "aw" : "of"}"></span><div style="flex:1;min-width:0"><b>${esc(u.name)}</b> <span class="rolepill ${u.role}">${u.role}</span>${st ? ` <span class="stpill">${STATIONS.find(x => x[0] === st)[1]}</span>` : ""}
+        <div class="small muted">${k !== "off" && u.tab ? "On " + (TAB_NAME[u.tab] || u.tab) + " · " : ""}${u.device ? esc(u.device) + " · " : ""}${ago2(u)}</div></div></div>`; }).join("")}</div>` : `<p class="small muted" style="margin:4px 0 8px">Nobody.</p>`}</section>`; }).join("");
+}
+function presDialog(){
+  modal(`<h3>Who's online</h3><p class="small muted">Only you can see this. Updates every 20 seconds.</p><div id="presBody">${presListHTML()}</div><div class="row" style="margin-top:10px"><span class="spacer"></span><button class="btn ghost" id="mc">Close</button></div>`, (m, close) => { $("#mc", m).onclick = close; });
+  presLoad();
 }
 async function hardRefresh(){
+  // refreshes only this screen: newest app version, your access, the live event and every number. Nobody else is told.
   const rf = $("#hRf"); if (rf){ rf.disabled = true; rf.classList.add("spinning"); }
   try {
+    try { const t = await (await fetch(location.pathname + "?nc=" + Date.now(), {cache:"no-store"})).text(); const m = t.match(/const BUILD = "(\d+)"/);
+      if (m && m[1] > BUILD){ try { sessionStorage.setItem("hub_refreshed", "1"); } catch {} const u = new URL(location.href); u.searchParams.set("v", m[1]); location.replace(u.toString()); return; } } catch {}
+    try { const r = await rpc("hub_me", {p_token:S.pin}); S.user = r.user; S.me = r.user.name; S.events = r.events || S.events; } catch {}
     if (RT && RT.client && RT.ch){ try { RT.client.removeChannel(RT.ch); } catch {} }
     RT = null; rtConnect();
     pulling = false; pullAgain = false;
+    S._setDrawn = null; S._usersLoaded = false; S.replyOpen = null;
+    ["#fdView","#setView","#usView"].forEach(sel => { const el = $(sel); if (el) el.remove(); });
+    main.innerHTML = "";
     await pull("full");
-    toast(S.ok ? "Refreshed. Everything is up to date." : "Still can't reach the server. Check the internet connection.", S.ok ? "green" : "red");
+    render(); liveBadge(); presLoad();
+    if (S.ok){ celebrate(true); toast("✨ Refreshed. Your screen is fully up to date.", "green"); }
+    else toast("Still can't reach the server. Check the internet connection.", "red");
   } finally { const b = $("#hRf"); if (b){ b.disabled = false; b.classList.remove("spinning"); } }
 }
 setInterval(liveBadge, 5000);
@@ -942,13 +1056,16 @@ function afterAuth(tok, r){
   openEvent();
 }
 async function logout(expired){
-  clearInterval(timer);
+  clearInterval(timer); clearInterval(PRES.ping); clearInterval(PRES.timer); PRES.list = null;
   try { if (S.pin && !expired) await rpc("hub_logout", {p_token:S.pin}); } catch {}
   store.del(TOKEN_KEY); S.pin = null; S.user = null; S.data = null;
   $("#who").innerHTML = "";
   authView(expired ? "Your session has ended. Please sign in again." : "");
 }
 function openEvent(){
+  const live = (S.events || []).find(e => e.live);
+  let picked = null; try { picked = sessionStorage.getItem("hub_pick"); } catch {}
+  if (live && !picked) CODE = live.code;
   CODE = CODE || store.get("hub_event");
   if (!CODE || !S.events.some(e => e.code === CODE)){
     if (S.events.length === 1) CODE = S.events[0].code;
@@ -966,12 +1083,14 @@ async function eventsView(){
   $("#evName").textContent = "Choose an event"; $("#evSub").textContent = "";
   const mgr = can("create_events");
   main.innerHTML = `<div class="card"><h2>Your events</h2><p class="muted small" style="margin:0 0 10px">Pick a graduation or alumni event to work on.</p>
-    <div class="evgrid">${S.events.map(e => `<div class="evtile" data-code="${esc(e.code)}"><h3>${esc(e.name)}</h3>
+    <div class="evgrid">${S.events.map(e => `<div class="evtile${e.live ? " islive" : ""}" data-code="${esc(e.code)}">${e.live ? `<span class="livebadge" title="Everyone opens this event when they sign in"><i></i>Live</span>` : ""}<h3>${esc(e.name)}</h3>
       <div class="m">${e.date ? new Date(e.date).toLocaleDateString("en-ZA",{day:"numeric",month:"long",year:"numeric"}) : "Date to be confirmed"}${e.venue ? " · " + esc(e.venue) : ""}</div>
-      <div class="n">${e.learners} ALUMNI</div></div>`).join("")}
+      <div class="n">${e.learners} ALUMNI</div>${S.user && S.user.role === "admin" ? (e.live ? `<button class="evlive" data-live="" type="button" title="Stop being the live event">Unpin</button>` : `<button class="evlive" data-live="${esc(e.code)}" type="button" title="Everyone will open this event when they sign in">📌 Make live</button>`) : ""}</div>`).join("")}
       ${mgr ? `<div class="evtile new" id="newEv">+ New event</div>` : ""}</div>
     ${!S.events.length && !mgr ? `<div class="empty">No events yet. A manager needs to create one.</div>` : ""}</div>`;
-  $$(".evtile[data-code]").forEach(t => t.onclick = () => { CODE = t.dataset.code; enterApp(); });
+  $$(".evtile[data-code]").forEach(t => t.onclick = e => { if (e.target.closest("[data-live]")) return; CODE = t.dataset.code; try { sessionStorage.setItem("hub_pick", CODE); } catch {} enterApp(); });
+  $$("[data-live]").forEach(b => b.onclick = async e => { e.stopPropagation(); const c = b.dataset.live || null;
+    try { S.events = await rpc("hub_live_event_set", {p_token:S.pin, p_code:c}); toast(c ? "Everyone will now open this event when they sign in" : "No live event set", "green"); eventsView(); } catch(err){ toast(err.message, "red"); } });
   const ne = $("#newEv"); if (ne) ne.onclick = () => modal(`<h3>New event</h3>
     <label class="lbl">Event name</label><input type="text" id="nen" placeholder="e.g. Camblish Graduation Ceremony 2027">
     <div class="grid g2" style="gap:10px"><div><label class="lbl">Date</label><input type="date" id="ned"></div><div><label class="lbl">Venue</label><input type="text" id="nev"></div></div>
@@ -990,16 +1109,37 @@ async function enterApp(){
   if (S.celebrate) S.tab = "overview";
   liveBadge();
   main.innerHTML = `<div class="card"><p class="muted">Connecting…</p></div>`;
-  await pull(true); startSync();
+  await pull(true); startSync(); presStart();
+  try { if (sessionStorage.getItem("hub_refreshed")){ sessionStorage.removeItem("hub_refreshed"); setTimeout(() => { celebrate(true); toast("✨ Updated to the newest version and refreshed.", "green"); }, 400); } } catch {}
   if (S.celebrate){ S.celebrate = false; capSpin(false); if (S.tab !== "overview") setTab("overview"); try { history.replaceState(null, "", "?e=" + CODE + "#overview"); } catch {} celebrate(); }
 }
 
 /* ======================================================================
    RENDER
    ====================================================================== */
+function liveBar(){
+  let b = $("#liveBar"); const live = (S.events || []).find(e => e.live);
+  const show = live && CODE && live.code !== CODE;
+  if (!show){ if (b) b.remove(); return; }
+  if (!b){ b = document.createElement("div"); b.id = "liveBar"; b.className = "livebar noprint"; main.parentNode.insertBefore(b, main); }
+  b.innerHTML = `⚠ You're looking at <b>${esc(S.data ? S.data.event.name : "another event")}</b>, not today's live event <b>${esc(live.name)}</b>. Numbers here won't match everyone else's. <button class="btn gold sm" id="goLive" type="button">Switch to the live event</button>`;
+  $("#goLive").onclick = () => { CODE = live.code; try { sessionStorage.removeItem("hub_pick"); } catch {} enterApp(); };
+}
+/* view-only: everyone sees every list; buttons they can't use are blurred and switched off */
+const RO_MAP = [["checkin","[data-ci]"],["robes","[data-rb]"],["certs","[data-ct]"],["stage","#callNext,#undoCall,[data-sg]"],["print_tags","[data-tag],#printAllTags"]];
+function roLock(){
+  let locked = 0;
+  RO_MAP.forEach(([p, sel]) => { if (can(p)) return; $$(sel, main).forEach(b => { if (b.classList.contains("ro")) { locked++; return; } b.disabled = true; b.classList.add("ro"); b.title = "View only: ask the administrator for access"; b.setAttribute("aria-disabled", "true"); locked++; }); });
+  const tabNeeds = {checkin:"checkin", robes:"robes", stage:"stage", certs:"certs"}[S.tab];
+  const note = $("#roNote", main);
+  if (tabNeeds && !can(tabNeeds)){ if (!note){ const n = document.createElement("div"); n.id = "roNote"; n.className = "ronote noprint"; n.innerHTML = "👁 <b>View only.</b> You can follow everything live here, but the buttons are switched off for you. Ask the administrator if you need to help at this station."; const f = $(".flowcard", main); (f ? f.after(n) : main.prepend(n)); } }
+  else if (note) note.remove();
+}
+new MutationObserver(() => { if (S.data) roLock(); }).observe(main, {childList:true, subtree:true});
 function render(){
   if (!S.data) return;
   const d = S.data;
+  liveBar();
   $("#evName").textContent = d.event.name + "  ▾";
   $("#evName").onclick = () => { clearInterval(timer); eventsView(); };
   $("#evSub").textContent = [d.event.date ? new Date(d.event.date).toLocaleDateString("en-ZA",{weekday:"short",day:"numeric",month:"long",year:"numeric"}) : "", d.event.venue].filter(Boolean).join(" · ");
@@ -1096,13 +1236,25 @@ async function renderTag(l){
     x.fillText(name, X(305), Y(285));
     x.fillStyle = "#0d2a6b"; fitText(x, prog, 340 * k, Math.round(14 * k), '800 {s}px Montserrat, "Segoe UI", Arial, sans-serif'); x.fillText(prog, X(305), Y(323));
     x.fillStyle = "#1d3fae"; fitText(x, cli, 340 * k, Math.round(13 * k), '700 {s}px Montserrat, "Segoe UI", Arial, sans-serif'); x.fillText(cli, X(305), Y(342));
+    stageList(); const pc = progColor(l);
+    x.fillStyle = pc; x.fillRect(X(0), Y(358), 612 * k, 8 * k);   // programme colour strip for ushers
+    if (isLead(l)){   // first of the programme: bright ribbon across the top-left corner
+      x.save(); x.translate(X(0), Y(0)); x.rotate(-Math.PI / 4);
+      x.fillStyle = pc; x.fillRect(-140 * k, 46 * k, 280 * k, 34 * k);
+      x.fillStyle = "#fff"; x.textAlign = "center"; x.font = `900 ${Math.round(15 * k)}px Montserrat, Arial, sans-serif`; x.fillText("★ 1ST IN CLASS ★", 0, 69 * k);
+      x.restore();
+      const lt = "LEADS " + (l.programme || "").toUpperCase(); x.textAlign = "center";
+      x.font = `900 ${Math.round(11 * k)}px Montserrat, Arial, sans-serif`; const tw = Math.min(x.measureText(lt).width + 22 * k, 330 * k);
+      x.beginPath(); x.roundRect(X(305) - tw / 2, Y(226), tw, 17 * k, 8.5 * k); x.fillStyle = pc; x.fill();
+      x.fillStyle = "#fff"; fitText(x, lt, tw - 14 * k, Math.round(11 * k), '900 {s}px Montserrat, Arial, sans-serif'); x.fillText(lt, X(305), Y(238.5));
+      x.textAlign = "center";
+    }
     if (l.seat || l._code){   // seat + stage number badge, bottom left
       const bx = X(14), by = Y(282), bw = 100 * k, bh = 70 * k, r = 11 * k;
       x.beginPath(); x.roundRect(bx, by, bw, bh, r); x.fillStyle = "#081a45"; x.fill(); x.lineWidth = 3 * k; x.strokeStyle = "#d4af37"; x.stroke();
       x.fillStyle = "#f3d27a"; x.font = `800 ${Math.round(8 * k)}px Montserrat, Arial, sans-serif`; x.fillText(l.seat ? "SEAT" : "STAGE No.", bx + bw / 2, by + 14 * k);
       const big = l.seat || l._code;
-      x.fillStyle = "#fff"; fitText(x, big, bw - 12 * k, Math.round(26 * k), '{s}px "Archivo Black", "Arial Black", sans-serif'); x.fillText(big, bx + bw / 2, by + 42 * k);
-      if (l.seat && l._code){ x.fillStyle = "#f3d27a"; x.font = `700 ${Math.round(9 * k)}px Montserrat, Arial, sans-serif`; x.fillText("STAGE " + l._code, bx + bw / 2, by + 60 * k); }
+      x.fillStyle = "#fff"; fitText(x, big, bw - 12 * k, Math.round(30 * k), '{s}px "Archivo Black", "Arial Black", sans-serif'); x.fillText(big, bx + bw / 2, by + 50 * k);
     }
   } else {   // simple black design for small thermal labels
     const pad = W * 0.04; x.fillStyle = "#000"; x.textAlign = "left";
@@ -1304,8 +1456,11 @@ async function seedTasks(){
    ====================================================================== */
 const F0 = () => ({q:"", prog:"", nqf:"", pm:"", client:""});
 function fopts(){
-  const L = S.data.learners, u = k => [...new Set(L.map(l => l[k]).filter(v => v !== null && v !== undefined && v !== ""))];
-  return { prog:u("programme").sort(), nqf:u("nqf").sort((a,b)=>a-b), pm:u("pm").sort(), client:u("client").sort() };
+  // each list only shows what is left once the other filters are applied (pick a client: only its programmes remain)
+  const F = S.f.L, field = {prog:"programme", nqf:"nqf", pm:"pm", client:"client"};
+  const keep = (l, skip) => Object.entries(field).every(([fk, col]) => fk === skip || !F[fk] || String(l[col]) === String(F[fk]));
+  const u = fk => { const v = [...new Set(S.data.learners.filter(l => keep(l, fk)).map(l => l[field[fk]]).filter(x => x !== null && x !== undefined && x !== ""))]; if (F[fk] && !v.some(x => String(x) === String(F[fk]))) v.push(F[fk]); return v; };
+  return { prog:u("prog").sort(), nqf:u("nqf").sort((a,b)=>a-b), pm:u("pm").sort(), client:u("client").sort() };
 }
 function fActive(){ const F = S.f.L; return !!(F.q || F.prog || F.nqf || F.pm || F.client); }
 function filterBar(extra=""){
@@ -1351,10 +1506,41 @@ function matchScore(l){
   return sc;
 }
 function chipsHTML(id, opts, cur){ return `<div class="chips" id="${id}" style="margin:10px 0">${opts.map(([k,label,n]) => `<button class="chip ${cur===k?"on":""}" data-c="${k}">${label} (${n})</button>`).join("")}</div>`; }
+const PROG_COLS = ["#e11d48","#f59e0b","#10b981","#3b82f6","#8b5cf6","#ec4899","#14b8a6","#f97316","#65a30d","#0891b2","#a855f7","#dc2626","#ca8a04","#2563eb","#db2777","#059669"];
+function progColor(l){ const keys = S._progKeys && S._progKeysAt === S.data.learners.length ? S._progKeys : (S._progKeysAt = S.data.learners.length, S._progKeys = [...new Set(S.data.learners.map(progKey))].sort()); const i = keys.indexOf(progKey(l)); return PROG_COLS[(i < 0 ? 0 : i) % PROG_COLS.length]; }
+const isLead = l => l.status === "present" && !l._late && /-01$/.test(codeOf(l));
+const leadTag = l => isLead(l) ? `<span class="leadtag" style="--pc:${progColor(l)}" title="First of ${esc(l.programme || "")} to arrive: leads this programme to the stage">★ 1st · ${esc(l.programme || "")}</span>` : "";
 const seatTag = l => l.seat ? `<span class="seat" title="Seat">💺 ${hl(l.seat)}</span>` : "";
+/* ---------- learner notes & queries (travel with the learner to the graduate list) ---------- */
+const NOTE_KIND = {name:["✏️","Name correction"], query:["⚠","Query"], note:["💬","Note"]};
+const notesOf = l => Array.isArray(l.queries) ? l.queries : [];
+const openQ = l => notesOf(l).filter(n => !n.resolved);
+const notesTxt = l => notesOf(l).map(n => `${NOTE_KIND[n.kind] ? NOTE_KIND[n.kind][1] : "Note"}${n.resolved && n.kind !== "note" ? " (resolved)" : ""}: ${n.text} (${n.by})`).join(" | ");
+function notesLine(l){
+  const N = notesOf(l), o = openQ(l), last = N[N.length - 1];
+  return `<div class="lnotes">${o.length ? `<span class="nq open">⚠ ${o.length} open quer${o.length === 1 ? "y" : "ies"}</span>` : ""}${last ? `<span class="nlast">${NOTE_KIND[last.kind][0]} ${esc(last.text.length > 70 ? last.text.slice(0, 70) + "…" : last.text)} <i>· ${esc(last.by)}</i></span>` : ""}<button type="button" class="nbtn" data-note="${l.id}">${N.length ? `💬 Notes (${N.length})` : "💬 Add note"}</button></div>`;
+}
+function noteDialog(id){
+  const l = S.data.learners.find(x => x.id === id); if (!l) return;
+  const draw = () => { const L2 = S.data.learners.find(x => x.id === id) || l; const N = notesOf(L2).slice().reverse();
+    return N.length ? N.map(n => `<div class="nrow ${n.resolved ? "res" : "open"} k-${n.kind}"><div><b>${NOTE_KIND[n.kind][0]} ${NOTE_KIND[n.kind][1]}</b>${n.kind !== "note" ? (n.resolved ? ` <span class="tag">Resolved${n.resolved_by ? " by " + esc(n.resolved_by) : ""}</span>` : ` <span class="tag red">Open</span>`) : ""}<div>${esc(n.text)}</div><div class="small muted">${esc(n.by)} · ${fmtTime(n.at)}</div></div>${!n.resolved && can("comment") ? `<button class="btn ghost sm" data-nres="${n.id}" type="button">✓ Resolved</button>` : ""}</div>`).join("") : `<p class="small muted">No notes yet.</p>`; };
+  modal(`<h3>Notes for ${esc(fullName(l))}</h3><p class="small muted">${esc(l.programme || "")}${l.seat ? " · Seat " + esc(l.seat) : ""}. Notes follow this graduate through every tab and print on the graduate list.</p>
+    <div id="nlist">${draw()}</div>
+    ${can("comment") ? `<label class="lbl">Add a note</label><div class="row" style="gap:6px;flex-wrap:wrap"><select id="nk" style="max-width:210px"><option value="name">✏️ Name correction on certificate</option><option value="query">⚠ Query (needs follow-up)</option><option value="note">💬 General note</option></select>
+      <input type="text" id="nt" maxlength="500" placeholder="e.g. Surname spelt Mokoena, should be Mokwena" style="flex:1;min-width:200px"></div>` : `<p class="small muted">View only.</p>`}
+    <div class="row" style="margin-top:12px"><span class="spacer"></span><button class="btn ghost" id="mc">Close</button>${can("comment") ? `<button class="btn gold" id="mo">Save note</button>` : ""}</div><div id="me"></div>`,
+    (m, close) => { $("#mc", m).onclick = close;
+      const wireRes = () => $$("[data-nres]", m).forEach(b => b.onclick = async () => { b.disabled = true; if (await act("grad_note", {p_learner:id, p_text:null, p_kind:null, p_resolve:b.dataset.nres}, "Marked as resolved")){ $("#nlist", m).innerHTML = draw(); wireRes(); } });
+      wireRes();
+      const save = async () => { const t = $("#nt", m).value.trim(); if (!t) return $("#nt", m).focus(); $("#mo", m).disabled = true;
+        if (await act("grad_note", {p_learner:id, p_text:t, p_kind:$("#nk", m).value, p_resolve:null}, "Note saved")){ $("#nt", m).value = ""; $("#nlist", m).innerHTML = draw(); wireRes(); }
+        $("#mo", m).disabled = false; };
+      const mo = $("#mo", m); if (mo){ mo.onclick = save; $("#nt", m).addEventListener("keydown", e => { if (e.key === "Enter") save(); }); setTimeout(() => $("#nt", m).focus(), 50); } });
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-note]"); if (b && S.data){ e.preventDefault(); noteDialog(b.dataset.note); } });
 function lInfo(l, extra=""){
-  return `<div class="info"><div class="nm">${hl(fullName(l))} ${seatTag(l)}</div>
-    <div class="small muted">NQF ${esc(l.nqf ?? "?")} · ${hl(l.programme||"")}${l.client?" · "+hl(l.client):""}${l.pm?" · PM: "+hl(l.pm):""}${l.learner_ref && qWords().some(w => String(l.learner_ref).toLowerCase().includes(w)) ? " · ID " + hl(l.learner_ref) : ""}</div>${extra}</div>`;
+  return `<div class="info"><div class="nm">${hl(fullName(l))} ${seatTag(l)} ${leadTag(l)}</div>
+    <div class="small muted">NQF ${esc(l.nqf ?? "?")} · ${hl(l.programme||"")}${l.client?" · "+hl(l.client):""}${l.pm?" · PM: "+hl(l.pm):""}${l.learner_ref && qWords().some(w => String(l.learner_ref).toLowerCase().includes(w)) ? " · ID " + hl(l.learner_ref) : ""}</div>${extra}${notesLine(l)}</div>`;
 }
 function listOut(el, list, rowFn, empty){
   const shown = list.slice(0, 150);
@@ -1404,7 +1590,7 @@ function groupedOut(el, list, rowFn, empty, tab, sortIn, redraw, numbered=true){
   $$("[data-gall]", el).forEach(b => b.onclick = () => { if (b.dataset.gall === "open") col.clear(); else keys.forEach(k => col.add(k)); redraw(); });
 }
 const posTag = (n, prog) => n ? `<span class="pos" title="${ord(n)} in ${esc(prog)}">${n}</span>` : "";
-const tagBtn = l => !can("print_tags") ? "" : l.tag_printed_at ? `<button class="btn ghost sm" data-tag="${l.id}" title="Printed at ${fmtTime(l.tag_printed_at)}" type="button">🖨 Reprint</button>` : `<button class="btn sm tagnow" data-tag="${l.id}" type="button">🖨 Print name tag</button>`;
+const tagBtn = l => l.tag_printed_at ? `<button class="btn ghost sm" data-tag="${l.id}" title="Printed at ${fmtTime(l.tag_printed_at)}" type="button">🖨 Reprint</button>` : `<button class="btn sm tagnow" data-tag="${l.id}" type="button">🖨 Print name tag</button>`;
 function wireTags(root){ $$("[data-tag]", root).forEach(b => b.onclick = () => { stageList(); const l = S.data.learners.find(x => x.id === b.dataset.tag); if (l) printTags([l]); }); }
 async function markPrinted(list){
   const ids = list.map(l => l.id).filter(Boolean); if (!ids.length || !CODE) return;
@@ -1416,6 +1602,7 @@ async function markPrinted(list){
 /* ======================================================================
    CHECK-IN  (present learners move on to Robes)
    ====================================================================== */
+const dcode = l => l.seat || codeOf(l);   // one code everywhere: the seat (seat order = stage order)
 function codeOf(l){ if (!l._code) stageList(); return l._code || ""; }
 function viewCheckin(){
   if (!$("#ciView")){
@@ -1459,9 +1646,9 @@ function drawCheckin(){
   groupedOut($("#cilist"), L.filter(l => l.status === S.f.ciFilter), (l, i, prog) => `<div class="lrow ${l.status}">${posTag(i, prog)}${lInfo(l,
       `<div class="meta" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:3px">${/^n/i.test(l.rsvp||"")?`<span class="tag red">RSVP: not attending</span>`:""}${/^y/i.test(l.robe||"")?`<span class="tag gold">Needs robe</span>`:""}${l.status!=="present"&&l.phone?`<a class="tag" href="tel:${esc(String(l.phone).split("/")[0].trim())}">📞 ${esc(l.phone)}</a>`:""}</div>
        ${l.status==="present"?`<div class="small" style="color:var(--ok)">Arrived ${fmtTime(l.arrived_at)} · by ${esc(l.checked_by||"")} · now ${l.cert_issued?"graduated":l.stage_status==="done"?"collecting certificate":l.robe_issued?"in the stage line":"at robes"}</div>`:""}`)}
-    <div class="pacts">${l.status==="present" ? `<span class="pill s-Completed">✓ Present</span><span class="tag gold" title="Stage number">${esc(codeOf(l))}</span>${tagBtn(l)}${can("checkin")?`<button class="btn ghost sm" data-ci="${l.id}" data-s="expected">Undo</button>`:""}`
-      : l.status==="absent" ? `<span class="tag">Absent</span>${can("checkin")?`<button class="btn ghost sm" data-ci="${l.id}" data-s="expected">Undo</button><button class="btn green bigbtn" data-ci="${l.id}" data-s="present">Arrived</button>`:""}`
-      : `<span class="notarr">Not arrived</span>${can("checkin")?`<button class="btn ghost sm" data-ci="${l.id}" data-s="absent">Absent</button><button class="btn green bigbtn" data-ci="${l.id}" data-s="present">✓ Mark present</button>`:""}`}</div></div>`,
+    <div class="pacts">${l.status==="present" ? `<span class="pill s-Completed">✓ Present</span><span class="tag gold" title="Seat (also their place in the stage line)">${esc(dcode(l))}</span>${tagBtn(l)}${true?`<button class="btn ghost sm" data-ci="${l.id}" data-s="expected">Undo</button>`:""}`
+      : l.status==="absent" ? `<span class="tag">Absent</span>${true?`<button class="btn ghost sm" data-ci="${l.id}" data-s="expected">Undo</button><button class="btn green bigbtn" data-ci="${l.id}" data-s="present">Arrived</button>`:""}`
+      : `<span class="notarr">Not arrived</span>${true?`<button class="btn ghost sm" data-ci="${l.id}" data-s="absent">Absent</button><button class="btn green bigbtn" data-ci="${l.id}" data-s="present">✓ Mark present</button>`:""}`}</div></div>`,
     fActive() ? "No graduate matches these filters." : S.f.ciFilter === "expected" ? "Everyone has arrived. 🎉" : "Nobody here yet.", "checkin", present ? byArrival : byName, drawCheckin, present);
   wireTags($("#cilist"));
   $$("#cilist [data-ci]").forEach(b => b.onclick = async () => {
@@ -1496,8 +1683,8 @@ function drawRobes(){
   $$("#rbc .chip").forEach(b => b.onclick = () => { S.f.rb = b.dataset.c; drawRobes(); });
   groupedOut($("#rblist"), S.f.rb === "wait" ? wait : done, (l, i, prog) => `<div class="lrow ${l.robe_issued?"present":"expected"}">${posTag(i, prog)}${lInfo(l,
       `<div class="small" style="margin-top:2px">${/^y/i.test(l.robe||"")?`<span class="tag gold">Needs robe</span> `:""}${l.belt?`<span class="tag">Belt: ${esc(l.belt)}</span> `:""}<span class="muted">Arrived ${fmtTime(l.arrived_at)}</span>${l.robe_issued?` · <span style="color:var(--ok)">${l.robe_skip?"Own robe":"Robe issued"} ${fmtTime(l.robe_at)}${l.robe_by?" by "+esc(l.robe_by):""}</span>`:""}</div>`)}
-    <div class="pacts"><span class="tag gold" title="Stage number">${esc(codeOf(l))}</span>${tagBtn(l)}
-      ${can("robes") ? (l.robe_issued ? `<span class="pill s-Completed">✓ ${l.robe_skip?"Own robe":"Robed"}</span><button class="btn ghost sm" data-rb="${l.id}" data-v="0">Undo</button>`
+    <div class="pacts"><span class="tag gold" title="Seat (also their place in the stage line)">${esc(dcode(l))}</span>${tagBtn(l)}
+      ${true ? (l.robe_issued ? `<span class="pill s-Completed">✓ ${l.robe_skip?"Own robe":"Robed"}</span><button class="btn ghost sm" data-rb="${l.id}" data-v="0">Undo</button>`
         : `<button class="btn ghost sm" data-rb="${l.id}" data-v="1" data-skip="1" title="Has their own robe or does not need one">Own robe</button><button class="btn gold bigbtn" data-rb="${l.id}" data-v="1">🎓 Robe issued</button>`) : ""}</div></div>`,
     fActive() ? "No graduate matches these filters." : S.f.rb === "wait" ? "Nobody waiting for a robe right now." : "No robes issued yet.", "robes", byArrival, drawRobes);
   wireTags($("#rblist"));
@@ -1528,7 +1715,7 @@ function drawCerts(){
   const byStage = (a, b) => new Date(a.stage_at || 0) - new Date(b.stage_at || 0);
   groupedOut($("#ctlist"), S.f.ct === "due" ? due : notYet, (l, i, prog) => `<div class="lrow ${l.stage_status==="done"?"called":"expected"}">${posTag(i, prog)}${lInfo(l,
       `<div class="small muted" style="margin-top:2px">${l.stage_status==="done"?`Crossed ${fmtTime(l.stage_at)}`:l.robe_issued?"In the stage line":"Waiting for robe"}</div>`)}
-    <div class="pacts"><span class="tag gold">${esc(codeOf(l))}</span>${tagBtn(l)}${can("certs") && l.stage_status === "done" ? `<button class="btn green bigbtn" data-ct="${l.id}" data-v="1">📜 Certificate issued</button>` : ""}</div></div>`,
+    <div class="pacts"><span class="tag gold" title="Seat">${esc(dcode(l))}</span>${tagBtn(l)}${l.stage_status === "done" ? `<button class="btn green bigbtn" data-ct="${l.id}" data-v="1">📜 Certificate issued</button>` : ""}</div></div>`,
     fActive() ? "No graduate matches these filters." : S.f.ct === "due" ? "No certificates waiting right now." : "Nobody waiting to go on stage.", "certs", S.f.ct === "due" ? byStage : byArrival, drawCerts);
   wireTags($("#ctlist"));
   $$("#ctlist [data-ct]").forEach(b => b.onclick = async () => { b.disabled = true; const l = S.data.learners.find(x=>x.id===b.dataset.ct);
@@ -1548,8 +1735,8 @@ function viewGrads(){
     $("#grPdf").onclick = async () => { const b = $("#grPdf"); b.disabled = true; b.textContent = "Building…"; await reportPdf(`Graduate list ${S.data.event.name} ${new Date().toISOString().slice(0,10)}.pdf`.replace(/[\\/:*?"<>|]/g, ""), buildReport("list")); b.disabled = false; b.textContent = "⬇ Graduate list (PDF)"; };
     $("#grCsv").onclick = () => {
       const G = applyF(S.data.learners.filter(l => l.cert_issued)).sort((a,b) => progKey(a).localeCompare(progKey(b)) || new Date(a.cert_at) - new Date(b.cert_at));
-      const head = ["Programme","NQF","Position","First name","Middle name","Surname","Client","Project manager","Seat","Arrived","Robe","Crossed the stage","Certificate issued","Certificate by"];
-      const pos = {}; const rows = G.map(l => { const k = progKey(l); pos[k] = (pos[k]||0) + 1; return [l.programme, l.nqf, pos[k], l.first_name, l.middle_name, l.surname, l.client, l.pm, l.seat, fmtTime(l.arrived_at), l.robe_skip ? "Own robe" : fmtTime(l.robe_at), fmtTime(l.stage_at), fmtTime(l.cert_at), l.cert_by]; });
+      const head = ["Programme","NQF","Position","First name","Middle name","Surname","Client","Project manager","Seat","Arrived","Robe","Crossed the stage","Certificate issued","Certificate by","Open queries","Notes"];
+      const pos = {}; const rows = G.map(l => { const k = progKey(l); pos[k] = (pos[k]||0) + 1; return [l.programme, l.nqf, pos[k], l.first_name, l.middle_name, l.surname, l.client, l.pm, l.seat, fmtTime(l.arrived_at), l.robe_skip ? "Own robe" : fmtTime(l.robe_at), fmtTime(l.stage_at), fmtTime(l.cert_at), l.cert_by, openQ(l).length || "", notesTxt(l)]; });
       const csv = [head, ...rows].map(r => r.map(v => `"${String(v ?? "").replace(/"/g,'""')}"`).join(",")).join("\r\n");
       saveFile(`Graduates ${S.data.event.name} ${new Date().toISOString().slice(0,10)}.csv`.replace(/[\\/:*?"<>|]/g, ""), "﻿" + csv);
     };
@@ -1564,7 +1751,7 @@ function drawGrads(){
   const byCert = (a, b) => new Date(a.cert_at || 0) - new Date(b.cert_at || 0);
   groupedOut($("#grlist"), G, (l, i, prog) => `<div class="lrow grad">${posTag(i, prog)}${lInfo(l,
       `<div class="small" style="margin-top:2px;color:var(--ok)">🎓 Graduated ${fmtTime(l.cert_at)}${l.cert_by ? " · certificate from " + esc(l.cert_by) : ""} <span class="muted">· crossed ${fmtTime(l.stage_at)}</span></div>`)}
-    <div class="pacts"><span class="tag gold">${esc(codeOf(l))}</span>${tagBtn(l)}${can("certs") ? `<button class="btn ghost sm" data-ct="${l.id}" title="Move back to Certificates">Undo</button>` : ""}</div></div>`,
+    <div class="pacts"><span class="tag gold" title="Seat">${esc(dcode(l))}</span>${tagBtn(l)}${true ? `<button class="btn ghost sm" data-ct="${l.id}" title="Move back to Certificates">Undo</button>` : ""}</div></div>`,
     fActive() ? "No graduate matches these filters." : "No graduates yet. They appear here once their certificate is issued.", "grads", byCert, drawGrads);
   wireTags($("#grlist"));
   $$("#grlist [data-ct]").forEach(b => b.onclick = async () => { const l = S.data.learners.find(x=>x.id===b.dataset.ct); if (!confirm(`Move ${fullName(l)} back to Certificates?`)) return; b.disabled = true; await act("grad_cert", {p_learner:l.id, p_issued:false}, null); });
@@ -1611,10 +1798,11 @@ const HALL = { name:"Great Hall, Wits", sections:[
     blocks:[{name:"Left", from:35, to:25}, {name:"Centre", from:24, to:12}, {name:"Right", from:11, to:1}] },
   { name:"Upper", rows:["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","R"],
     blocks:[{name:"Left", from:44, to:33}, {name:"Centre left", from:32, to:23}, {name:"Centre right", from:22, to:12}, {name:"Right", from:11, to:1}] }],
-  reserved: s => s.section === "Lower" && s.block === "Left" && ["AA","BB","CC"].includes(s.row) };
+  reserved: s => s.section === "Lower" && ["AA","BB","CC"].includes(s.row) };
+const SEAT_LBL = (r, n) => `${r}-${String(n).padStart(2, "0")}`;
 function hallSeats(){
   const out = [];
-  HALL.sections.forEach(sec => sec.rows.forEach(r => sec.blocks.forEach(b => { for (let n = b.from; n >= b.to; n--) out.push({section:sec.name, row:r, block:b.name, n, label:`${r}-${n}`}); })));
+  HALL.sections.forEach(sec => sec.rows.forEach(r => sec.blocks.forEach(b => { for (let n = b.from; n >= b.to; n--) out.push({section:sec.name, row:r, block:b.name, n, label:SEAT_LBL(r, n)}); })));
   out.forEach(s => s.reserved = HALL.reserved(s));
   return out;
 }
@@ -1631,7 +1819,7 @@ function seatPlan(){
   return { plan, unseated: Math.max(0, todo.length - free.length), lower: hallSeats().filter(s => s.section === "Lower" && !s.reserved).length };
 }
 async function assignSeats(){
-  if (!confirm("Assign seats by programme? Graduates who are already checked in keep their seats; absent and not-attending graduates give theirs up.")) return;
+  if (!confirm("Recalculate all seats by programme? This happens automatically at every check-in; use this after uploading or editing the learner list.")) return;
   try { S.lastActAt = Date.now(); const r = await rpc("grad_seats_assign", {p_code:CODE, p_pin:S.pin, p_actor:S.me});
     toast(`Seats assigned: ${r.seated} seated${r.unseated ? `, ${r.unseated} did not fit in the hall` : ""}`, r.unseated ? "red" : "green"); rtPing(); await pull(true); }
   catch(e){ toast("Could not assign seats: " + e.message, "red"); }
@@ -1658,7 +1846,7 @@ function planSeats(){
     const r = planRowR(sec.name, ri);
     sec.blocks.forEach(b => { const u0 = planBlockStart(sec.name, b.name); let i = 0;
       for (let n = b.from; n >= b.to; n--, i++){ const th = planAngle(sec.name, u0 + i + .5, r); const [x, y] = planXY(r, th);
-        out.push({section:sec.name, row, block:b.name, n, label:`${row}-${n}`, x, y, deg:th * 180 / Math.PI + 90, r, u:u0 + i + .5, reserved:HALL.reserved({section:sec.name, row, block:b.name}) }); } });
+        out.push({section:sec.name, row, block:b.name, n, label:SEAT_LBL(row, n), x, y, deg:th * 180 / Math.PI + 90, r, u:u0 + i + .5, reserved:HALL.reserved({section:sec.name, row, block:b.name}) }); } });
   }));
   return out;
 }
@@ -1748,7 +1936,7 @@ function planGuide(l){
     <ol><li>Enter through the <b>Learner Entrance ${door === "left" ? "Left (stage-left door)" : "Right (stage-right door)"}</b>.</li>
       <li>Go up the ${s.section === "Lower" ? (s.block === "Centre" ? "aisle between the centre and right blocks" : s.block === "Left" ? "left aisle" : "right aisle") : door === "left" ? "left aisle to the upper section" : "right aisle to the upper section"}. Usher <b style="color:${USH_COL[uu[2]]}">${u}</b> (${uu[1].toLowerCase()}) will help.</li>
       <li>Row <b>${esc(s.row)}</b>, seat <b>${s.n}</b> in the ${blockTxt}.</li></ol>
-    <div class="small muted">${esc(l.programme || "")}${l.client ? " · " + esc(l.client) : ""}${l._code ? " · stage number " + esc(l._code) : ""}</div></div>`;
+    <div class="small muted">${esc(l.programme || "")}${l.client ? " · " + esc(l.client) : ""}${l._code ? " · stage position " + esc(l._code.split("-").pop().replace(/^0/,"")) + " in their programme" : ""}</div></div>`;
 }
 function seatMap(preselect){
   stageList();
@@ -1844,7 +2032,9 @@ function viewOverview(){
 }
 function stageTiles(J, cls=""){
   const nowOn = S.data.learners.filter(l => l.status === "present" && l.stage_status === "called");
-  const tile = (go, n, lab, sub, hot) => `<button class="stile${hot ? " hot" : ""}" data-go="${go}" type="button"><b>${n}</b><span>${lab}</span>${sub ? `<small>${sub}</small>` : ""}</button>`;
+  const tile = (go, n, lab, sub, hot) => hot
+    ? `<button class="stile hot" data-go="${go}" type="button" title="${esc(nowOn.map(fullName).join(", "))}"><span class="gcoin">${n}</span><span class="gtx"><strong>${esc(nowOn.map(fullName).join(", "))}</strong><small>Currently on stage</small></span><em class="glive"><i></i>LIVE</em></button>`
+    : `<button class="stile" data-go="${go}" type="button"><b>${n}</b><span>${lab}</span>${sub ? `<small>${sub}</small>` : ""}</button>`;
   return `<div class="stiles ${cls}">
     ${tile("robes", J.robing, "Waiting for robes", "present, not robed yet")}
     ${tile("stage", J.line, "In the stage line", "robed, waiting to be called")}
@@ -1885,14 +2075,11 @@ function pmTable(L){
    ====================================================================== */
 function reportDialog(){
   modal(`<h3>Graduation report</h3><p class="small muted">A landscape report of the day: attendance, robes, the stage, certificates, programmes, clients, project managers, tasks and announcements. ${fActive() ? "<b>Your current filters apply.</b>" : ""}</p>
-    <div class="row" style="margin-top:12px;flex-wrap:wrap"><button class="btn gold" id="rPdf">⬇ Download PDF (landscape)</button><button class="btn ghost" id="rOpen">Open to print</button><button class="btn ghost" id="rDl">Web page version</button><span class="spacer"></span><button class="btn ghost" id="mc">Close</button></div><div id="rMsg" class="small" style="margin-top:8px"></div>`,
+    <div class="row" style="margin-top:12px;flex-wrap:wrap"><button class="btn gold" id="rPdf">⬇ Download PDF (landscape)</button><button class="btn ghost" id="rDl">Web page version</button><span class="spacer"></span><button class="btn ghost" id="mc">Close</button></div><div id="rMsg" class="small" style="margin-top:8px"></div>`,
     (m, close) => { $("#mc",m).onclick = close;
       const base = `Graduation report ${S.data.event.name} ${new Date().toISOString().slice(0,10)}`.replace(/[\\/:*?"<>|]/g, "");
       $("#rPdf",m).onclick = async () => { $("#rPdf",m).disabled = true; $("#rMsg",m).textContent = "Building the PDF…"; const ok = await reportPdf(base + ".pdf"); $("#rPdf",m).disabled = false; $("#rMsg",m).textContent = ok ? "Done." : ""; };
       $("#rDl",m).onclick = () => saveFile(base + ".html", buildReport());
-      $("#rOpen",m).onclick = () => { const html = buildReport().replace("</body>", `<script>setTimeout(()=>print(),700)<\/script></body>`);
-        if (DESKTOP() && DESKTOP().save_file) return saveFile(base + ".html", html, true);
-        const w = window.open(URL.createObjectURL(new Blob([html], {type:"text/html"})), "_blank"); if (!w) saveFile(base + ".html", html); };
     });
 }
 async function reportPdf(name, htmlIn){
@@ -1905,20 +2092,19 @@ async function reportPdf(name, htmlIn){
     if (DESKTOP() && DESKTOP().save_file){   // older desktop installs: open it ready to save as PDF
       await saveFile(name.replace(/\.pdf$/, ".html"), html.replace("</body>", `<script>setTimeout(()=>print(),700)<\/script></body>`), true); return true;
     }
-    return await new Promise(res => {
-      const f = document.createElement("iframe"); f.style.cssText = "position:fixed;left:-12000px;top:0;width:1130px;height:900px;border:0";
-      const done = ok => { window.removeEventListener("message", onMsg); setTimeout(() => f.remove(), 1500); toast(ok ? "PDF downloaded: " + name : "Could not make the PDF. Use Open to print instead.", ok ? "green" : "red"); res(ok); };
-      const onMsg = e => { if (e.data && e.data.pdf) done(e.data.pdf === "done"); };
-      window.addEventListener("message", onMsg);
-      setTimeout(() => done(false), 60000);
-      f.srcdoc = html.replace("</body>", `<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>
-        <script>window.addEventListener("load", () => setTimeout(() => { try { html2pdf().set({ margin:[6,6,8,6], filename:${JSON.stringify(name)}, image:{type:"jpeg", quality:0.95},
-          html2canvas:{scale:2, useCORS:true, windowWidth:1100, backgroundColor:"#ffffff"}, jsPDF:{unit:"mm", format:"a4", orientation:"landscape"},
-          pagebreak:{mode:["css","legacy"], avoid:[".pb",".fr","tr",".kp",".rings",".ann",".story",".cover",".glr",".glh"]} }).from(document.querySelector(".page")).save()
-          .then(() => parent.postMessage({pdf:"done"}, "*")).catch(() => parent.postMessage({pdf:"fail"}, "*")); } catch(e){ parent.postMessage({pdf:"fail"}, "*"); } }, 600));<\/script></body>`);
-      document.body.appendChild(f);
-    });
+    return printHTML(htmlIn || buildReport(), true);
   } catch(e){ toast("Could not make the PDF: " + e.message, "red"); return false; }
+}
+/* print through the browser's own engine: clean page breaks, then "Save as PDF" */
+function printHTML(html, asPdf){
+  return new Promise(res => {
+    const f = document.createElement("iframe"); f.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0"; f.srcdoc = html; document.body.appendChild(f);
+    f.onload = () => setTimeout(() => {
+      try { f.contentWindow.focus(); f.contentWindow.print(); if (asPdf) toast("In the print window set Destination to “Save as PDF” (not Microsoft Print to PDF), turn on “Background graphics”, then Save. Pages come out landscape.", "gold big"); res(true); }
+      catch(e){ toast("Could not open printing: " + e.message, "red"); res(false); }
+      setTimeout(() => f.remove(), 60000);
+    }, 700);
+  });
 }
 async function saveFile(name, content, open){
   if (DESKTOP() && DESKTOP().save_file){ const r = await DESKTOP().save_file(name, content, true); toast(r && r.ok ? "Saved to Downloads and opened: " + name : "Could not save: " + (r && r.error), r && r.ok ? "green" : "red"); return; }
@@ -1933,7 +2119,7 @@ function gradListHTML(L){
   return keys.map(k => { const [nq, prog] = k.split("|"); const items = g[k].sort((a,b) => new Date(a.cert_at||0) - new Date(b.cert_at||0));
     const tot = L.filter(l => progKey(l) === k).length;
     return `<section class="gl"><div class="glh"><span class="gln">${esc(prog)}</span><span class="glq">NQF ${nq === "099" ? "?" : +nq}</span><span class="sp"></span><span class="glc">${items.length} graduated<small> of ${tot}</small></span></div>
-      <div class="glg">${(() => { const cards = items.map((l, i) => `<div class="gli"><span class="gnum">${i+1}</span><div><b>${esc(fullName(l))}</b><small>${esc([l.client, l.seat ? "Seat " + l.seat : "", "🎓 " + fmtTime(l.cert_at)].filter(Boolean).join(" · "))}</small></div></div>`);
+      <div class="glg">${(() => { const cards = items.map((l, i) => `<div class="gli"><span class="gnum">${i+1}</span><div><b>${esc(fullName(l))}</b><small>${esc([l.client, l.seat ? "Seat " + l.seat : "", "🎓 " + fmtTime(l.cert_at)].filter(Boolean).join(" · "))}</small>${notesOf(l).filter(n => n.kind !== "note" || true).map(n => `<em class="gq ${n.resolved ? "r" : "o"}">${NOTE_KIND[n.kind][0]} ${esc(n.text)}${n.kind !== "note" ? (n.resolved ? " · resolved" : " · OPEN") : ""}</em>`).join("")}</div></div>`);
         const rows = []; for (let r = 0; r < cards.length; r += 3) rows.push(`<div class="glr">${cards.slice(r, r + 3).join("")}${"<div></div>".repeat(Math.max(0, 3 - cards.slice(r, r + 3).length))}</div>`); return rows.join(""); })()}</div></section>`; }).join("");
 }
 const GL_CSS = `.gl{margin:14px 0 18px;break-inside:auto}.glh{display:flex;align-items:center;gap:10px;background:linear-gradient(90deg,#081a45,#1d3fae);color:#fff;border-radius:12px 12px 0 0;padding:10px 14px;break-after:avoid;page-break-after:avoid}
@@ -1943,6 +2129,7 @@ const GL_CSS = `.gl{margin:14px 0 18px;break-inside:auto}.glh{display:flex;align
     .glg{border:1px solid #e3e8f3;border-top:0;border-radius:0 0 12px 12px;padding:10px;background:#fbfcff}
     .gli{display:flex;gap:8px;align-items:center;background:#fff;border:1px solid #e9edf6;border-left:3px solid #d4af37;border-radius:8px;padding:6px 8px;break-inside:avoid;page-break-inside:avoid}
     .gli b{display:block;font-size:12.5px;line-height:1.25}.gli small{display:block;font-size:10px;color:#5b6785;margin-top:1px}
+    .gq{display:block;font-style:normal;font-size:9.5px;margin-top:3px;padding:2px 5px;border-radius:5px;line-height:1.3}.gq.o{background:#fde8e6;color:#9b1c14;font-weight:700}.gq.r{background:#eef2fb;color:#35457a}
     .gnum{flex:0 0 auto;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#eef2fb;color:#1d3fae;font-weight:800;font-size:11px}`;
 const SO_CSS = `.sok{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px}.sok div{background:#f6f8fd;border-radius:12px;padding:10px 14px;border-top:3px solid #d4af37}.sok b{display:block;font-size:24px;color:#081a45}.sok span{font-size:11px;color:#5b6785;text-transform:uppercase;letter-spacing:.4px}
     .sog{margin:18px 0 6px;break-inside:auto}.sot{width:100%;border-collapse:separate;border-spacing:0;border:1px solid #e3e8f3;border-top:0;border-radius:0 0 12px 12px;overflow:hidden;font-size:13px}
@@ -1966,8 +2153,8 @@ function stageOrderHTML(Lf){
     <p class="sonote">Programmes go up by NQF level, lowest first. Within a programme it is first come, first on stage.${robing ? ` ${robing} graduate${robing === 1 ? " is" : "s are"} still being robed and will join the line.` : ""}</p>
     ${groups.length ? groups.map(G => { const m = G.g.match(/^NQF (\S+) · (.*)$/); const done = G.items.filter(l => l.stage_status === "done").length;
       return `<section class="sog"><div class="glh"><span class="gln">${esc(m ? m[2] : G.g)}</span>${m ? `<span class="glq">NQF ${esc(m[1])}</span>` : ""}<span class="sp"></span><span class="glq">${done} of ${G.items.length} crossed</span>${notYetBy[G.g] ? `<span class="glq">${notYetBy[G.g]} not yet arrived</span>` : ""}<span class="glc">${G.items.length} in line</span></div>
-      <table class="sot"><thead><tr><th>#</th><th>Code</th><th>Graduate</th><th>Client</th><th>Seat</th><th style="text-align:right">Status</th></tr></thead><tbody>
-      ${G.items.map(l => `<tr class="${l.stage_status}"><td class="no">${++n}</td><td class="cd"><span>${esc(l._code || "")}</span></td><td class="nm">${esc(fullName(l))}</td><td class="cl">${esc([l.client, l.cohort].filter(Boolean).join(" · "))}</td><td class="se">${esc(l.seat || "–")}</td><td class="stt">${st(l)}</td></tr>`).join("")}
+      <table class="sot"><thead><tr><th>#</th><th>Seat</th><th>Graduate</th><th>Client</th><th>Seat</th><th style="text-align:right">Status</th></tr></thead><tbody>
+      ${G.items.map(l => `<tr class="${l.stage_status}"><td class="no">${++n}</td><td class="cd"><span>${esc(dcode(l) || "")}</span></td><td class="nm">${esc(fullName(l))}</td><td class="cl">${esc([l.client, l.cohort].filter(Boolean).join(" · "))}</td><td class="se">${esc(l.seat || "–")}</td><td class="stt">${st(l)}</td></tr>`).join("")}
       </tbody></table></section>`; }).join("") : `<p class="muted" style="font-size:13px">Nobody is in the stage line yet. Graduates join once their robe is issued.</p>`}`;
 }
 function stageDialog(){
@@ -1986,12 +2173,18 @@ function buildReport(mode){
   const fmt = ts => ts ? new Date(ts).toLocaleTimeString("en-ZA",{hour:"2-digit",minute:"2-digit"}) : "–";
   const pct = (a,b) => b ? Math.round(100*a/b) : 0;
   const tm = k => P.map(l => l[k]).filter(Boolean).map(x => new Date(x).getTime()).sort((a,b)=>a-b);
-  const arr = tm("arrived_at"), st = L.filter(l => l.stage_status === "done").map(l => new Date(l.stage_at).getTime()).filter(Boolean).sort((a,b)=>a-b);
-  const stageMins = st.length > 1 ? Math.round((st[st.length-1]-st[0])/60000) : 0;
-  const perGrad = st.length > 1 ? Math.round((st[st.length-1]-st[0]) / 1000 / (st.length-1)) : 0;
+  // keep only the main session: ignore stray times from rehearsals or other days (a gap of more than 90 minutes starts a new session)
+  const session = ts => { if (ts.length < 2) return {t:ts, dropped:0}; const segs = [[ts[0]]]; for (let i = 1; i < ts.length; i++){ if (ts[i] - ts[i-1] > 90*60000) segs.push([]); segs[segs.length-1].push(ts[i]); }
+    const best = segs.reduce((a, b) => b.length >= a.length ? b : a); return {t:best, dropped:ts.length - best.length}; };
+  const arrS = session(tm("arrived_at")), arr = arrS.t;
+  const stS = session(L.filter(l => l.stage_status === "done").map(l => new Date(l.stage_at).getTime()).filter(Boolean).sort((a,b)=>a-b)), st = stS.t;
+  const stageMins = st.length > 1 ? Math.max(1, Math.round((st[st.length-1]-st[0])/60000)) : 0;
+  const gaps = st.slice(1).map((x, i) => (x - st[i]) / 1000).filter(g => g > 0 && g < 600).sort((a,b)=>a-b);
+  const perGrad = gaps.length ? Math.round(gaps[Math.floor(gaps.length/2)]) : 0;
+  const dropNote = (stS.dropped || arrS.dropped) ? ` (${stS.dropped + arrS.dropped} time${stS.dropped + arrS.dropped === 1 ? "" : "s"} recorded outside the main session, e.g. a rehearsal, ${stS.dropped + arrS.dropped === 1 ? "was" : "were"} left out of the timings.)` : "";
   const dateTxt = d.event.date ? new Date(d.event.date).toLocaleDateString("en-ZA",{weekday:"long",day:"numeric",month:"long",year:"numeric"}) : "";
   const groupT = key => { const g = {}; L.forEach(l => { const k = l[key] || "Not set"; (g[k] = g[k] || []).push(l); }); return Object.entries(g).sort((a,b)=>b[1].length-a[1].length); };
-  const tbl = (title, key) => `<h2>${title}</h2><table><thead><tr><th>${title.replace("By ","")}</th><th>Graduates</th><th>Arrived</th><th>Robed</th><th>Crossed</th><th>Certificates</th><th>Attendance</th></tr></thead><tbody>
+  const tbl = (title, key, c) => `<h2>${title}</h2><table${c ? ' class="cmp"' : ""}><thead><tr><th>${title.replace("By ","")}</th><th>${c ? "Total" : "Graduates"}</th><th>Arrived</th><th>Robed</th><th>Crossed</th><th>${c ? "Certs" : "Certificates"}</th><th>${c ? "Attend." : "Attendance"}</th></tr></thead><tbody>
     ${groupT(key).map(([k,G]) => { const j = journey(G); return `<tr><td>${esc(k)}</td><td>${j.total}</td><td>${j.arrived}</td><td>${j.robed}</td><td>${j.crossed}</td><td>${j.cert}</td><td><span class="mb"><i style="width:${pct(j.arrived,j.total)}%"></i></span> ${pct(j.arrived,j.total)}%</td></tr>`; }).join("")}</tbody></table>`;
   const anns = d.feed.filter(f => f.kind === "announcement").slice().reverse();
   const roads = d.feed.filter(f => f.kind === "roadblock").length;
@@ -1999,16 +2192,18 @@ function buildReport(mode){
   const peak = (() => { if (arr.length < 2) return ""; const step = 900000, b = {}; arr.forEach(x => { const k = Math.floor(x/step)*step; b[k] = (b[k]||0)+1; }); const [k,v] = Object.entries(b).sort((a,b)=>b[1]-a[1])[0]; return `The busiest 15 minutes at registration were from ${fmt(+k)} to ${fmt(+k+step)}, with ${v} arrivals.`; })();
   const story = `${J.arrived} of ${J.total} graduates arrived (${pct(J.arrived,J.total)}%)${J.absent ? `, ${J.absent} were marked absent` : ""}. ${J.robed} received their robes, ${J.crossed} crossed the stage and ${J.cert} received their certificates.`
     + (arr.length ? ` Registration opened with the first arrival at ${fmt(arr[0])} and the last graduate checked in at ${fmt(arr[arr.length-1])}.` : "")
-    + (st.length > 1 ? ` The ceremony ran from ${fmt(st[0])} to ${fmt(st[st.length-1])}: ${stageMins} minute${stageMins===1?"":"s"} on stage, about ${perGrad} second${perGrad===1?"":"s"} per graduate.` : "");
-  const css = `@page{size:A4 landscape;margin:9mm}*{box-sizing:border-box}body{font-family:Montserrat,"Segoe UI",Arial,sans-serif;color:#0d1b3e;margin:0;background:#eef2fb}
+    + (st.length > 1 ? ` The ceremony ran from ${fmt(st[0])} to ${fmt(st[st.length-1])}: ${stageMins} minute${stageMins===1?"":"s"} on stage, typically about ${perGrad} second${perGrad===1?"":"s"} between graduates.` : "") + dropNote;
+  const css = `@page{size:A4 landscape;margin:0}*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}body{font-family:Montserrat,"Segoe UI",Arial,sans-serif;color:#0d1b3e;margin:0;background:#eef2fb}
     .page{max-width:1100px;margin:0 auto;background:#fff;padding:0 0 30px;box-shadow:0 10px 40px -20px rgba(8,26,69,.4)}
     .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}.two h2{margin-top:22px}
-    .two table{font-size:11px;table-layout:fixed}.two th{font-size:9.5px;padding:6px 4px;letter-spacing:.2px}.two td{padding:5px 4px;word-wrap:break-word}.two td:first-child,.two th:first-child{width:30%}.two .mb{width:34px}
-    .newpage{page-break-before:always;break-before:page}
+    .two table{font-size:11px;table-layout:fixed}.two th{font-size:8.5px;padding:6px 3px;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.two td{padding:5px 3px;word-wrap:break-word}.two td:first-child,.two th:first-child{width:31%}
+    .two th:nth-child(n+2),.two td:nth-child(n+2){text-align:center}.two th:last-child,.two td:last-child{width:19%;white-space:nowrap}.two .mb{width:26px;height:6px;margin-right:3px}
+    .newpage{page-break-before:always;break-before:page;margin-top:0!important;padding-top:4px}
     .cover{background:linear-gradient(135deg,#081a45,#1d3fae);color:#fff;padding:34px 40px 30px;position:relative;overflow:hidden}
     .cover:after{content:"";position:absolute;right:-60px;top:-40px;width:260px;height:260px;border:2px solid rgba(212,175,55,.5);transform:rotate(30deg)}
-    .cover img{width:64px;height:64px;border-radius:50%;background:#fff;padding:4px;float:right}
+    .cover img{width:100px;height:100px;border-radius:50%;background:#fff;padding:7px;float:right;object-fit:contain;box-shadow:0 0 0 3px rgba(212,175,55,.75),0 8px 20px -8px rgba(0,0,0,.5);position:relative;z-index:1}
     .cover h1{margin:0;font-size:30px;letter-spacing:-.3px}.cover h1 span{color:#f3d27a}.cover p{margin:6px 0 0;color:#c9d3f2}
+    .cover{border-bottom:5px solid #d4af37}.prep{display:inline-flex;align-items:center;gap:8px;margin-top:14px;background:rgba(255,255,255,.1);border:1px solid rgba(243,210,122,.55);border-radius:30px;padding:5px 14px;font-size:12px;color:#fff}.prep b{color:#f3d27a}
     .tag{display:inline-block;color:#f3d27a;font-weight:700;letter-spacing:.6px;margin-top:14px;font-size:12px;text-transform:uppercase}
     .in{padding:0 40px}h2{font-size:17px;margin:28px 0 10px;padding-bottom:6px;border-bottom:2px solid #d4af37}
     .story{font-size:15px;line-height:1.6;background:#f6f8fd;border-left:4px solid #d4af37;padding:14px 18px;margin-top:22px;border-radius:0 10px 10px 0}
@@ -2023,25 +2218,26 @@ function buildReport(mode){
     .foot{text-align:center;color:#8a93a8;font-size:11px;margin-top:30px}.foot .c{font-size:8px;opacity:.4}
     ${GL_CSS}
     ${SO_CSS}
-    @media print{body{background:#fff}.page{box-shadow:none;max-width:none}h2{break-after:avoid}.pb,.fr,tr,.kp,.rings,.ann{break-inside:avoid}.newpage{break-before:page}}`;
+    @media print{html,body{background:#fff;width:297mm}.page{box-shadow:none;max-width:none;padding:0}.in{padding:10mm 14mm 12mm;-webkit-box-decoration-break:clone;box-decoration-break:clone}.cover{padding:10mm 14mm 8mm}.story{margin-top:12px;padding:10px 16px;font-size:13.5px}.rings{margin-top:10px}.ring svg{max-height:96px}h2{margin:16px 0 8px}.two h2{margin-top:14px}h2{break-after:avoid}.pb,.fr,tr,.kp,.rings,.ann{break-inside:avoid}.newpage{break-before:page}}`;
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${stageMode ? "Stage order" : listOnly ? "Graduate list" : "Graduation report"} · ${esc(d.event.name)}</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=swap" rel="stylesheet"><style>${css}</style></head><body><div class="page">
     <div class="cover"><img src="${document.querySelector('.top img').src}" alt="Camblish crest"><div class="tag">${stageMode ? "Stage order · for the MC" : listOnly ? "Graduate list" : "Graduation day report"}</div><h1>${esc(d.event.name)}</h1>
-      <p>${esc([dateTxt, d.event.venue].filter(Boolean).join(" · "))}</p><p style="font-size:12px">Prepared ${new Date().toLocaleString("en-ZA",{day:"numeric",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"})} by ${esc(S.me)}${fActive() ? " · filtered view" : ""}</p></div>
+      <p>${esc([dateTxt, d.event.venue].filter(Boolean).join(" · "))}</p><div class="prep">Prepared by <b>Eddie Bila</b> · ${new Date().toLocaleString("en-ZA",{day:"numeric",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"})}${fActive() ? " · filtered view" : ""}</div></div>
     <div class="in">${stageMode ? stageOrderHTML(L) : listOnly ? `
+      ${(() => { const Q = L.filter(l => l.cert_issued && openQ(l).length); return Q.length ? `<div class="story" style="border-left-color:#b3261e;background:#fdf1ef"><b>⚠ ${Q.length} graduate${Q.length === 1 ? " has" : "s have"} an open query</b> (marked in red below): ${Q.map(l => esc(fullName(l))).join(", ")}.</div>` : ""; })()}
       <div class="story">${J.cert} graduate${J.cert === 1 ? "" : "s"} received their certificates${J.total ? ` (${Math.round(100*J.cert/J.total)}% of the ${J.total} expected)` : ""}, listed by programme in the order they were capped.</div>
       ${gradListHTML(L)}` : `
       <div class="story">${story} ${peak}</div>
       <div class="rings">${ring(J.arrived, J.total, "Present", RAMP.arr, `${J.absent} absent`)}${ring(J.robed, J.arrived, "Robes issued", RAMP.robe, "of those present")}${ring(J.crossed, J.arrived, "Crossed the stage", RAMP.crossed, "of those present")}${ring(J.cert, J.arrived, "Certificates", RAMP.cert, "of those present")}</div>
-      <div class="two"><div><h2>The journey through the day</h2>${funnel(J)}</div><div><h2>Arrivals at registration</h2>${arrivalsChart(L, 520, 170)}</div></div>
+      <div class="two"><div><h2>The journey through the day</h2>${funnel(J)}</div><div><h2>Arrivals at registration</h2>${arrivalsChart(L, 520, 125)}</div></div>
       <div class="kp"><div><b>${fmt(arr[0])}</b><span>First arrival</span></div><div><b>${fmt(arr[arr.length-1])}</b><span>Last arrival</span></div><div><b>${st.length ? fmt(st[0]) : "–"}</b><span>First graduate on stage</span></div><div><b>${stageMins ? stageMins + " min" : "–"}</b><span>Time on stage${perGrad ? ` · ${perGrad}s each` : ""}</span></div></div>
-      <h2 class="newpage">Progress by programme</h2>${progBars(L, 80)}
-      <div class="newpage">${tbl("By programme","programme")}</div><div class="two"><div>${tbl("By client","client")}</div><div>${tbl("By project manager","pm")}</div></div>
+      <h2>Progress by programme</h2>${progBars(L, 80)}
+      <div class="newpage">${tbl("By programme","programme")}</div><div class="two"><div>${tbl("By client","client",1)}</div><div>${tbl("By project manager","pm",1)}</div></div>
       <h2 class="newpage">Team and tasks</h2><div class="kp"><div><b>${tDone}/${T.length}</b><span>Tasks completed</span></div><div><b>${roads}</b><span>Roadblocks raised</span></div><div><b>${anns.length}</b><span>Announcements</span></div><div><b>${new Set(d.feed.map(f => f.actor)).size}</b><span>Team members active</span></div></div>
       ${T.filter(t => t.status !== "Completed").length ? `<p style="font-size:13px"><b>Still open:</b> ${T.filter(t => t.status !== "Completed").map(t => esc(t.title) + ` (${esc(t.status)})`).join("; ")}</p>` : ""}
       ${anns.length ? `<h2>Announcements</h2>${anns.map(a => `<div class="ann"><small>${fmt(a.created_at)} · ${esc(a.actor)}</small><br>${esc(a.text)}</div>`).join("")}` : ""}
-      <h2 class="newpage">Graduate list</h2>${gradListHTML(L)}`}
-      <div class="foot">Camblish Training Institute · Taking the Lead, Shaping the Future<br><span class="c">Designed and developed by Eddie Bila</span></div>
+      <h2 class="newpage">Graduate list</h2>${(() => { const Q = L.filter(l => l.cert_issued && openQ(l).length); return Q.length ? `<div class="story" style="border-left-color:#b3261e;background:#fdf1ef"><b>⚠ ${Q.length} open quer${Q.length === 1 ? "y" : "ies"}:</b> ${Q.map(l => esc(fullName(l))).join(", ")}.</div>` : ""; })()}${gradListHTML(L)}`}
+      <div class="foot"><b style="color:#0d1b3e">Camblish Training Institute</b> · Taking the Lead, Shaping the Future<br>Report prepared by Eddie Bila<br><span class="c">Designed and developed by Eddie Bila</span></div>
     </div></div></body></html>`;
 }
 
@@ -2056,42 +2252,52 @@ function viewStage(){
   const notYetBy = {}; notYet.forEach(l => { const g = groupOf(l); notYetBy[g] = (notYetBy[g]||0)+1; });
   const late = waiting.filter(l=>l._late);
   // the stage manager can call one programme at a time; inside it, first to arrive goes first
-  const progOrder = [...new Set(P.filter(l => l.stage_status !== "done").sort((a,b) => progKey(a).localeCompare(progKey(b))).map(l => l.programme || "No programme"))];
+  const cliSel = S.f.stageCli || "", inCli = l => !cliSel || (l.client || "") === cliSel;
+  const cliOpts = [...new Set(P.filter(l => l.stage_status !== "done").map(l => l.client || ""))].filter(Boolean).sort()
+    .map(c => `<option value="${esc(c)}" ${c === cliSel ? "selected" : ""}>${esc(c)} · ${waiting.filter(l => l.client === c).length} waiting</option>`).join("");
+  const progOrder = [...new Set(P.filter(l => l.stage_status !== "done" && inCli(l)).sort((a,b) => progKey(a).localeCompare(progKey(b))).map(l => l.programme || "No programme"))];
   if (S.f.stageProg && !progOrder.includes(S.f.stageProg)) progOrder.push(S.f.stageProg);
   const sel = S.f.stageProg || "";
-  const queue = sel ? waiting.filter(l => (l.programme || "No programme") === sel).sort(byArrival) : waiting;
+  const queue = waiting.filter(l => inCli(l) && (!sel || (l.programme || "No programme") === sel)).sort(sel || cliSel ? byArrival : () => 0);
   const nextUp = queue.slice(0,5);
-  const progOpts = progOrder.map(p => { const n = waiting.filter(l => (l.programme || "No programme") === p).length; return `<option value="${esc(p)}" ${p === sel ? "selected" : ""}>${esc(p)} · ${n} waiting</option>`; }).join("");
+  const progOpts = progOrder.map(p => { const n = waiting.filter(l => inCli(l) && (l.programme || "No programme") === p).length; return `<option value="${esc(p)}" ${p === sel ? "selected" : ""}>${esc(p)} · ${n} waiting</option>`; }).join("");
   let html = bannerHTML() + `<div class="card flowcard noprint"><div id="flow" class="flowwrap"></div></div>
   ${stageTiles(journey(S.data.learners), "noprint")}
   <div class="stagebox noprint">
     <div class="now"><div class="l">Now on stage</div>
-      ${called.length ? called.map(l=>`<div class="big">${esc(fullName(l))}</div><div class="pr">${l.seat?"Seat "+esc(l.seat)+" · ":""}Tag ${l._code} · #${l._seq} · NQF ${esc(l.nqf??"?")} · ${esc(l.programme||"")}${l.client?" · "+esc(l.client):""}</div>`).join("") : `<div class="big" style="opacity:.7">Nobody called yet</div><div class="pr">${P.length} arrived graduates in the line-up</div>`}
+      ${called.length ? called.map(l=>`<div class="big">${esc(fullName(l))}</div><div class="pr">Seat ${esc(dcode(l))} · #${l._seq} · NQF ${esc(l.nqf??"?")} · ${esc(l.programme||"")}${l.client?" · "+esc(l.client):""}</div>`).join("") : `<div class="big" style="opacity:.7">Nobody called yet</div><div class="pr">${P.length} arrived graduates in the line-up</div>`}
       <div class="row" style="margin-top:12px;position:relative;z-index:1">
         <button class="btn gold lg" id="callNext" ${queue.length || called.length ? "" : "disabled"}>${called.length ? (queue.length ? "✓ Done, call next" : "✓ Done") : "▶ Call first graduate"}</button>
         ${called.length?`<button class="btn ghost sm" id="undoCall">Back to waiting</button>`:""}
       </div>
-      <label class="callsel"><span>Programme up next</span><select id="stProg" aria-label="Programme up next"><option value="">All programmes, in stage order</option>${progOpts}</select></label>
+      <label class="callsel"><span>Client</span><select id="stCli" aria-label="Client up next"><option value="">All clients</option>${cliOpts}</select></label>
+      <label class="callsel"><span>Programme up next</span><select id="stProg" aria-label="Programme up next"><option value="">${cliSel ? "All of this client's programmes" : "All programmes, in stage order"}</option>${progOpts}</select></label>
       <div class="small" style="margin-top:10px;color:#c9d3f2">${done} of ${P.length} crossed · ${robing} still getting robes · ${notYet.length} not yet arrived</div>
     </div>
     <div class="card upnext" style="margin:0">
       <h2>Up next${sel ? ` <span class="tag gold">${esc(sel)}</span>` : ""}<span class="spacer"></span><span class="small muted">${queue.length} waiting</span></h2>
-      ${nextUp.length ? nextUp.map((l,i)=>`<div class="row" style="padding:6px 0;border-bottom:1px solid var(--line)"><span class="seq" style="width:auto;min-width:30px;height:30px;font-size:12px;padding:0 6px;border-radius:15px">${l._code}</span><div style="flex:1"><b>${esc(fullName(l))}</b><div class="small muted">${esc(l.programme||"")}${l.client?" · "+esc(l.client):""}</div></div>${l._late?`<span class="tag red">Late arrival</span>`:""}${i===0?`<span class="tag gold">Next</span>`:""}</div>`).join("") : `<div class="empty">No one waiting.</div>`}
+      ${nextUp.length ? nextUp.map((l,i)=>`<div class="row" style="padding:6px 0;border-bottom:1px solid var(--line)"><span class="seq" style="width:auto;min-width:30px;height:30px;font-size:12px;padding:0 6px;border-radius:15px">${esc(dcode(l))}</span><div style="flex:1"><b>${esc(fullName(l))}</b><div class="small muted">${esc(l.programme||"")}${l.client?" · "+esc(l.client):""}</div></div>${l._late?`<span class="tag red">Late arrival</span>`:""}${i===0?`<span class="tag gold">Next</span>`:""}</div>`).join("") : `<div class="empty">No one waiting.</div>`}
     </div>
   </div>
   ${late.length?`<div class="err noprint" style="margin-top:12px">${late.length} late arrival${late.length>1?"s":""} after their programme had finished: ${late.map(l=>esc(fullName(l))).join(", ")}. They have been moved to the end of the ceremony.</div>`:""}
   <div class="card" style="margin-top:14px"><h2>Full stage order<span class="spacer"></span><button class="btn ghost sm noprint" id="printAllTags">Reprint all tags</button><button class="btn gold sm noprint" onclick="stageDialog()">🖨 Print for MC</button></h2>
-    <p class="small muted noprint">Graduates join this line once their robe is issued. Programmes go up by NQF level (lowest first); within a programme it is first come, first on stage. After crossing they move to the <b>Certificates</b> tab.</p>${filterBar()}<div id="stList">`;
-  const PF = applyF(P);
-  if (!PF.length && P.length) html += `<div class="empty">No graduate in the line matches these filters.</div>`;
+    <p class="small muted noprint">Graduates join this line once their robe is issued. Programmes go up by NQF level (lowest first); within a programme it is first come, first on stage. Once they cross they leave this list and move to the <b>Certificates</b> tab.</p>${filterBar()}<div id="stList">`;
+  const PFall = applyF(P), doneN = PFall.filter(l => l.stage_status === "done").length;
+  const PF = S.f.stShowDone || qWords().length ? PFall : PFall.filter(l => l.stage_status !== "done");
+  html += `<div class="row noprint" style="margin:8px 0 4px;gap:8px;flex-wrap:wrap"><button class="chip ${S.f.stShowDone ? "" : "on"}" data-stdone="0" type="button">Still to cross (${PFall.length - doneN})</button><button class="chip ${S.f.stShowDone ? "on" : ""}" data-stdone="1" type="button">Everyone, incl. crossed (${PFall.length})</button>${doneN ? `<span class="small muted">${doneN} who crossed are on the <a href="#" data-go2="certs">Certificates</a> tab.</span>` : ""}</div>`;
+  if (!PF.length && PFall.length && !S.f.stShowDone) html += `<div class="empty">🎓 Everyone in the line has crossed the stage. They are now on the Certificates tab.</div>`;
+  else if (!PF.length && P.length) html += `<div class="empty">No graduate in the line matches these filters.</div>`;
   else if (!P.length) html += `<div class="empty">Nobody in the line yet. Graduates appear here once their robe is issued.</div>`;
   else {
-    let g = null; html += `<div class="list">`;
+    let g = null; const scol = S.f.collapsed.stage = S.f.collapsed.stage || new Set(); const searching = qWords().length > 0;
+    const gOf = x => x._late ? "Late arrivals (end of ceremony)" : groupOf(x); const allG = [...new Set(PF.map(gOf))];
+    html += `<div class="grp-tools small noprint"><span class="muted">${allG.length} programme${allG.length === 1 ? "" : "s"} · ${PF.length} in the line</span><span class="spacer"></span><button class="lnk" data-sgall="open" type="button">Expand all</button><button class="lnk" data-sgall="close" type="button">Collapse all</button></div><div class="list">`;
     PF.forEach(l => {
-      const gg = l._late ? "Late arrivals (end of ceremony)" : groupOf(l);
-      if (gg !== g){ g = gg; const inG = P.filter(x=>(x._late ? "Late arrivals (end of ceremony)" : groupOf(x))===gg); html += `<div class="group-h">${esc(gg)}<span class="spacer"></span><span class="tag">${inG.length} present</span>${notYetBy[gg]?`<span class="tag">${notYetBy[gg]} not yet arrived</span>`:""}</div>`; }
-      html += `<div class="lrow ${l.stage_status}"><span class="seq" style="width:auto;min-width:38px;padding:0 6px;border-radius:19px">${l.stage_status==="done"?"✓ "+l._code:l._code}</span>
-        <div class="info"><div class="nm">${hl(fullName(l))} ${seatTag(l)}</div><div class="small muted">${l._late?esc(l.programme||"")+" · ":""}${esc(l.client||"")}${l.cohort?" · "+esc(l.cohort):""} · arrived ${fmtTime(l.arrived_at)}</div></div>
+      const gg = gOf(l); const closed = scol.has(gg) && !searching;
+      if (gg !== g){ g = gg; const inG = P.filter(x=>gOf(x)===gg); const dn = inG.filter(x => x.stage_status === "done").length; html += `<div class="group-h sgh${closed ? " closed" : ""}" data-sgk="${esc(gg)}" role="button" tabindex="0" aria-expanded="${!closed}"><span class="chev" aria-hidden="true">▾</span>${esc(gg)}<span class="spacer"></span><span class="tag">${dn} of ${inG.length} crossed</span><span class="tag">${inG.length} present</span>${notYetBy[gg]?`<span class="tag">${notYetBy[gg]} not yet arrived</span>`:""}</div>`; }
+      if (closed) return;
+      html += `<div class="lrow ${l.stage_status}"><span class="seq" style="width:auto;min-width:38px;padding:0 6px;border-radius:19px">${l.stage_status==="done"?"✓ "+esc(dcode(l)):esc(dcode(l))}</span>
+        <div class="info"><div class="nm">${hl(fullName(l))} ${seatTag(l)} ${leadTag(l)}</div><div class="small muted">${l._late?esc(l.programme||"")+" · ":""}${esc(l.client||"")}${l.cohort?" · "+esc(l.cohort):""} · arrived ${fmtTime(l.arrived_at)}</div>${notesLine(l)}</div>
         ${l._late?`<span class="tag red">Late arrival</span>`:""}
         ${l.stage_status==="called"?`<span class="tag gold">On stage</span>`:""}
         <span class="noprint pacts">${tagBtn(l)}${l.stage_status==="waiting"?`<button class="sbtn p" data-sg="${l.id}" data-s="called">Call</button>`:""}
@@ -2104,16 +2310,21 @@ function viewStage(){
   const keepQ = document.activeElement && document.activeElement.dataset && document.activeElement.dataset.fk === "q";
   main.innerHTML = html; putFlow("stage"); wireTags(main); wireBanner(); wireFilterBar(() => { const pos = $(".fbar [data-fk=q]").selectionStart; viewStage(); const q = $(".fbar [data-fk=q]"); if (q && S.f.L.q){ q.focus(); try { q.setSelectionRange(pos, pos); } catch {} } });
   if (keepQ){ const q = $(".fbar [data-fk=q]"); if (q){ q.focus(); q.setSelectionRange(q.value.length, q.value.length); } }
+  $$("[data-sgk]", main).forEach(h => { const tog = () => { const k = h.dataset.sgk, c = S.f.collapsed.stage; c.has(k) ? c.delete(k) : c.add(k); viewStage(); }; h.onclick = tog; h.onkeydown = e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); tog(); } }; });
+  $$("[data-stdone]", main).forEach(b => b.onclick = () => { S.f.stShowDone = b.dataset.stdone === "1"; viewStage(); });
+  $$("[data-go2]", main).forEach(a => a.onclick = e => { e.preventDefault(); setTab(a.dataset.go2); });
+  $$("[data-sgall]", main).forEach(b => b.onclick = () => { const c = S.f.collapsed.stage = S.f.collapsed.stage || new Set(); if (b.dataset.sgall === "open") c.clear(); else $$("[data-sgk]", main).forEach(h => c.add(h.dataset.sgk)); viewStage(); });
   const pat = $("#printAllTags"); if (pat) pat.onclick = () => { if (P.length && confirm(`Print ${P.length} name tags?`)) printTags(P); };
   $$(".stiles [data-go]", main).forEach(b => b.onclick = () => setTab(b.dataset.go));
-  if (!can("stage")) $$("#callNext,#undoCall,[data-sg]").forEach(b => b.remove());
+  roLock();
   $$("[data-sg]").forEach(b => b.onclick = () => act("grad_stage", {p_learner:b.dataset.sg, p_stage:b.dataset.s}));
   const cn = $("#callNext"); if (cn) cn.onclick = async () => {
     cn.disabled = true;
     for (const l of called) await rpc("grad_stage", {p_code:CODE,p_pin:S.pin,p_actor:S.me,p_learner:l.id,p_stage:"done"}).catch(()=>{});
-    const nxt = queue[0]; if (nxt) await act("grad_stage", {p_learner:nxt.id, p_stage:"called"}); else { if (sel) toast(`Everyone in ${sel} who is ready has crossed`, "green"); await pull(true); }
+    const nxt = queue[0]; if (nxt) await act("grad_stage", {p_learner:nxt.id, p_stage:"called"}); else { if (sel || cliSel) toast(`Everyone in ${sel || cliSel} who is ready has crossed`, "green"); await pull(true); }
   };
   const sp = $("#stProg"); if (sp) sp.onchange = () => { S.f.stageProg = sp.value; viewStage(); };
+  const sc = $("#stCli"); if (sc) sc.onchange = () => { S.f.stageCli = sc.value; S.f.stageProg = ""; viewStage(); };
   const uc = $("#undoCall"); if (uc) uc.onclick = async () => { for (const l of called) await rpc("grad_stage",{p_code:CODE,p_pin:S.pin,p_actor:S.me,p_learner:l.id,p_stage:"waiting"}).catch(()=>{}); pull(true); };
 }
 
@@ -2213,7 +2424,7 @@ function viewManage(){
       <button class="btn sm" id="esave" style="margin-top:10px">Save settings</button></div>
   </div>
   <div class="card"><h2>Seating plan · ${HALL.name}<span class="spacer"></span><button class="btn ghost sm" id="smOpen">💺 View seating plan</button>${can("seating")?`<button class="btn gold sm" id="smAssign">Assign seats by programme</button>`:""}</h2>
-    ${(() => { const st = seatStats(), sp = seatPlan(); return `<p class="small">Seats are filled front to back in the lower section first (rows AA–LL), keeping each programme together in stage order (NQF level, then programme). Left-block rows AA, BB and CC (seats 25–35) are kept for clients. Anyone who doesn't fit downstairs continues in the upper section from row A. Graduates who are already checked in keep their seats; absent graduates and anyone marked "not attending" lose theirs.</p>
+    ${(() => { const st = seatStats(), sp = seatPlan(); return `<p class="small">Seats follow the stage order: NQF 1 first, then 2, 3 and up, one programme at a time. Filling starts in the <b>lower right block at DD-01</b>, then the lower centre and lower left blocks, then the upper blocks from right to left. Rows AA, BB and CC downstairs are kept for VIPs and clients. A programme that would run over into the next block moves there as a whole. Inside a programme the first graduate to arrive takes the first seat and the first stage spot; everyone not yet arrived keeps a provisional seat that moves up as others arrive. Absent graduates and anyone marked "not attending" give their seat up.</p>
     <div class="row" style="gap:18px"><div><div class="big2">${st.seated}</div><div class="small muted">seated</div></div><div><div class="big2">${st.lower}</div><div class="small muted">lower section (of ${sp.lower})</div></div><div><div class="big2">${st.upper}</div><div class="small muted">upper section</div></div><div><div class="big2" style="color:${st.none?"var(--bad)":"inherit"}">${st.none}</div><div class="small muted">without a seat</div></div></div>`; })()}
   </div>
   <div class="card"><h2>Learner list<span class="spacer"></span></h2>
@@ -2298,8 +2509,8 @@ async function importPreview(e){
 }
 function exportCsv(){
   const P = stageList(); const seq = new Map(P.map(l=>[l.id,l._seq]));
-  const head = ["Stage order","Seat","First name","Middle name","Surname","Programme","NQF","Client","Project manager","Region","SETA","Attendance","Arrived","Checked in by","Robe issued","Robe time","Stage status","Stage time","Certificate issued","Certificate time"];
-  const rows = S.data.learners.slice().sort(orderKey).map(l => [seq.get(l.id)||"", l.seat||"", l.first_name, l.middle_name, l.surname, l.programme, l.nqf, l.client, l.pm, l.region, l.seta, l.status, fmtTime(l.arrived_at), l.checked_by, l.robe_issued?(l.robe_skip?"Own robe":"Yes"):"", fmtTime(l.robe_at), l.stage_status, fmtTime(l.stage_at), l.cert_issued?"Yes":"", fmtTime(l.cert_at)]);
+  const head = ["Stage order","Seat","First name","Middle name","Surname","Programme","NQF","Client","Project manager","Region","SETA","Attendance","Arrived","Checked in by","Robe issued","Robe time","Stage status","Stage time","Certificate issued","Certificate time","Open queries","Notes"];
+  const rows = S.data.learners.slice().sort(orderKey).map(l => [seq.get(l.id)||"", l.seat||"", l.first_name, l.middle_name, l.surname, l.programme, l.nqf, l.client, l.pm, l.region, l.seta, l.status, fmtTime(l.arrived_at), l.checked_by, l.robe_issued?(l.robe_skip?"Own robe":"Yes"):"", fmtTime(l.robe_at), l.stage_status, fmtTime(l.stage_at), l.cert_issued?"Yes":"", fmtTime(l.cert_at), openQ(l).length || "", notesTxt(l)]);
   const csv = [head, ...rows].map(r => r.map(v => `"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\r\n");
   saveFile(`Graduation attendance ${new Date().toISOString().slice(0,10)}.csv`, "\ufeff" + csv);
 }
@@ -2323,18 +2534,21 @@ async function viewUsers(){
         <label class="lbl">Full name</label><input type="text" id="un">
         <label class="lbl">Camblish email</label><input type="text" id="ue" placeholder="name@camblish.co.za">
         <label class="lbl">Role</label><select id="ur"><option value="team">Team member</option><option value="spectator">Spectator (view only)</option><option value="manager">Manager</option>${S.user.role==="admin"?`<option value="admin">Administrator (full access)</option>`:""}</select>
+        <div id="ustwrap"><label class="lbl">Station on the day</label>${stationSelect("ust", "checkin")}<p class="small muted" style="margin:4px 0 0">Picks the right access for the job. You can still tick or untick below.</p></div>
         <label class="lbl">What this person can do</label><div id="upwrap"></div>
         <button class="btn gold" id="uadd" style="margin-top:12px">Create account</button><div id="uout"></div></div>
       <div class="card"><h2>People with access<span class="spacer"></span><span class="small muted" id="ucount"></span></h2><div id="ulist"><p class="muted">Loading…</p></div></div></div>
       <div class="card"><h2>What each role can do</h2><p class="small muted" style="margin-top:-4px">Ticked items are switched on by default for that role. You can switch any of them on or off per person when you add them, or later with Change access.</p>${accessMatrix()}</div>`;
-    const drawPw = () => { const r = $("#ur").value; $("#upwrap").innerHTML = r === "admin" ? `<p class="small muted">Administrators can do everything.</p>` : r === "spectator" ? `<div class="okm" style="margin:4px 0">👁 Spectators can see every tab, the live progress and all announcements, but get no buttons: they can't check anyone in, issue robes or certificates, run the stage, edit tasks or post. You can give them access later with Change access.</div>` : permBoxes("upg", ROLE_DEFAULT[r].filter(p => myGrantable().includes(p)), myGrantable()); };
+    const drawPw = () => { const r = $("#ur").value; $("#upwrap").innerHTML = r === "admin" ? `<p class="small muted">Administrators can do everything.</p>` : r === "spectator" ? `<div class="okm" style="margin:4px 0">👁 Spectators can see every tab, the live progress and all announcements, but get no buttons: they can't check anyone in, issue robes or certificates, run the stage, edit tasks or post. You can give them access later with Change access.</div>` : permBoxes("upg", ROLE_DEFAULT[r].filter(p => myGrantable().includes(p)), myGrantable());
+      $("#ustwrap").style.display = r === "team" ? "" : "none";
+      if (r === "team" && $("#upg")){ const apply = wireStation($("#ust"), $("#upg")); apply(); } };
     $("#ur").onchange = drawPw; drawPw();
     $("#uadd").onclick = async () => {
       const em = $("#ue").value.trim();
       if (!/@camblish\.co\.za$/i.test(em)) return $("#uout").innerHTML = `<div class="err">Only @camblish.co.za email addresses can be added.</div>`;
       $("#uadd").disabled = true;
       try { const r = await rpc("hub_user_create", {p_token:S.pin, p_email:em, p_name:$("#un").value.trim(), p_role:$("#ur").value, p_perms: $("#upg") ? pickedPerms($("#upg")) : []});
-        $("#un").value = ""; $("#ue").value = ""; credCard($("#uout"), r, true); drawUsers(); autoMail(r, true); }
+        $("#un").value = ""; $("#ue").value = ""; $("#un").focus(); credCard($("#uout"), r, true); drawUsers(); autoMail(r, true); }
       catch(e){ $("#uout").innerHTML = `<div class="err">${esc(e.message)}</div>`; }
       $("#uadd").disabled = false;
     };
@@ -2345,8 +2559,10 @@ async function viewUsers(){
 async function drawUsers(){
   let list; try { list = await rpc("hub_users_list", {p_token:S.pin}); } catch(e){ $("#ulist").innerHTML = `<div class="err">${esc(e.message)}</div>`; return; }
   $("#ucount").textContent = `${list.filter(u=>u.active).length} active`;
-  $("#ulist").innerHTML = `<div class="list">${list.map(u => `<div class="lrow ${u.active?"":"absent"}"><div class="info">
-      <div class="nm">${esc(u.name)} <span class="rolepill ${u.viewer ? "spectator" : u.role}">${u.viewer ? "spectator" : u.role}</span>${u.active?"":` <span class="tag red">Deactivated</span>`}${u.must_change && u.active?` <span class="tag gold">Awaiting first sign-in</span>`:""}</div>
+  const act = list.filter(u => u.active && u.role === "team" && !u.viewer), cnt = k => act.filter(u => stationOf(u.perms) === k).length;
+  const staffing = `<div class="staff">${STATIONS.map(([k,l,,want]) => { const n = cnt(k); return `<div class="stf ${want && n >= want ? "ok" : want && n ? "part" : ""}"><b>${n}${want ? `<small>/${want}</small>` : ""}</b><span>${l}</span></div>`; }).join("")}</div>`;
+  $("#ulist").innerHTML = staffing + `<div class="list">${list.map(u => `<div class="lrow ${u.active?"":"absent"}"><div class="info">
+      <div class="nm">${esc(u.name)} <span class="rolepill ${u.viewer ? "spectator" : u.role}">${u.viewer ? "spectator" : u.role}</span>${u.role === "team" && !u.viewer && stationOf(u.perms) ? ` <span class="stpill">${STATIONS.find(x => x[0] === stationOf(u.perms))[1]}</span>` : ""}${u.active?"":` <span class="tag red">Deactivated</span>`}${u.must_change && u.active?` <span class="tag gold">Awaiting first sign-in</span>`:""}</div>
       <div class="small muted">${esc(u.email)} · ${u.last_login ? "last sign-in " + ago(u.last_login) : "never signed in"}${u.created_by ? " · added by " + esc(u.created_by) : ""}</div>
       <div class="acc">${u.active ? PERMS.filter(([k]) => (u.perms||[]).includes(k)).map(([k,l]) => `<span>${l}</span>`).join("") || `<span class="no">View only</span>` : `<span class="no">No access (deactivated)</span>`}${u.custom && u.role !== "admin" ? `<span style="background:#fff6dd;color:#8a6200">Custom access</span>` : ""}</div>${u.active && u.role !== "admin" && PERMS.some(([k]) => !(u.perms||[]).includes(k)) ? `<div class="noacc">Can't: ${PERMS.filter(([k]) => !(u.perms||[]).includes(k)).map(([k,l]) => l.toLowerCase()).join(", ")}</div>` : ""}</div>
       ${u.id === S.user.id ? `<span class="tag">You</span>` : `
@@ -2358,9 +2574,10 @@ async function drawUsers(){
   $$("[data-ureset]").forEach(b => b.onclick = async () => { if (!confirm("Create a new temporary password for this person? Their current password stops working.")) return;
     try { const r = await rpc("hub_user_reset", {p_token:S.pin, p_user:b.dataset.ureset}); credCard($("#uout"), r, false); drawUsers(); autoMail(r, false); } catch(e){ toast(e.message, "red"); } });
   $$("[data-uperm]").forEach(b => b.onclick = () => { const u = list.find(x => x.id === b.dataset.uperm);
-    modal(`<h3>Access for ${esc(u.name)}</h3><p class="small muted">Tick what ${esc(u.name.split(" ")[0])} can do. Changes apply within a minute, no need to sign out.</p>${permBoxes("epg", u.perms||[], myGrantable())}
+    modal(`<h3>Access for ${esc(u.name)}</h3><p class="small muted">Pick a station or tick what ${esc(u.name.split(" ")[0])} can do. Changes apply within a minute, no need to sign out.</p><label class="lbl">Station on the day</label>${stationSelect("est", stationOf(u.perms))}${permBoxes("epg", u.perms||[], myGrantable())}
       <div class="row" style="margin-top:8px"><button class="btn ghost sm" id="edef" type="button">Reset to ${u.role} defaults</button><span class="spacer"></span><button class="btn ghost" id="mc">Cancel</button><button class="btn" id="mo">Save access</button></div><div id="me"></div>`,
       (m, close) => { $("#mc",m).onclick = close;
+        wireStation($("#est",m), $("#epg",m));
         $("#edef",m).onclick = () => $$("#epg input", m).forEach(i => { if (!i.disabled) i.checked = ROLE_DEFAULT[u.role].includes(i.value); });
         $("#mo",m).onclick = async () => { try { await rpc("hub_user_perms", {p_token:S.pin, p_user:u.id, p_perms:pickedPerms($("#epg",m))}); close(); toast("Access updated for " + u.name, "green"); drawUsers(); } catch(e){ $("#me",m).innerHTML = `<div class="err">${esc(e.message)}</div>`; } }; }); });
   $$("[data-urm]").forEach(b => b.onclick = async () => { const u = list.find(x => x.id === b.dataset.urm);
