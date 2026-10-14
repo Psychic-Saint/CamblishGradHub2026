@@ -564,7 +564,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202610141255";
+const BUILD = "202610141325";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -1456,8 +1456,11 @@ async function seedTasks(){
    ====================================================================== */
 const F0 = () => ({q:"", prog:"", nqf:"", pm:"", client:""});
 function fopts(){
-  const L = S.data.learners, u = k => [...new Set(L.map(l => l[k]).filter(v => v !== null && v !== undefined && v !== ""))];
-  return { prog:u("programme").sort(), nqf:u("nqf").sort((a,b)=>a-b), pm:u("pm").sort(), client:u("client").sort() };
+  // each list only shows what is left once the other filters are applied (pick a client: only its programmes remain)
+  const F = S.f.L, field = {prog:"programme", nqf:"nqf", pm:"pm", client:"client"};
+  const keep = (l, skip) => Object.entries(field).every(([fk, col]) => fk === skip || !F[fk] || String(l[col]) === String(F[fk]));
+  const u = fk => { const v = [...new Set(S.data.learners.filter(l => keep(l, fk)).map(l => l[field[fk]]).filter(x => x !== null && x !== undefined && x !== ""))]; if (F[fk] && !v.some(x => String(x) === String(F[fk]))) v.push(F[fk]); return v; };
+  return { prog:u("prog").sort(), nqf:u("nqf").sort((a,b)=>a-b), pm:u("pm").sort(), client:u("client").sort() };
 }
 function fActive(){ const F = S.f.L; return !!(F.q || F.prog || F.nqf || F.pm || F.client); }
 function filterBar(extra=""){
@@ -2251,12 +2254,15 @@ function viewStage(){
   const notYetBy = {}; notYet.forEach(l => { const g = groupOf(l); notYetBy[g] = (notYetBy[g]||0)+1; });
   const late = waiting.filter(l=>l._late);
   // the stage manager can call one programme at a time; inside it, first to arrive goes first
-  const progOrder = [...new Set(P.filter(l => l.stage_status !== "done").sort((a,b) => progKey(a).localeCompare(progKey(b))).map(l => l.programme || "No programme"))];
+  const cliSel = S.f.stageCli || "", inCli = l => !cliSel || (l.client || "") === cliSel;
+  const cliOpts = [...new Set(P.filter(l => l.stage_status !== "done").map(l => l.client || ""))].filter(Boolean).sort()
+    .map(c => `<option value="${esc(c)}" ${c === cliSel ? "selected" : ""}>${esc(c)} · ${waiting.filter(l => l.client === c).length} waiting</option>`).join("");
+  const progOrder = [...new Set(P.filter(l => l.stage_status !== "done" && inCli(l)).sort((a,b) => progKey(a).localeCompare(progKey(b))).map(l => l.programme || "No programme"))];
   if (S.f.stageProg && !progOrder.includes(S.f.stageProg)) progOrder.push(S.f.stageProg);
   const sel = S.f.stageProg || "";
-  const queue = sel ? waiting.filter(l => (l.programme || "No programme") === sel).sort(byArrival) : waiting;
+  const queue = waiting.filter(l => inCli(l) && (!sel || (l.programme || "No programme") === sel)).sort(sel || cliSel ? byArrival : () => 0);
   const nextUp = queue.slice(0,5);
-  const progOpts = progOrder.map(p => { const n = waiting.filter(l => (l.programme || "No programme") === p).length; return `<option value="${esc(p)}" ${p === sel ? "selected" : ""}>${esc(p)} · ${n} waiting</option>`; }).join("");
+  const progOpts = progOrder.map(p => { const n = waiting.filter(l => inCli(l) && (l.programme || "No programme") === p).length; return `<option value="${esc(p)}" ${p === sel ? "selected" : ""}>${esc(p)} · ${n} waiting</option>`; }).join("");
   let html = bannerHTML() + `<div class="card flowcard noprint"><div id="flow" class="flowwrap"></div></div>
   ${stageTiles(journey(S.data.learners), "noprint")}
   <div class="stagebox noprint">
@@ -2266,7 +2272,8 @@ function viewStage(){
         <button class="btn gold lg" id="callNext" ${queue.length || called.length ? "" : "disabled"}>${called.length ? (queue.length ? "✓ Done, call next" : "✓ Done") : "▶ Call first graduate"}</button>
         ${called.length?`<button class="btn ghost sm" id="undoCall">Back to waiting</button>`:""}
       </div>
-      <label class="callsel"><span>Programme up next</span><select id="stProg" aria-label="Programme up next"><option value="">All programmes, in stage order</option>${progOpts}</select></label>
+      <label class="callsel"><span>Client</span><select id="stCli" aria-label="Client up next"><option value="">All clients</option>${cliOpts}</select></label>
+      <label class="callsel"><span>Programme up next</span><select id="stProg" aria-label="Programme up next"><option value="">${cliSel ? "All of this client's programmes" : "All programmes, in stage order"}</option>${progOpts}</select></label>
       <div class="small" style="margin-top:10px;color:#c9d3f2">${done} of ${P.length} crossed · ${robing} still getting robes · ${notYet.length} not yet arrived</div>
     </div>
     <div class="card upnext" style="margin:0">
@@ -2316,9 +2323,10 @@ function viewStage(){
   const cn = $("#callNext"); if (cn) cn.onclick = async () => {
     cn.disabled = true;
     for (const l of called) await rpc("grad_stage", {p_code:CODE,p_pin:S.pin,p_actor:S.me,p_learner:l.id,p_stage:"done"}).catch(()=>{});
-    const nxt = queue[0]; if (nxt) await act("grad_stage", {p_learner:nxt.id, p_stage:"called"}); else { if (sel) toast(`Everyone in ${sel} who is ready has crossed`, "green"); await pull(true); }
+    const nxt = queue[0]; if (nxt) await act("grad_stage", {p_learner:nxt.id, p_stage:"called"}); else { if (sel || cliSel) toast(`Everyone in ${sel || cliSel} who is ready has crossed`, "green"); await pull(true); }
   };
   const sp = $("#stProg"); if (sp) sp.onchange = () => { S.f.stageProg = sp.value; viewStage(); };
+  const sc = $("#stCli"); if (sc) sc.onchange = () => { S.f.stageCli = sc.value; S.f.stageProg = ""; viewStage(); };
   const uc = $("#undoCall"); if (uc) uc.onclick = async () => { for (const l of called) await rpc("grad_stage",{p_code:CODE,p_pin:S.pin,p_actor:S.me,p_learner:l.id,p_stage:"waiting"}).catch(()=>{}); pull(true); };
 }
 
