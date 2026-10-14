@@ -412,6 +412,7 @@ nav.tabs .badge.green{background:var(--ok);color:#fff}
 .feed-item.mine{background:linear-gradient(90deg,#fffaf0,#fff)}
 #capSpin{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:radial-gradient(circle at 50% 40%,rgba(29,63,174,.92),rgba(8,26,69,.97));perspective:900px;transition:opacity .35s}
 #capSpin.out{opacity:0}
+.leadtag{display:inline-block;background:var(--pc);color:#fff;border-radius:99px;padding:2px 9px;font-size:11px;font-weight:900;letter-spacing:.2px;vertical-align:2px;box-shadow:0 0 0 2px #fff,0 0 0 3.5px var(--pc);max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sgh{cursor:pointer;user-select:none}.sgh .chev{display:inline-block;margin-right:8px;transition:transform .15s}.sgh.closed .chev{transform:rotate(-90deg)}.sgh:hover{filter:brightness(1.12)}
 .lnotes{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:4px;font-size:12px}
 .nbtn{background:none;border:1px dashed #9db3ec;color:#1d3fae;border-radius:99px;padding:1px 9px;font-size:11.5px;font-weight:700;cursor:pointer}.nbtn:hover{background:#eef2fb}
@@ -563,7 +564,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202610072200";
+const BUILD = "202610141243";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -1235,6 +1236,19 @@ async function renderTag(l){
     x.fillText(name, X(305), Y(285));
     x.fillStyle = "#0d2a6b"; fitText(x, prog, 340 * k, Math.round(14 * k), '800 {s}px Montserrat, "Segoe UI", Arial, sans-serif'); x.fillText(prog, X(305), Y(323));
     x.fillStyle = "#1d3fae"; fitText(x, cli, 340 * k, Math.round(13 * k), '700 {s}px Montserrat, "Segoe UI", Arial, sans-serif'); x.fillText(cli, X(305), Y(342));
+    stageList(); const pc = progColor(l);
+    x.fillStyle = pc; x.fillRect(X(0), Y(358), 612 * k, 8 * k);   // programme colour strip for ushers
+    if (isLead(l)){   // first of the programme: bright ribbon across the top-left corner
+      x.save(); x.translate(X(0), Y(0)); x.rotate(-Math.PI / 4);
+      x.fillStyle = pc; x.fillRect(-140 * k, 46 * k, 280 * k, 34 * k);
+      x.fillStyle = "#fff"; x.textAlign = "center"; x.font = `900 ${Math.round(15 * k)}px Montserrat, Arial, sans-serif`; x.fillText("★ 1ST IN CLASS ★", 0, 69 * k);
+      x.restore();
+      const lt = "LEADS " + (l.programme || "").toUpperCase(); x.textAlign = "center";
+      x.font = `900 ${Math.round(11 * k)}px Montserrat, Arial, sans-serif`; const tw = Math.min(x.measureText(lt).width + 22 * k, 330 * k);
+      x.beginPath(); x.roundRect(X(305) - tw / 2, Y(226), tw, 17 * k, 8.5 * k); x.fillStyle = pc; x.fill();
+      x.fillStyle = "#fff"; fitText(x, lt, tw - 14 * k, Math.round(11 * k), '900 {s}px Montserrat, Arial, sans-serif'); x.fillText(lt, X(305), Y(238.5));
+      x.textAlign = "center";
+    }
     if (l.seat || l._code){   // seat + stage number badge, bottom left
       const bx = X(14), by = Y(282), bw = 100 * k, bh = 70 * k, r = 11 * k;
       x.beginPath(); x.roundRect(bx, by, bw, bh, r); x.fillStyle = "#081a45"; x.fill(); x.lineWidth = 3 * k; x.strokeStyle = "#d4af37"; x.stroke();
@@ -1490,6 +1504,10 @@ function matchScore(l){
   return sc;
 }
 function chipsHTML(id, opts, cur){ return `<div class="chips" id="${id}" style="margin:10px 0">${opts.map(([k,label,n]) => `<button class="chip ${cur===k?"on":""}" data-c="${k}">${label} (${n})</button>`).join("")}</div>`; }
+const PROG_COLS = ["#e11d48","#f59e0b","#10b981","#3b82f6","#8b5cf6","#ec4899","#14b8a6","#f97316","#65a30d","#0891b2","#a855f7","#dc2626","#ca8a04","#2563eb","#db2777","#059669"];
+function progColor(l){ const keys = S._progKeys && S._progKeysAt === S.data.learners.length ? S._progKeys : (S._progKeysAt = S.data.learners.length, S._progKeys = [...new Set(S.data.learners.map(progKey))].sort()); const i = keys.indexOf(progKey(l)); return PROG_COLS[(i < 0 ? 0 : i) % PROG_COLS.length]; }
+const isLead = l => l.status === "present" && !l._late && /-01$/.test(codeOf(l));
+const leadTag = l => isLead(l) ? `<span class="leadtag" style="--pc:${progColor(l)}" title="First of ${esc(l.programme || "")} to arrive: leads this programme to the stage">★ 1st · ${esc(l.programme || "")}</span>` : "";
 const seatTag = l => l.seat ? `<span class="seat" title="Seat">💺 ${hl(l.seat)}</span>` : "";
 /* ---------- learner notes & queries (travel with the learner to the graduate list) ---------- */
 const NOTE_KIND = {name:["✏️","Name correction"], query:["⚠","Query"], note:["💬","Note"]};
@@ -1519,7 +1537,7 @@ function noteDialog(id){
 }
 document.addEventListener("click", e => { const b = e.target.closest("[data-note]"); if (b && S.data){ e.preventDefault(); noteDialog(b.dataset.note); } });
 function lInfo(l, extra=""){
-  return `<div class="info"><div class="nm">${hl(fullName(l))} ${seatTag(l)}</div>
+  return `<div class="info"><div class="nm">${hl(fullName(l))} ${seatTag(l)} ${leadTag(l)}</div>
     <div class="small muted">NQF ${esc(l.nqf ?? "?")} · ${hl(l.programme||"")}${l.client?" · "+hl(l.client):""}${l.pm?" · PM: "+hl(l.pm):""}${l.learner_ref && qWords().some(w => String(l.learner_ref).toLowerCase().includes(w)) ? " · ID " + hl(l.learner_ref) : ""}</div>${extra}${notesLine(l)}</div>`;
 }
 function listOut(el, list, rowFn, empty){
@@ -1777,10 +1795,11 @@ const HALL = { name:"Great Hall, Wits", sections:[
     blocks:[{name:"Left", from:35, to:25}, {name:"Centre", from:24, to:12}, {name:"Right", from:11, to:1}] },
   { name:"Upper", rows:["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","R"],
     blocks:[{name:"Left", from:44, to:33}, {name:"Centre left", from:32, to:23}, {name:"Centre right", from:22, to:12}, {name:"Right", from:11, to:1}] }],
-  reserved: s => s.section === "Lower" && s.block === "Left" && ["AA","BB","CC"].includes(s.row) };
+  reserved: s => s.section === "Lower" && ["AA","BB","CC"].includes(s.row) };
+const SEAT_LBL = (r, n) => `${r}-${String(n).padStart(2, "0")}`;
 function hallSeats(){
   const out = [];
-  HALL.sections.forEach(sec => sec.rows.forEach(r => sec.blocks.forEach(b => { for (let n = b.from; n >= b.to; n--) out.push({section:sec.name, row:r, block:b.name, n, label:`${r}-${n}`}); })));
+  HALL.sections.forEach(sec => sec.rows.forEach(r => sec.blocks.forEach(b => { for (let n = b.from; n >= b.to; n--) out.push({section:sec.name, row:r, block:b.name, n, label:SEAT_LBL(r, n)}); })));
   out.forEach(s => s.reserved = HALL.reserved(s));
   return out;
 }
@@ -1797,7 +1816,7 @@ function seatPlan(){
   return { plan, unseated: Math.max(0, todo.length - free.length), lower: hallSeats().filter(s => s.section === "Lower" && !s.reserved).length };
 }
 async function assignSeats(){
-  if (!confirm("Assign seats by programme? Graduates who are already checked in keep their seats; absent and not-attending graduates give theirs up.")) return;
+  if (!confirm("Recalculate all seats by programme? This happens automatically at every check-in; use this after uploading or editing the learner list.")) return;
   try { S.lastActAt = Date.now(); const r = await rpc("grad_seats_assign", {p_code:CODE, p_pin:S.pin, p_actor:S.me});
     toast(`Seats assigned: ${r.seated} seated${r.unseated ? `, ${r.unseated} did not fit in the hall` : ""}`, r.unseated ? "red" : "green"); rtPing(); await pull(true); }
   catch(e){ toast("Could not assign seats: " + e.message, "red"); }
@@ -1824,7 +1843,7 @@ function planSeats(){
     const r = planRowR(sec.name, ri);
     sec.blocks.forEach(b => { const u0 = planBlockStart(sec.name, b.name); let i = 0;
       for (let n = b.from; n >= b.to; n--, i++){ const th = planAngle(sec.name, u0 + i + .5, r); const [x, y] = planXY(r, th);
-        out.push({section:sec.name, row, block:b.name, n, label:`${row}-${n}`, x, y, deg:th * 180 / Math.PI + 90, r, u:u0 + i + .5, reserved:HALL.reserved({section:sec.name, row, block:b.name}) }); } });
+        out.push({section:sec.name, row, block:b.name, n, label:SEAT_LBL(row, n), x, y, deg:th * 180 / Math.PI + 90, r, u:u0 + i + .5, reserved:HALL.reserved({section:sec.name, row, block:b.name}) }); } });
   }));
   return out;
 }
@@ -2273,7 +2292,7 @@ function viewStage(){
       if (gg !== g){ g = gg; const inG = P.filter(x=>gOf(x)===gg); const dn = inG.filter(x => x.stage_status === "done").length; html += `<div class="group-h sgh${closed ? " closed" : ""}" data-sgk="${esc(gg)}" role="button" tabindex="0" aria-expanded="${!closed}"><span class="chev" aria-hidden="true">▾</span>${esc(gg)}<span class="spacer"></span><span class="tag">${dn} of ${inG.length} crossed</span><span class="tag">${inG.length} present</span>${notYetBy[gg]?`<span class="tag">${notYetBy[gg]} not yet arrived</span>`:""}</div>`; }
       if (closed) return;
       html += `<div class="lrow ${l.stage_status}"><span class="seq" style="width:auto;min-width:38px;padding:0 6px;border-radius:19px">${l.stage_status==="done"?"✓ "+l._code:l._code}</span>
-        <div class="info"><div class="nm">${hl(fullName(l))} ${seatTag(l)}</div><div class="small muted">${l._late?esc(l.programme||"")+" · ":""}${esc(l.client||"")}${l.cohort?" · "+esc(l.cohort):""} · arrived ${fmtTime(l.arrived_at)}</div>${notesLine(l)}</div>
+        <div class="info"><div class="nm">${hl(fullName(l))} ${seatTag(l)} ${leadTag(l)}</div><div class="small muted">${l._late?esc(l.programme||"")+" · ":""}${esc(l.client||"")}${l.cohort?" · "+esc(l.cohort):""} · arrived ${fmtTime(l.arrived_at)}</div>${notesLine(l)}</div>
         ${l._late?`<span class="tag red">Late arrival</span>`:""}
         ${l.stage_status==="called"?`<span class="tag gold">On stage</span>`:""}
         <span class="noprint pacts">${tagBtn(l)}${l.stage_status==="waiting"?`<button class="sbtn p" data-sg="${l.id}" data-s="called">Call</button>`:""}
@@ -2399,7 +2418,7 @@ function viewManage(){
       <button class="btn sm" id="esave" style="margin-top:10px">Save settings</button></div>
   </div>
   <div class="card"><h2>Seating plan · ${HALL.name}<span class="spacer"></span><button class="btn ghost sm" id="smOpen">💺 View seating plan</button>${can("seating")?`<button class="btn gold sm" id="smAssign">Assign seats by programme</button>`:""}</h2>
-    ${(() => { const st = seatStats(), sp = seatPlan(); return `<p class="small">Seats are filled front to back in the lower section first (rows AA–LL), keeping each programme together in stage order (NQF level, then programme). Left-block rows AA, BB and CC (seats 25–35) are kept for clients. Anyone who doesn't fit downstairs continues in the upper section from row A. Graduates who are already checked in keep their seats; absent graduates and anyone marked "not attending" lose theirs.</p>
+    ${(() => { const st = seatStats(), sp = seatPlan(); return `<p class="small">Seats follow the stage order: NQF 1 first, then 2, 3 and up, one programme at a time. Filling starts in the <b>lower right block at DD-01</b>, then the lower centre and lower left blocks, then the upper blocks from right to left. Rows AA, BB and CC downstairs are kept for VIPs and clients. A programme that would run over into the next block moves there as a whole. Inside a programme the first graduate to arrive takes the first seat and the first stage spot; everyone not yet arrived keeps a provisional seat that moves up as others arrive. Absent graduates and anyone marked "not attending" give their seat up.</p>
     <div class="row" style="gap:18px"><div><div class="big2">${st.seated}</div><div class="small muted">seated</div></div><div><div class="big2">${st.lower}</div><div class="small muted">lower section (of ${sp.lower})</div></div><div><div class="big2">${st.upper}</div><div class="small muted">upper section</div></div><div><div class="big2" style="color:${st.none?"var(--bad)":"inherit"}">${st.none}</div><div class="small muted">without a seat</div></div></div>`; })()}
   </div>
   <div class="card"><h2>Learner list<span class="spacer"></span></h2>
