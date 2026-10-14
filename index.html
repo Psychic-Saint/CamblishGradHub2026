@@ -564,7 +564,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202610141243";
+const BUILD = "202610141255";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -1254,8 +1254,7 @@ async function renderTag(l){
       x.beginPath(); x.roundRect(bx, by, bw, bh, r); x.fillStyle = "#081a45"; x.fill(); x.lineWidth = 3 * k; x.strokeStyle = "#d4af37"; x.stroke();
       x.fillStyle = "#f3d27a"; x.font = `800 ${Math.round(8 * k)}px Montserrat, Arial, sans-serif`; x.fillText(l.seat ? "SEAT" : "STAGE No.", bx + bw / 2, by + 14 * k);
       const big = l.seat || l._code;
-      x.fillStyle = "#fff"; fitText(x, big, bw - 12 * k, Math.round(26 * k), '{s}px "Archivo Black", "Arial Black", sans-serif'); x.fillText(big, bx + bw / 2, by + 42 * k);
-      if (l.seat && l._code){ x.fillStyle = "#f3d27a"; x.font = `700 ${Math.round(9 * k)}px Montserrat, Arial, sans-serif`; x.fillText("STAGE " + l._code, bx + bw / 2, by + 60 * k); }
+      x.fillStyle = "#fff"; fitText(x, big, bw - 12 * k, Math.round(30 * k), '{s}px "Archivo Black", "Arial Black", sans-serif'); x.fillText(big, bx + bw / 2, by + 50 * k);
     }
   } else {   // simple black design for small thermal labels
     const pad = W * 0.04; x.fillStyle = "#000"; x.textAlign = "left";
@@ -1600,6 +1599,7 @@ async function markPrinted(list){
 /* ======================================================================
    CHECK-IN  (present learners move on to Robes)
    ====================================================================== */
+const dcode = l => l.seat || codeOf(l);   // one code everywhere: the seat (seat order = stage order)
 function codeOf(l){ if (!l._code) stageList(); return l._code || ""; }
 function viewCheckin(){
   if (!$("#ciView")){
@@ -1643,7 +1643,7 @@ function drawCheckin(){
   groupedOut($("#cilist"), L.filter(l => l.status === S.f.ciFilter), (l, i, prog) => `<div class="lrow ${l.status}">${posTag(i, prog)}${lInfo(l,
       `<div class="meta" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:3px">${/^n/i.test(l.rsvp||"")?`<span class="tag red">RSVP: not attending</span>`:""}${/^y/i.test(l.robe||"")?`<span class="tag gold">Needs robe</span>`:""}${l.status!=="present"&&l.phone?`<a class="tag" href="tel:${esc(String(l.phone).split("/")[0].trim())}">📞 ${esc(l.phone)}</a>`:""}</div>
        ${l.status==="present"?`<div class="small" style="color:var(--ok)">Arrived ${fmtTime(l.arrived_at)} · by ${esc(l.checked_by||"")} · now ${l.cert_issued?"graduated":l.stage_status==="done"?"collecting certificate":l.robe_issued?"in the stage line":"at robes"}</div>`:""}`)}
-    <div class="pacts">${l.status==="present" ? `<span class="pill s-Completed">✓ Present</span><span class="tag gold" title="Stage number">${esc(codeOf(l))}</span>${tagBtn(l)}${true?`<button class="btn ghost sm" data-ci="${l.id}" data-s="expected">Undo</button>`:""}`
+    <div class="pacts">${l.status==="present" ? `<span class="pill s-Completed">✓ Present</span><span class="tag gold" title="Seat (also their place in the stage line)">${esc(dcode(l))}</span>${tagBtn(l)}${true?`<button class="btn ghost sm" data-ci="${l.id}" data-s="expected">Undo</button>`:""}`
       : l.status==="absent" ? `<span class="tag">Absent</span>${true?`<button class="btn ghost sm" data-ci="${l.id}" data-s="expected">Undo</button><button class="btn green bigbtn" data-ci="${l.id}" data-s="present">Arrived</button>`:""}`
       : `<span class="notarr">Not arrived</span>${true?`<button class="btn ghost sm" data-ci="${l.id}" data-s="absent">Absent</button><button class="btn green bigbtn" data-ci="${l.id}" data-s="present">✓ Mark present</button>`:""}`}</div></div>`,
     fActive() ? "No graduate matches these filters." : S.f.ciFilter === "expected" ? "Everyone has arrived. 🎉" : "Nobody here yet.", "checkin", present ? byArrival : byName, drawCheckin, present);
@@ -1680,7 +1680,7 @@ function drawRobes(){
   $$("#rbc .chip").forEach(b => b.onclick = () => { S.f.rb = b.dataset.c; drawRobes(); });
   groupedOut($("#rblist"), S.f.rb === "wait" ? wait : done, (l, i, prog) => `<div class="lrow ${l.robe_issued?"present":"expected"}">${posTag(i, prog)}${lInfo(l,
       `<div class="small" style="margin-top:2px">${/^y/i.test(l.robe||"")?`<span class="tag gold">Needs robe</span> `:""}${l.belt?`<span class="tag">Belt: ${esc(l.belt)}</span> `:""}<span class="muted">Arrived ${fmtTime(l.arrived_at)}</span>${l.robe_issued?` · <span style="color:var(--ok)">${l.robe_skip?"Own robe":"Robe issued"} ${fmtTime(l.robe_at)}${l.robe_by?" by "+esc(l.robe_by):""}</span>`:""}</div>`)}
-    <div class="pacts"><span class="tag gold" title="Stage number">${esc(codeOf(l))}</span>${tagBtn(l)}
+    <div class="pacts"><span class="tag gold" title="Seat (also their place in the stage line)">${esc(dcode(l))}</span>${tagBtn(l)}
       ${true ? (l.robe_issued ? `<span class="pill s-Completed">✓ ${l.robe_skip?"Own robe":"Robed"}</span><button class="btn ghost sm" data-rb="${l.id}" data-v="0">Undo</button>`
         : `<button class="btn ghost sm" data-rb="${l.id}" data-v="1" data-skip="1" title="Has their own robe or does not need one">Own robe</button><button class="btn gold bigbtn" data-rb="${l.id}" data-v="1">🎓 Robe issued</button>`) : ""}</div></div>`,
     fActive() ? "No graduate matches these filters." : S.f.rb === "wait" ? "Nobody waiting for a robe right now." : "No robes issued yet.", "robes", byArrival, drawRobes);
@@ -1712,7 +1712,7 @@ function drawCerts(){
   const byStage = (a, b) => new Date(a.stage_at || 0) - new Date(b.stage_at || 0);
   groupedOut($("#ctlist"), S.f.ct === "due" ? due : notYet, (l, i, prog) => `<div class="lrow ${l.stage_status==="done"?"called":"expected"}">${posTag(i, prog)}${lInfo(l,
       `<div class="small muted" style="margin-top:2px">${l.stage_status==="done"?`Crossed ${fmtTime(l.stage_at)}`:l.robe_issued?"In the stage line":"Waiting for robe"}</div>`)}
-    <div class="pacts"><span class="tag gold">${esc(codeOf(l))}</span>${tagBtn(l)}${l.stage_status === "done" ? `<button class="btn green bigbtn" data-ct="${l.id}" data-v="1">📜 Certificate issued</button>` : ""}</div></div>`,
+    <div class="pacts"><span class="tag gold" title="Seat">${esc(dcode(l))}</span>${tagBtn(l)}${l.stage_status === "done" ? `<button class="btn green bigbtn" data-ct="${l.id}" data-v="1">📜 Certificate issued</button>` : ""}</div></div>`,
     fActive() ? "No graduate matches these filters." : S.f.ct === "due" ? "No certificates waiting right now." : "Nobody waiting to go on stage.", "certs", S.f.ct === "due" ? byStage : byArrival, drawCerts);
   wireTags($("#ctlist"));
   $$("#ctlist [data-ct]").forEach(b => b.onclick = async () => { b.disabled = true; const l = S.data.learners.find(x=>x.id===b.dataset.ct);
@@ -1748,7 +1748,7 @@ function drawGrads(){
   const byCert = (a, b) => new Date(a.cert_at || 0) - new Date(b.cert_at || 0);
   groupedOut($("#grlist"), G, (l, i, prog) => `<div class="lrow grad">${posTag(i, prog)}${lInfo(l,
       `<div class="small" style="margin-top:2px;color:var(--ok)">🎓 Graduated ${fmtTime(l.cert_at)}${l.cert_by ? " · certificate from " + esc(l.cert_by) : ""} <span class="muted">· crossed ${fmtTime(l.stage_at)}</span></div>`)}
-    <div class="pacts"><span class="tag gold">${esc(codeOf(l))}</span>${tagBtn(l)}${true ? `<button class="btn ghost sm" data-ct="${l.id}" title="Move back to Certificates">Undo</button>` : ""}</div></div>`,
+    <div class="pacts"><span class="tag gold" title="Seat">${esc(dcode(l))}</span>${tagBtn(l)}${true ? `<button class="btn ghost sm" data-ct="${l.id}" title="Move back to Certificates">Undo</button>` : ""}</div></div>`,
     fActive() ? "No graduate matches these filters." : "No graduates yet. They appear here once their certificate is issued.", "grads", byCert, drawGrads);
   wireTags($("#grlist"));
   $$("#grlist [data-ct]").forEach(b => b.onclick = async () => { const l = S.data.learners.find(x=>x.id===b.dataset.ct); if (!confirm(`Move ${fullName(l)} back to Certificates?`)) return; b.disabled = true; await act("grad_cert", {p_learner:l.id, p_issued:false}, null); });
@@ -1933,7 +1933,7 @@ function planGuide(l){
     <ol><li>Enter through the <b>Learner Entrance ${door === "left" ? "Left (stage-left door)" : "Right (stage-right door)"}</b>.</li>
       <li>Go up the ${s.section === "Lower" ? (s.block === "Centre" ? "aisle between the centre and right blocks" : s.block === "Left" ? "left aisle" : "right aisle") : door === "left" ? "left aisle to the upper section" : "right aisle to the upper section"}. Usher <b style="color:${USH_COL[uu[2]]}">${u}</b> (${uu[1].toLowerCase()}) will help.</li>
       <li>Row <b>${esc(s.row)}</b>, seat <b>${s.n}</b> in the ${blockTxt}.</li></ol>
-    <div class="small muted">${esc(l.programme || "")}${l.client ? " · " + esc(l.client) : ""}${l._code ? " · stage number " + esc(l._code) : ""}</div></div>`;
+    <div class="small muted">${esc(l.programme || "")}${l.client ? " · " + esc(l.client) : ""}${l._code ? " · stage position " + esc(l._code.split("-").pop().replace(/^0/,"")) + " in their programme" : ""}</div></div>`;
 }
 function seatMap(preselect){
   stageList();
@@ -2153,8 +2153,8 @@ function stageOrderHTML(Lf){
     <p class="sonote">Programmes go up by NQF level, lowest first. Within a programme it is first come, first on stage.${robing ? ` ${robing} graduate${robing === 1 ? " is" : "s are"} still being robed and will join the line.` : ""}</p>
     ${groups.length ? groups.map(G => { const m = G.g.match(/^NQF (\S+) · (.*)$/); const done = G.items.filter(l => l.stage_status === "done").length;
       return `<section class="sog"><div class="glh"><span class="gln">${esc(m ? m[2] : G.g)}</span>${m ? `<span class="glq">NQF ${esc(m[1])}</span>` : ""}<span class="sp"></span><span class="glq">${done} of ${G.items.length} crossed</span>${notYetBy[G.g] ? `<span class="glq">${notYetBy[G.g]} not yet arrived</span>` : ""}<span class="glc">${G.items.length} in line</span></div>
-      <table class="sot"><thead><tr><th>#</th><th>Code</th><th>Graduate</th><th>Client</th><th>Seat</th><th style="text-align:right">Status</th></tr></thead><tbody>
-      ${G.items.map(l => `<tr class="${l.stage_status}"><td class="no">${++n}</td><td class="cd"><span>${esc(l._code || "")}</span></td><td class="nm">${esc(fullName(l))}</td><td class="cl">${esc([l.client, l.cohort].filter(Boolean).join(" · "))}</td><td class="se">${esc(l.seat || "–")}</td><td class="stt">${st(l)}</td></tr>`).join("")}
+      <table class="sot"><thead><tr><th>#</th><th>Seat</th><th>Graduate</th><th>Client</th><th>Seat</th><th style="text-align:right">Status</th></tr></thead><tbody>
+      ${G.items.map(l => `<tr class="${l.stage_status}"><td class="no">${++n}</td><td class="cd"><span>${esc(dcode(l) || "")}</span></td><td class="nm">${esc(fullName(l))}</td><td class="cl">${esc([l.client, l.cohort].filter(Boolean).join(" · "))}</td><td class="se">${esc(l.seat || "–")}</td><td class="stt">${st(l)}</td></tr>`).join("")}
       </tbody></table></section>`; }).join("") : `<p class="muted" style="font-size:13px">Nobody is in the stage line yet. Graduates join once their robe is issued.</p>`}`;
 }
 function stageDialog(){
@@ -2261,7 +2261,7 @@ function viewStage(){
   ${stageTiles(journey(S.data.learners), "noprint")}
   <div class="stagebox noprint">
     <div class="now"><div class="l">Now on stage</div>
-      ${called.length ? called.map(l=>`<div class="big">${esc(fullName(l))}</div><div class="pr">${l.seat?"Seat "+esc(l.seat)+" · ":""}Tag ${l._code} · #${l._seq} · NQF ${esc(l.nqf??"?")} · ${esc(l.programme||"")}${l.client?" · "+esc(l.client):""}</div>`).join("") : `<div class="big" style="opacity:.7">Nobody called yet</div><div class="pr">${P.length} arrived graduates in the line-up</div>`}
+      ${called.length ? called.map(l=>`<div class="big">${esc(fullName(l))}</div><div class="pr">Seat ${esc(dcode(l))} · #${l._seq} · NQF ${esc(l.nqf??"?")} · ${esc(l.programme||"")}${l.client?" · "+esc(l.client):""}</div>`).join("") : `<div class="big" style="opacity:.7">Nobody called yet</div><div class="pr">${P.length} arrived graduates in the line-up</div>`}
       <div class="row" style="margin-top:12px;position:relative;z-index:1">
         <button class="btn gold lg" id="callNext" ${queue.length || called.length ? "" : "disabled"}>${called.length ? (queue.length ? "✓ Done, call next" : "✓ Done") : "▶ Call first graduate"}</button>
         ${called.length?`<button class="btn ghost sm" id="undoCall">Back to waiting</button>`:""}
@@ -2271,7 +2271,7 @@ function viewStage(){
     </div>
     <div class="card upnext" style="margin:0">
       <h2>Up next${sel ? ` <span class="tag gold">${esc(sel)}</span>` : ""}<span class="spacer"></span><span class="small muted">${queue.length} waiting</span></h2>
-      ${nextUp.length ? nextUp.map((l,i)=>`<div class="row" style="padding:6px 0;border-bottom:1px solid var(--line)"><span class="seq" style="width:auto;min-width:30px;height:30px;font-size:12px;padding:0 6px;border-radius:15px">${l._code}</span><div style="flex:1"><b>${esc(fullName(l))}</b><div class="small muted">${esc(l.programme||"")}${l.client?" · "+esc(l.client):""}</div></div>${l._late?`<span class="tag red">Late arrival</span>`:""}${i===0?`<span class="tag gold">Next</span>`:""}</div>`).join("") : `<div class="empty">No one waiting.</div>`}
+      ${nextUp.length ? nextUp.map((l,i)=>`<div class="row" style="padding:6px 0;border-bottom:1px solid var(--line)"><span class="seq" style="width:auto;min-width:30px;height:30px;font-size:12px;padding:0 6px;border-radius:15px">${esc(dcode(l))}</span><div style="flex:1"><b>${esc(fullName(l))}</b><div class="small muted">${esc(l.programme||"")}${l.client?" · "+esc(l.client):""}</div></div>${l._late?`<span class="tag red">Late arrival</span>`:""}${i===0?`<span class="tag gold">Next</span>`:""}</div>`).join("") : `<div class="empty">No one waiting.</div>`}
     </div>
   </div>
   ${late.length?`<div class="err noprint" style="margin-top:12px">${late.length} late arrival${late.length>1?"s":""} after their programme had finished: ${late.map(l=>esc(fullName(l))).join(", ")}. They have been moved to the end of the ceremony.</div>`:""}
@@ -2291,7 +2291,7 @@ function viewStage(){
       const gg = gOf(l); const closed = scol.has(gg) && !searching;
       if (gg !== g){ g = gg; const inG = P.filter(x=>gOf(x)===gg); const dn = inG.filter(x => x.stage_status === "done").length; html += `<div class="group-h sgh${closed ? " closed" : ""}" data-sgk="${esc(gg)}" role="button" tabindex="0" aria-expanded="${!closed}"><span class="chev" aria-hidden="true">▾</span>${esc(gg)}<span class="spacer"></span><span class="tag">${dn} of ${inG.length} crossed</span><span class="tag">${inG.length} present</span>${notYetBy[gg]?`<span class="tag">${notYetBy[gg]} not yet arrived</span>`:""}</div>`; }
       if (closed) return;
-      html += `<div class="lrow ${l.stage_status}"><span class="seq" style="width:auto;min-width:38px;padding:0 6px;border-radius:19px">${l.stage_status==="done"?"✓ "+l._code:l._code}</span>
+      html += `<div class="lrow ${l.stage_status}"><span class="seq" style="width:auto;min-width:38px;padding:0 6px;border-radius:19px">${l.stage_status==="done"?"✓ "+esc(dcode(l)):esc(dcode(l))}</span>
         <div class="info"><div class="nm">${hl(fullName(l))} ${seatTag(l)} ${leadTag(l)}</div><div class="small muted">${l._late?esc(l.programme||"")+" · ":""}${esc(l.client||"")}${l.cohort?" · "+esc(l.cohort):""} · arrived ${fmtTime(l.arrived_at)}</div>${notesLine(l)}</div>
         ${l._late?`<span class="tag red">Late arrival</span>`:""}
         ${l.stage_status==="called"?`<span class="tag gold">On stage</span>`:""}
