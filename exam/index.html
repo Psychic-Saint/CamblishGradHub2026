@@ -1313,11 +1313,11 @@ on(/^#\/results$/, async () => {
 
 // ---------- exam editor ----------
 on(/^#\/exam\/([\w-]+)$/, async (id) => {
-  let exam = { title: '', qualification: 'Occupational Certificate: Data Science Practitioner', saqa_id: '118708', duration_min: 180, grace_min: 15, pass_mark: 60, status: 'draft', instructions: [], paper: { questions: [] }, memo: { answers: [] }, datasets: [], settings: { snapshot_sec: 30, require_phone: true, allowed_emails: [] } };
+  let exam = { title: '', qualification: 'Occupational Certificate: Data Science Practitioner', saqa_id: '118708', duration_min: 180, grace_min: 15, pass_mark: 60, status: 'draft', instructions: [], paper: { questions: [] }, memo: { answers: [] }, datasets: [], settings: { snapshot_sec: 120, require_phone: true, allowed_emails: [] } };
   if (id !== 'new') { const r = await api('exm_exam_get', { p_exam_id: id }); exam = r.exam; }
   exam.paper = exam.paper || { questions: [] }; exam.paper.questions = exam.paper.questions || [];
   exam.memo = exam.memo || { answers: [] }; exam.memo.answers = exam.memo.answers || [];
-  exam.settings = Object.assign({ snapshot_sec: 30, require_phone: true, allowed_emails: [] }, exam.settings || {});
+  exam.settings = Object.assign({ snapshot_sec: 120, require_phone: true, allowed_emails: [] }, exam.settings || {});
   exam.datasets = exam.datasets || [];
   const toLocal = d => d ? new Date(new Date(d).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '';
 
@@ -1453,6 +1453,15 @@ on(/^#\/exam\/([\w-]+)$/, async (id) => {
       if (parsed.total_marks) $('#total').value = parsed.total_marks;
       if (parsed.qualification && !$('#qual').value) $('#qual').value = parsed.qualification;
       if (parsed.instructions && parsed.instructions.length) $('#instr').value = parsed.instructions.join('\n');
+      if (parsed.grace_min != null) $('#grace').value = parsed.grace_min;
+      if (parsed.settings) {
+        const st = parsed.settings;
+        if (st.snapshot_sec) $('#snap').value = st.snapshot_sec;
+        if (st.shuffle != null) $('#shuf').checked = !!st.shuffle;
+        if (st.reshuffle_on_flag != null) $('#reshuf').checked = !!st.reshuffle_on_flag;
+        if (st.require_phone != null) $('#reqphone').checked = !!st.require_phone;
+      }
+      if (parsed.memo && parsed.memo.answers && parsed.memo.answers.length && !exam.memo.answers.length) { exam.memo = { answers: parsed.memo.answers, source_file: f.name }; renderM(); $('#memoMsg').innerHTML = `<span class="pill ok">${parsed.memo.answers.length} answers</span>`; }
       renderQ();
       $('#paperMsg').innerHTML = `<span class="pill ok">${parsed.questions.length} questions · ${parsed.parsed_total} marks</span>`;
       if (parsed.total_marks && parsed.total_marks !== parsed.parsed_total) toast(`The paper says ${parsed.total_marks} marks but the questions add up to ${parsed.parsed_total}. Check the marks.`, 'bad');
