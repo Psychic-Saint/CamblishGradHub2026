@@ -412,6 +412,9 @@ nav.tabs .badge.green{background:var(--ok);color:#fff}
 .feed-item.mine{background:linear-gradient(90deg,#fffaf0,#fff)}
 #capSpin{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:radial-gradient(circle at 50% 40%,rgba(29,63,174,.92),rgba(8,26,69,.97));perspective:900px;transition:opacity .35s}
 #capSpin.out{opacity:0}
+.sigbox{position:relative;border:2px dashed #b9c5e4;border-radius:12px;background:#fff;height:170px}.sigbox canvas{width:100%;height:100%;display:block;cursor:crosshair;border-radius:12px}
+.sigbox .sigx{position:absolute;left:14px;bottom:30px;color:#9aa6c4;font-size:18px;pointer-events:none}.sigbox .sigline{position:absolute;left:40px;right:16px;bottom:34px;border-bottom:1.5px solid #c9d3ea;color:#9aa6c4;font-size:11px;padding-bottom:2px;pointer-events:none;text-align:right}
+.cqbtn{color:#b3261e!important;border-color:#f1b8b2!important}.lrow.cq{border-left:4px solid #b3261e}.cqtxt{margin-top:4px;font-size:12px;color:#b3261e;background:#fdf1ef;border-radius:8px;padding:5px 8px}.cqtxt i{color:#8a5a55;font-style:normal;font-size:11px}
 .leadtag{display:inline-block;background:var(--pc);color:#fff;border-radius:99px;padding:2px 9px;font-size:11px;font-weight:900;letter-spacing:.2px;vertical-align:2px;box-shadow:0 0 0 2px #fff,0 0 0 3.5px var(--pc);max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sgh{cursor:pointer;user-select:none}.sgh .chev{display:inline-block;margin-right:8px;transition:transform .15s}.sgh.closed .chev{transform:rotate(-90deg)}.sgh:hover{filter:brightness(1.12)}
 .lnotes{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:4px;font-size:12px}
@@ -564,7 +567,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202610141530";
+const BUILD = "202610151100";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -1697,29 +1700,154 @@ function drawRobes(){
    ====================================================================== */
 function viewCerts(){
   if (!$("#ctView")){
-    main.innerHTML = `<div id="bn"></div><div class="card" id="ctView"><div id="flow" class="flowwrap"></div><h2>Certificates<span class="spacer"></span><span id="ctSum" class="small muted"></span></h2>
+    main.innerHTML = `<div id="bn"></div><div class="card" id="ctView"><div id="flow" class="flowwrap"></div><h2>Certificates<span class="spacer"></span><span id="ctSum" class="small muted"></span><button class="btn gold sm" id="ctReg" style="margin-left:8px">🖊 Certificate register</button></h2>
       <p class="small muted" style="margin-top:-6px">Graduates who have crossed the stage, by programme in the order they crossed. Once their certificate is issued they move to <b>Graduates</b>.</p>
       ${filterBar()}<div id="ctchips"></div><div id="ctlist"></div></div>`;
-    wireFilterBar(drawCerts);
+    wireFilterBar(drawCerts); $("#ctReg").onclick = registerDialog;
   }
   $("#bn").innerHTML = bannerHTML(); wireBanner(); drawCerts();
 }
 function drawCerts(){
   stageList(); putFlow("certs");
   const P = applyF(S.data.learners.filter(l => l.status === "present" && !l.cert_issued));
-  const due = P.filter(l => l.stage_status === "done"), notYet = P.filter(l => l.stage_status !== "done");
-  if (!["due","notyet"].includes(S.f.ct)) S.f.ct = "due";
-  $("#ctSum").textContent = `${due.length} waiting · ${flowCounts().grads} graduated`;
-  $("#ctchips").innerHTML = chipsHTML("ctc", [["due","Crossed, awaiting certificate",due.length],["notyet","Not yet on stage",notYet.length]], S.f.ct);
+  const crossed = P.filter(l => l.stage_status === "done"), notYet = P.filter(l => l.stage_status !== "done");
+  const held = crossed.filter(l => openQ(l).length), due = crossed.filter(l => !openQ(l).length);
+  if (!["due","held","notyet"].includes(S.f.ct)) S.f.ct = "due";
+  $("#ctSum").textContent = `${due.length} waiting${held.length ? ` · ${held.length} on query` : ""} · ${flowCounts().grads} graduated`;
+  $("#ctchips").innerHTML = chipsHTML("ctc", [["due","Crossed, awaiting certificate",due.length],["held","⚠ Certificate queries",held.length],["notyet","Not yet on stage",notYet.length]], S.f.ct);
   $$("#ctc .chip").forEach(b => b.onclick = () => { S.f.ct = b.dataset.c; drawCerts(); });
   const byStage = (a, b) => new Date(a.stage_at || 0) - new Date(b.stage_at || 0);
-  groupedOut($("#ctlist"), S.f.ct === "due" ? due : notYet, (l, i, prog) => `<div class="lrow ${l.stage_status==="done"?"called":"expected"}">${posTag(i, prog)}${lInfo(l,
-      `<div class="small muted" style="margin-top:2px">${l.stage_status==="done"?`Crossed ${fmtTime(l.stage_at)}`:l.robe_issued?"In the stage line":"Waiting for robe"}</div>`)}
-    <div class="pacts"><span class="tag gold" title="Seat">${esc(dcode(l))}</span>${tagBtn(l)}${l.stage_status === "done" ? `<button class="btn green bigbtn" data-ct="${l.id}" data-v="1">📜 Certificate issued</button>` : ""}</div></div>`,
-    fActive() ? "No graduate matches these filters." : S.f.ct === "due" ? "No certificates waiting right now." : "Nobody waiting to go on stage.", "certs", S.f.ct === "due" ? byStage : byArrival, drawCerts);
+  const list = S.f.ct === "due" ? due : S.f.ct === "held" ? held : notYet;
+  groupedOut($("#ctlist"), list, (l, i, prog) => `<div class="lrow ${l.stage_status==="done"?"called":"expected"} ${openQ(l).length ? "cq" : ""}">${posTag(i, prog)}${lInfo(l,
+      `<div class="small muted" style="margin-top:2px">${l.stage_status==="done"?`Crossed ${fmtTime(l.stage_at)}`:l.robe_issued?"In the stage line":"Waiting for robe"}</div>${S.f.ct === "held" ? `<div class="cqtxt">${openQ(l).map(n => `⚠ ${esc(n.text)} <i>· ${esc(n.by)}, ${fmtTime(n.at)}</i>`).join("<br>")}</div>` : ""}`)}
+    <div class="pacts"><span class="tag gold" title="Seat">${esc(dcode(l))}</span>${tagBtn(l)}${l.stage_status === "done" ? (S.f.ct === "held"
+      ? `<button class="btn ghost" data-cqfix="${l.id}">✓ Query fixed</button>`
+      : `<button class="btn ghost cqbtn" data-cq="${l.id}">⚠ Certificate query</button><button class="btn green bigbtn" data-ct="${l.id}" data-v="1">📜 Certificate issued</button>`) : ""}</div></div>`,
+    fActive() ? "No graduate matches these filters." : S.f.ct === "due" ? "No certificates waiting right now." : S.f.ct === "held" ? "No certificate queries. 🎉" : "Nobody waiting to go on stage.", "certs", S.f.ct === "notyet" ? byArrival : byStage, drawCerts);
   wireTags($("#ctlist"));
-  $$("#ctlist [data-ct]").forEach(b => b.onclick = async () => { b.disabled = true; const l = S.data.learners.find(x=>x.id===b.dataset.ct);
-    if (await act("grad_cert", {p_learner:l.id, p_issued:true}, `🎓 ${fullName(l)} has graduated`)) bounceTab("grads"); });
+  $$("#ctlist [data-ct]").forEach(b => b.onclick = () => certSignDialog(b.dataset.ct));
+  $$("#ctlist [data-cq]").forEach(b => b.onclick = () => certQueryDialog(b.dataset.cq));
+  $$("#ctlist [data-cqfix]").forEach(b => b.onclick = async () => { const l = S.data.learners.find(x => x.id === b.dataset.cqfix); if (!l) return;
+    if (!confirm(`Mark the certificate query for ${fullName(l)} as fixed? They go back to "awaiting certificate".`)) return; b.disabled = true;
+    for (const n of openQ(l)) await rpc("grad_note", {p_code:CODE, p_pin:S.pin, p_actor:S.me, p_learner:l.id, p_text:null, p_kind:null, p_resolve:n.id}).catch(e => toast("Could not save: " + e.message, "red"));
+    toast(`${fullName(l)} is ready for their certificate`, "green"); await pull(true); });
+}
+const CQ_REASONS = [["name","Name or surname spelt wrong on the certificate"],["query","ID number wrong on the certificate"],["query","Wrong programme, NQF level or qualification"],["query","Certificate not printed or missing"],["query","Certificate damaged"],["query","Other"]];
+function certQueryDialog(id){
+  const l = S.data.learners.find(x => x.id === id); if (!l) return;
+  if (!can("comment")) return toast("You can view only. Ask the admin for access to raise queries.", "red");
+  modal(`<h3>⚠ Certificate query</h3><p class="small muted"><b>${esc(fullName(l))}</b> · ${esc(l.programme || "")}${l.seat ? " · Seat " + esc(l.seat) : ""}. The certificate is held back and the query stays with this graduate on every report until it is fixed.</p>
+    <label class="lbl">What is wrong?</label><select id="cqr">${CQ_REASONS.map(([k, t], i) => `<option value="${i}">${esc(t)}</option>`).join("")}</select>
+    <label class="lbl">Details</label><input type="text" id="cqd" maxlength="400" placeholder="e.g. Certificate says Mokoena, ID says Mokwena">
+    <div class="row" style="margin-top:12px"><span class="spacer"></span><button class="btn ghost" id="mc">Cancel</button><button class="btn red" id="mo">Hold certificate</button></div>`,
+    (m, close) => { $("#mc", m).onclick = close; setTimeout(() => $("#cqd", m).focus(), 50);
+      $("#mo", m).onclick = async () => { const [k, t] = CQ_REASONS[+$("#cqr", m).value], d = $("#cqd", m).value.trim();
+        if (t === "Other" && !d) return $("#cqd", m).focus();
+        $("#mo", m).disabled = true;
+        if (await act("grad_note", {p_learner:id, p_text:`Certificate query: ${t}${d ? " – " + d : ""}`, p_kind:k, p_resolve:null}, `Certificate held for ${fullName(l)}`)) close(); else $("#mo", m).disabled = false; };
+    });
+}
+/* ---------- signature pad: small PNG, a few KB each ---------- */
+function sigPad(cv){
+  const W = 600, H = 200; cv.width = W; cv.height = H; const c = cv.getContext("2d"); let down = false, last = null, inked = false;
+  c.lineWidth = 3.2; c.lineCap = "round"; c.lineJoin = "round"; c.strokeStyle = "#0b1d4d";
+  const pt = e => { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) * W / r.width, (e.clientY - r.top) * H / r.height]; };
+  cv.style.touchAction = "none";
+  cv.addEventListener("pointerdown", e => { down = true; last = pt(e); cv.setPointerCapture(e.pointerId); c.beginPath(); c.arc(last[0], last[1], 1.4, 0, 7); c.fillStyle = c.strokeStyle; c.fill(); inked = true; cv.dispatchEvent(new Event("ink")); });
+  cv.addEventListener("pointermove", e => { if (!down) return; const p = pt(e); c.beginPath(); c.moveTo(last[0], last[1]); c.lineTo(p[0], p[1]); c.stroke(); last = p; });
+  ["pointerup","pointercancel","pointerleave"].forEach(ev => cv.addEventListener(ev, () => { down = false; }));
+  return { clear(){ c.clearRect(0, 0, W, H); inked = false; cv.dispatchEvent(new Event("ink")); }, empty: () => !inked,
+    load(src){ const im = new Image(); im.onload = () => { c.clearRect(0, 0, W, H); c.drawImage(im, 0, 0, W, H); inked = true; cv.dispatchEvent(new Event("ink")); }; im.src = src; },
+    data(){ const o = document.createElement("canvas"); o.width = 300; o.height = 100; o.getContext("2d").drawImage(cv, 0, 0, 300, 100); return o.toDataURL("image/png"); } };
+}
+function certSignDialog(id){
+  const l = S.data.learners.find(x => x.id === id); if (!l) return;
+  if (!can("certs")) return toast("You can view only. Ask the admin for access to issue certificates.", "red");
+  modal(`<h3>📜 Hand over certificate</h3>
+    <div class="sighead"><div><b style="font-size:18px">${esc(fullName(l))}</b><div class="small muted">${esc(l.programme || "")} · NQF ${esc(l.nqf ?? "?")}${l.seat ? " · Seat " + esc(l.seat) : ""}${l.client ? " · " + esc(l.client) : ""}</div></div></div>
+    ${openQ(l).length ? `<div class="err" style="margin:8px 0">⚠ This graduate has an open query: ${openQ(l).map(n => esc(n.text)).join("; ")}</div>` : ""}
+    <p class="small" style="margin:10px 0 4px"><b>Graduate:</b> please sign below to confirm you received your certificate.</p>
+    <div class="sigbox"><canvas id="sg"></canvas><span class="sigx">✕</span><span class="sigline">Sign here</span></div>
+    <div class="row" style="margin-top:12px;flex-wrap:wrap"><button class="btn ghost sm" id="sgc">Clear</button><span class="small muted">Issued by ${esc(S.me)}</span><span class="spacer"></span><button class="btn ghost" id="mc">Cancel</button><button class="btn ghost" id="sgskip" title="Use only if the graduate cannot sign">Issue without signature</button><button class="btn green" id="mo" disabled>✓ Signed · issue certificate</button></div>`,
+    (m, close) => { const cv = $("#sg", m), pad = sigPad(cv), ok = $("#mo", m);
+      cv.addEventListener("ink", () => { ok.disabled = pad.empty(); m.querySelector(".sigline").style.opacity = pad.empty() ? 1 : .25; });
+      $("#sgc", m).onclick = () => pad.clear(); $("#mc", m).onclick = close;
+      const done = async (sig) => { ok.disabled = true; $("#sgskip", m).disabled = true;
+        const r = sig ? await act("grad_cert_signed", {p_learner:id, p_sig:sig}, `🎓 ${fullName(l)} has graduated`) : await act("grad_cert", {p_learner:id, p_issued:true}, `🎓 ${fullName(l)} has graduated (no signature)`);
+        if (r){ close(); bounceTab("grads"); } else { ok.disabled = pad.empty(); $("#sgskip", m).disabled = false; } };
+      ok.onclick = () => done(pad.data());
+      $("#sgskip", m).onclick = () => { if (confirm("Issue without the graduate's signature? The register will show 'Not signed'.")) done(null); };
+    });
+}
+/* ---------- certificate register (separate from the reports): one per programme ---------- */
+function registerDialog(){
+  const G = S.data.learners.filter(l => l.cert_issued), g = {};
+  G.forEach(l => (g[progKey(l)] = g[progKey(l)] || []).push(l));
+  const keys = Object.keys(g).sort();
+  if (!can("certs") && !can("manage_event")) return toast("Only the certificate team and managers can print the register.", "red");
+  if (!keys.length) return toast("No certificates issued yet, so there is no register to print.", "gold");
+  modal(`<h3>🖊 Certificate register</h3><p class="small muted">A signed register of certificates handed over, one page set per programme. It is separate from the graduation report.</p>
+    <label class="lbl">Programme</label><select id="rgp">${keys.map(k => { const [nq, p] = k.split("|"); return `<option value="${esc(k)}">${esc(p)} · NQF ${nq === "099" ? "?" : +nq} (${g[k].length} issued)</option>`; }).join("")}<option value="*">All programmes (${keys.length} registers)</option></select>
+    <p class="small" style="margin:14px 0 4px"><b>${esc(S.me)}</b>, sign below as the person who handed over the certificates. Your signature goes on the heading of the register.</p>
+    <div class="sigbox"><canvas id="sg"></canvas><span class="sigx">✕</span><span class="sigline">Sign here</span></div>
+    <div class="row" style="margin-top:12px;flex-wrap:wrap"><button class="btn ghost sm" id="sgc">Clear</button><span id="rgm" class="small muted"></span><span class="spacer"></span><button class="btn ghost" id="mc">Close</button><button class="btn gold" id="mo" disabled>⬇ Sign and download PDF</button></div>`,
+    async (m, close) => { const cv = $("#sg", m), pad = sigPad(cv), ok = $("#mo", m);
+      cv.addEventListener("ink", () => { ok.disabled = pad.empty(); m.querySelector(".sigline").style.opacity = pad.empty() ? 1 : .25; });
+      $("#sgc", m).onclick = () => pad.clear(); $("#mc", m).onclick = close;
+      try { const sg = await rpc("grad_signatures", {p_code:CODE, p_pin:S.pin}); S._sigs = sg; if (sg.issuers && sg.issuers[S.me]){ pad.load(sg.issuers[S.me].sig); $("#rgm", m).textContent = "Your saved signature is loaded. Clear it to sign again."; } } catch(e){ $("#rgm", m).textContent = "Could not load signatures: " + e.message; }
+      ok.onclick = async () => { ok.disabled = true; $("#rgm", m).textContent = "Saving your signature…";
+        try { await rpc("grad_issuer_sign", {p_code:CODE, p_pin:S.pin, p_actor:S.me, p_sig:pad.data()}); S._sigs = await rpc("grad_signatures", {p_code:CODE, p_pin:S.pin}); }
+        catch(e){ $("#rgm", m).textContent = ""; toast("Could not save your signature: " + e.message, "red"); ok.disabled = false; return; }
+        const k = $("#rgp", m).value, sel = k === "*" ? keys : [k];
+        $("#rgm", m).textContent = "Building the register…";
+        const nm = (k === "*" ? `Certificate registers ${S.data.event.name}` : `Certificate register ${k.split("|")[1]} ${S.data.event.name}`) + ` ${new Date().toISOString().slice(0,10)}.pdf`;
+        await reportPdf(nm.replace(/[\\/:*?"<>|]/g, ""), registerHTML(sel.map(x => [x, g[x]]), S._sigs));
+        $("#rgm", m).textContent = "Done."; ok.disabled = false; };
+    });
+}
+function registerHTML(groups, sigs){
+  const d = S.data, LS = (sigs && sigs.learners) || {}, IS = (sigs && sigs.issuers) || {};
+  const dateTxt = d.event.event_date || d.event.date ? new Date(d.event.event_date || d.event.date).toLocaleDateString("en-ZA", {weekday:"long", day:"numeric", month:"long", year:"numeric"}) : "";
+  const uniq = a => [...new Set(a.filter(Boolean))];
+  const crest = document.querySelector('.top img').src;
+  const css = `@page{size:A4 landscape;margin:0}*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    body{font-family:Montserrat,"Segoe UI",Arial,sans-serif;color:#0d1b3e;margin:0;background:#eef2fb;font-size:11px}
+    .reg{background:#fff;max-width:1100px;margin:0 auto 20px;padding:0 0 10mm}
+    .rh{display:flex;align-items:center;gap:16px;background:linear-gradient(135deg,#081a45,#1d3fae);color:#fff;padding:7mm 12mm;border-bottom:4px solid #d4af37}
+    .rh img{width:62px;height:62px;border-radius:50%;background:#fff;padding:4px;box-shadow:0 0 0 2px rgba(212,175,55,.8)}
+    .rh h1{margin:0;font-size:22px;letter-spacing:1px}.rh p{margin:2px 0 0;color:#c9d3f2;font-size:11px}.rh .sp{flex:1}.rh .tg{color:#f3d27a;font-weight:700;font-size:10px;letter-spacing:.8px;text-transform:uppercase}
+    .in{padding:5mm 12mm 0;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+    .meta{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid #c9d3ea;border-radius:8px;overflow:hidden}
+    .meta div{padding:5px 9px;border-right:1px solid #e1e6f2;border-bottom:1px solid #e1e6f2}.meta div:nth-child(4n){border-right:0}
+    .meta small{display:block;color:#1d3fae;font-weight:700;font-size:8.5px;text-transform:uppercase;letter-spacing:.5px}.meta b{font-size:11.5px}
+    .iss{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 6px}.isc{flex:1;min-width:230px;border:1px solid #c9d3ea;border-left:4px solid #d4af37;border-radius:8px;padding:5px 10px;display:flex;align-items:center;gap:10px}
+    .isc small{display:block;color:#5b6785;font-size:8.5px;text-transform:uppercase;letter-spacing:.4px}.isc img{height:38px;max-width:140px;object-fit:contain}.isc .no{color:#b3261e;font-size:10px}
+    table{width:100%;border-collapse:collapse;margin-top:4px}thead{display:table-header-group}
+    th{background:#1d3fae;color:#fff;font-size:8.5px;text-transform:uppercase;letter-spacing:.4px;padding:6px 5px;text-align:left;border:1px solid #1d3fae}
+    td{border:1px solid #d5dcec;padding:3px 5px;height:34px;vertical-align:middle}tr{break-inside:avoid}tbody tr:nth-child(even) td{background:#f7f9fd}
+    td.n{width:28px;text-align:center;color:#5b6785}td.sg{width:150px;text-align:center}td.sg img{height:30px;max-width:140px;object-fit:contain}td.sg .no{color:#b3261e;font-size:9px}
+    .q{color:#b3261e;font-size:9px;display:block}
+    .ft{display:flex;justify-content:space-between;color:#8a93a8;font-size:9px;margin-top:8px;border-top:1px solid #e1e6f2;padding-top:4px}
+    .newpage{break-before:page;page-break-before:always}
+    @media print{body{background:#fff}.reg{max-width:none;margin:0}}`;
+  const pages = groups.map(([k, L], gi) => {
+    const [nq, prog] = k.split("|"), all = d.learners.filter(l => progKey(l) === k);
+    const items = L.slice().sort((a, b) => new Date(a.cert_at || 0) - new Date(b.cert_at || 0));
+    const issuers = uniq(items.map(l => l.cert_by));
+    return `<section class="reg ${gi ? "newpage" : ""}"><div class="rh"><img src="${crest}" alt=""><div><div class="tg">Camblish Training Institute</div><h1>CERTIFICATE ISSUE REGISTER</h1><p>${esc(d.event.name)}</p></div><span class="sp"></span><div style="text-align:right"><div class="tg">Taking the Lead, Shaping the Future</div><p>Prepared by Eddie Bila</p></div></div>
+      <div class="in"><div class="meta">
+        <div><small>Learning programme</small><b>${esc(prog)}</b></div><div><small>NQF level</small><b>${nq === "099" ? "–" : +nq}</b></div><div><small>Client</small><b>${esc(uniq(all.map(l => l.client)).join(", ") || "–")}</b></div><div><small>SETA</small><b>${esc(uniq(all.map(l => l.seta)).join(", ") || "–")}</b></div>
+        <div><small>Graduation event</small><b>${esc(d.event.name)}</b></div><div><small>Date</small><b>${esc(dateTxt || "–")}</b></div><div><small>Venue</small><b>${esc(d.event.venue || "–")}</b></div><div><small>Project manager</small><b>${esc(uniq(all.map(l => l.pm)).join(", ") || "–")}</b></div>
+        <div><small>Certificates issued</small><b>${items.length} of ${all.length}</b></div><div><small>Signed by graduates</small><b>${items.filter(l => LS[l.id]).length} of ${items.length}</b></div><div><small>Region</small><b>${esc(uniq(all.map(l => l.region)).join(", ") || "–")}</b></div><div><small>Printed</small><b>${new Date().toLocaleString("en-ZA", {day:"numeric", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit"})} by ${esc(S.me)}</b></div>
+      </div>
+      <div class="iss">${issuers.map(n => `<div class="isc"><div style="flex:1"><small>Certificates handed over by</small><b>${esc(n)}</b>${IS[n] ? `<small>Signed ${fmtTime(IS[n].at)}</small>` : ""}</div>${IS[n] ? `<img src="${IS[n].sig}" alt="Signature of ${esc(n)}">` : `<span class="no">Not signed yet</span>`}</div>`).join("")}</div>
+      <table><thead><tr><th>#</th><th>First name</th><th>Middle name</th><th>Surname</th><th>Learner ID / ref</th><th>Seat</th><th>Client</th><th>Time issued</th><th>Issued by</th><th style="text-align:center">Graduate signature</th></tr></thead><tbody>
+      ${items.map((l, i) => `<tr><td class="n">${i + 1}</td><td><b>${esc(l.first_name || "")}</b></td><td>${esc(l.middle_name || "")}</td><td><b>${esc(l.surname || "")}</b>${notesOf(l).filter(n => n.kind !== "note").map(n => `<span class="q">${n.resolved ? "✓" : "⚠"} ${esc(n.text)}${n.resolved ? " (resolved)" : ""}</span>`).join("")}</td><td>${esc(l.learner_ref || "")}</td><td>${esc(l.seat || "")}</td><td>${esc(l.client || "")}</td><td>${fmtTime(l.cert_at)}</td><td>${esc(l.cert_by || "")}</td>
+        <td class="sg">${LS[l.id] ? `<img src="${LS[l.id].sig}" alt="">` : `<span class="no">Not signed</span>`}</td></tr>`).join("")}
+      </tbody></table>
+      <div class="ft"><span>Camblish Training Institute · info@camblish.co.za · www.camblish.co.za</span><span>${esc(prog)} · Certificate issue register</span><span>Designed and developed by Eddie Bila</span></div></div></section>`;
+  }).join("");
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Certificate register · ${esc(d.event.name)}</title><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=swap" rel="stylesheet"><style>${css}</style></head><body>${pages}</body></html>`;
 }
 
 /* ======================================================================
@@ -1728,10 +1856,10 @@ function drawCerts(){
 function viewGrads(){
   if (!$("#grView")){
     main.innerHTML = `<div id="bn"></div><div class="card" id="grView"><div id="flow" class="flowwrap"></div>
-      <h2>Graduates 🎓<span class="spacer"></span><button class="btn ghost sm" id="grCsv">⬇ Excel (CSV)</button><button class="btn sm" id="grPdf">⬇ Graduate list (PDF)</button><button class="btn gold sm" id="grRep">📄 Graduation report</button></h2>
+      <h2>Graduates 🎓<span class="spacer"></span><button class="btn ghost sm" id="grCsv">⬇ Excel (CSV)</button><button class="btn sm" id="grPdf">⬇ Graduate list (PDF)</button><button class="btn sm" id="grReg">🖊 Certificate register</button><button class="btn gold sm" id="grRep">📄 Graduation report</button></h2>
       <div id="grHero"></div>${filterBar()}<div id="grlist"></div></div>`;
     wireFilterBar(drawGrads);
-    $("#grRep").onclick = reportDialog;
+    $("#grRep").onclick = reportDialog; $("#grReg").onclick = registerDialog;
     $("#grPdf").onclick = async () => { const b = $("#grPdf"); b.disabled = true; b.textContent = "Building…"; await reportPdf(`Graduate list ${S.data.event.name} ${new Date().toISOString().slice(0,10)}.pdf`.replace(/[\\/:*?"<>|]/g, ""), buildReport("list")); b.disabled = false; b.textContent = "⬇ Graduate list (PDF)"; };
     $("#grCsv").onclick = () => {
       const G = applyF(S.data.learners.filter(l => l.cert_issued)).sort((a,b) => progKey(a).localeCompare(progKey(b)) || new Date(a.cert_at) - new Date(b.cert_at));
