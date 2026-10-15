@@ -851,6 +851,12 @@ async function rpc(name, params = {}) {
   return data;
 }
 async function api(name, params = {}) { return rpc(name, { p_token: S.token, ...params }); }
+function automark(body) {
+  return fetch(CFG.SB_URL + '/functions/v1/exam-automark', {
+    method: 'POST', headers: { 'Content-Type': 'application/json', apikey: CFG.SB_KEY, Authorization: 'Bearer ' + CFG.SB_KEY },
+    body: JSON.stringify({ token: S.token, ...body }), keepalive: true,
+  }).then(r => r.json()).catch(() => ({ ok: false }));
+}
 async function fn(action, body = {}) {
   const res = await fetch(CFG.FN_URL, {
     method: 'POST',
@@ -2105,6 +2111,7 @@ async function doSubmit(auto) {
   for (let i = 0; i < 5; i++) {
     try {
       await api('exm_attempt_submit', { p_attempt_id: XS.attempt.id, p_answers: patch, p_auto: !!auto });
+      automark({ attempt_id: XS.attempt.id }); // silent: marks are saved as an unreleased draft for staff only
       logEv('submitted', 'info', { auto }); await flushEvents();
       return endExam(auto ? 'auto_submitted' : 'submitted');
     } catch (e) {
@@ -2524,7 +2531,7 @@ on(/^#\/invig\/([\w-]+)$/, async (examId) => {
     $('#aWarn', body).onclick = async () => { const m = await promptBox('Warning to ' + a.full_name, 'Message shown on the learner\'s screen', 'Please keep your face in view of the camera.', 'textarea'); if (m) { W.live.warn(aid, m); act('warn', { message: m }, 'Warning sent'); } };
     $('#aNote', body).onclick = async () => { const m = await promptBox('Invigilator note', 'Recorded in the report (not shown to the learner)', '', 'textarea'); if (m) act('note', { text: m }, 'Note saved'); };
     $('#aExt', body).onclick = async () => { const m = await promptBox('Change time', 'Minutes to add (use a negative number to remove time)', '10', 'number'); if (m && +m) { await act('extend', { minutes: +m }, 'Time changed'); W.live.notify('extend', aid); } };
-    const t = $('#aTerm', body); if (t) t.onclick = async () => { const reason = await promptBox('Terminate exam', 'Reason (recorded in the report)', '', 'textarea'); if (reason) { await act('terminate', { reason }, 'Exam terminated'); W.live.notify('end', aid); md.close(); } };
+    const t = $('#aTerm', body); if (t) t.onclick = async () => { const reason = await promptBox('Terminate exam', 'Reason (recorded in the report)', '', 'textarea'); if (reason) { await act('terminate', { reason }, 'Exam terminated'); W.live.notify('end', aid); automark({ attempt_id: aid }); md.close(); } };
     const ro = $('#aReopen', body); if (ro) ro.onclick = async () => { const m = await promptBox('Reopen exam', 'Minutes to give the learner if the time has run out', '15', 'number'); if (m !== null) { await act('reopen', { minutes: +m || 15 }, 'Exam reopened. The learner can resume from My exams.'); md.close(); } };
     $('#aEv', body).onclick = () => evidenceGallery(examId, aid, a.full_name);
     const tl = async () => {
@@ -2679,6 +2686,14 @@ function signBadges(so) {
 on(/^#\/mark\/([\w-]+)$/, async (examId) => {
   const r = await api('exm_marking_list', { p_exam_id: examId });
   const exam = r.exam, list = r.attempts || [];
+  const pending = list.filter(a => a.status !== 'in_progress' && !a.finalised && !a.marked_at && !(a.scores && Object.values(a.scores).some(s => s && s.conf)));
+  if (pending.length && exam.memo && (exam.memo.answers || []).length && !S._autoRan) {
+    S._autoRan = true;
+    toast(`Auto-marking ${pending.length} new script(s)…`);
+    await Promise.all(pending.map(a => automark({ attempt_id: a.id })));
+    setTimeout(() => { S._autoRan = false; }, 5000);
+    return route();
+  }
   const done = list.filter(a => a.finalised).length;
   setApp(shell('home', `
   <div class="pagehead"><div><div class="kicker">Marking · ${esc(exam.code)}</div><h1>${esc(exam.title)}</h1><p>${list.length} scripts · ${done} finalised · MCQs are marked automatically on submission.</p></div>

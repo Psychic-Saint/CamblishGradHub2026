@@ -520,6 +520,7 @@ async function doSubmit(auto) {
   for (let i = 0; i < 5; i++) {
     try {
       await api('exm_attempt_submit', { p_attempt_id: XS.attempt.id, p_answers: patch, p_auto: !!auto });
+      automark({ attempt_id: XS.attempt.id }); // silent: marks are saved as an unreleased draft for staff only
       logEv('submitted', 'info', { auto }); await flushEvents();
       return endExam(auto ? 'auto_submitted' : 'submitted');
     } catch (e) {

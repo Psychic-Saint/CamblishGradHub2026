@@ -119,6 +119,14 @@ function signBadges(so) {
 on(/^#\/mark\/([\w-]+)$/, async (examId) => {
   const r = await api('exm_marking_list', { p_exam_id: examId });
   const exam = r.exam, list = r.attempts || [];
+  const pending = list.filter(a => a.status !== 'in_progress' && !a.finalised && !a.marked_at && !(a.scores && Object.values(a.scores).some(s => s && s.conf)));
+  if (pending.length && exam.memo && (exam.memo.answers || []).length && !S._autoRan) {
+    S._autoRan = true;
+    toast(`Auto-marking ${pending.length} new script(s)…`);
+    await Promise.all(pending.map(a => automark({ attempt_id: a.id })));
+    setTimeout(() => { S._autoRan = false; }, 5000);
+    return route();
+  }
   const done = list.filter(a => a.finalised).length;
   setApp(shell('home', `
   <div class="pagehead"><div><div class="kicker">Marking · ${esc(exam.code)}</div><h1>${esc(exam.title)}</h1><p>${list.length} scripts · ${done} finalised · MCQs are marked automatically on submission.</p></div>

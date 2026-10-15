@@ -36,6 +36,12 @@ async function rpc(name, params = {}) {
   return data;
 }
 async function api(name, params = {}) { return rpc(name, { p_token: S.token, ...params }); }
+function automark(body) {
+  return fetch(CFG.SB_URL + '/functions/v1/exam-automark', {
+    method: 'POST', headers: { 'Content-Type': 'application/json', apikey: CFG.SB_KEY, Authorization: 'Bearer ' + CFG.SB_KEY },
+    body: JSON.stringify({ token: S.token, ...body }), keepalive: true,
+  }).then(r => r.json()).catch(() => ({ ok: false }));
+}
 async function fn(action, body = {}) {
   const res = await fetch(CFG.FN_URL, {
     method: 'POST',
