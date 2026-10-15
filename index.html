@@ -412,6 +412,7 @@ nav.tabs .badge.green{background:var(--ok);color:#fff}
 .feed-item.mine{background:linear-gradient(90deg,#fffaf0,#fff)}
 #capSpin{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:radial-gradient(circle at 50% 40%,rgba(29,63,174,.92),rgba(8,26,69,.97));perspective:900px;transition:opacity .35s}
 #capSpin.out{opacity:0}
+.leadtag{display:inline-block;background:var(--pc);color:#fff;border-radius:99px;padding:2px 9px;font-size:11px;font-weight:900;letter-spacing:.2px;vertical-align:2px;box-shadow:0 0 0 2px #fff,0 0 0 3.5px var(--pc);max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sgh{cursor:pointer;user-select:none}.sgh .chev{display:inline-block;margin-right:8px;transition:transform .15s}.sgh.closed .chev{transform:rotate(-90deg)}.sgh:hover{filter:brightness(1.12)}
 .lnotes{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:4px;font-size:12px}
 .nbtn{background:none;border:1px dashed #9db3ec;color:#1d3fae;border-radius:99px;padding:1px 9px;font-size:11.5px;font-weight:700;cursor:pointer}.nbtn:hover{background:#eef2fb}
@@ -563,7 +564,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202610072200";
+const BUILD = "202610141530";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -1235,13 +1236,25 @@ async function renderTag(l){
     x.fillText(name, X(305), Y(285));
     x.fillStyle = "#0d2a6b"; fitText(x, prog, 340 * k, Math.round(14 * k), '800 {s}px Montserrat, "Segoe UI", Arial, sans-serif'); x.fillText(prog, X(305), Y(323));
     x.fillStyle = "#1d3fae"; fitText(x, cli, 340 * k, Math.round(13 * k), '700 {s}px Montserrat, "Segoe UI", Arial, sans-serif'); x.fillText(cli, X(305), Y(342));
+    stageList(); const pc = progColor(l);
+    x.fillStyle = pc; x.fillRect(X(0), Y(358), 612 * k, 8 * k);   // programme colour strip for ushers
+    if (isLead(l)){   // first of the programme: bright ribbon across the top-left corner
+      x.save(); x.translate(X(0), Y(0)); x.rotate(-Math.PI / 4);
+      x.fillStyle = pc; x.fillRect(-140 * k, 46 * k, 280 * k, 34 * k);
+      x.fillStyle = "#fff"; x.textAlign = "center"; x.font = `900 ${Math.round(15 * k)}px Montserrat, Arial, sans-serif`; x.fillText("★ 1ST IN CLASS ★", 0, 69 * k);
+      x.restore();
+      const lt = "LEADS " + (l.programme || "").toUpperCase(); x.textAlign = "center";
+      x.font = `900 ${Math.round(11 * k)}px Montserrat, Arial, sans-serif`; const tw = Math.min(x.measureText(lt).width + 22 * k, 330 * k);
+      x.beginPath(); x.roundRect(X(305) - tw / 2, Y(226), tw, 17 * k, 8.5 * k); x.fillStyle = pc; x.fill();
+      x.fillStyle = "#fff"; fitText(x, lt, tw - 14 * k, Math.round(11 * k), '900 {s}px Montserrat, Arial, sans-serif'); x.fillText(lt, X(305), Y(238.5));
+      x.textAlign = "center";
+    }
     if (l.seat || l._code){   // seat + stage number badge, bottom left
       const bx = X(14), by = Y(282), bw = 100 * k, bh = 70 * k, r = 11 * k;
       x.beginPath(); x.roundRect(bx, by, bw, bh, r); x.fillStyle = "#081a45"; x.fill(); x.lineWidth = 3 * k; x.strokeStyle = "#d4af37"; x.stroke();
       x.fillStyle = "#f3d27a"; x.font = `800 ${Math.round(8 * k)}px Montserrat, Arial, sans-serif`; x.fillText(l.seat ? "SEAT" : "STAGE No.", bx + bw / 2, by + 14 * k);
       const big = l.seat || l._code;
-      x.fillStyle = "#fff"; fitText(x, big, bw - 12 * k, Math.round(26 * k), '{s}px "Archivo Black", "Arial Black", sans-serif'); x.fillText(big, bx + bw / 2, by + 42 * k);
-      if (l.seat && l._code){ x.fillStyle = "#f3d27a"; x.font = `700 ${Math.round(9 * k)}px Montserrat, Arial, sans-serif`; x.fillText("STAGE " + l._code, bx + bw / 2, by + 60 * k); }
+      x.fillStyle = "#fff"; fitText(x, big, bw - 12 * k, Math.round(30 * k), '{s}px "Archivo Black", "Arial Black", sans-serif'); x.fillText(big, bx + bw / 2, by + 50 * k);
     }
   } else {   // simple black design for small thermal labels
     const pad = W * 0.04; x.fillStyle = "#000"; x.textAlign = "left";
@@ -1443,8 +1456,11 @@ async function seedTasks(){
    ====================================================================== */
 const F0 = () => ({q:"", prog:"", nqf:"", pm:"", client:""});
 function fopts(){
-  const L = S.data.learners, u = k => [...new Set(L.map(l => l[k]).filter(v => v !== null && v !== undefined && v !== ""))];
-  return { prog:u("programme").sort(), nqf:u("nqf").sort((a,b)=>a-b), pm:u("pm").sort(), client:u("client").sort() };
+  // each list only shows what is left once the other filters are applied (pick a client: only its programmes remain)
+  const F = S.f.L, field = {prog:"programme", nqf:"nqf", pm:"pm", client:"client"};
+  const keep = (l, skip) => Object.entries(field).every(([fk, col]) => fk === skip || !F[fk] || String(l[col]) === String(F[fk]));
+  const u = fk => { const v = [...new Set(S.data.learners.filter(l => keep(l, fk)).map(l => l[field[fk]]).filter(x => x !== null && x !== undefined && x !== ""))]; if (F[fk] && !v.some(x => String(x) === String(F[fk]))) v.push(F[fk]); return v; };
+  return { prog:u("prog").sort(), nqf:u("nqf").sort((a,b)=>a-b), pm:u("pm").sort(), client:u("client").sort() };
 }
 function fActive(){ const F = S.f.L; return !!(F.q || F.prog || F.nqf || F.pm || F.client); }
 function filterBar(extra=""){
@@ -1490,6 +1506,10 @@ function matchScore(l){
   return sc;
 }
 function chipsHTML(id, opts, cur){ return `<div class="chips" id="${id}" style="margin:10px 0">${opts.map(([k,label,n]) => `<button class="chip ${cur===k?"on":""}" data-c="${k}">${label} (${n})</button>`).join("")}</div>`; }
+const PROG_COLS = ["#e11d48","#f59e0b","#10b981","#3b82f6","#8b5cf6","#ec4899","#14b8a6","#f97316","#65a30d","#0891b2","#a855f7","#dc2626","#ca8a04","#2563eb","#db2777","#059669"];
+function progColor(l){ const keys = S._progKeys && S._progKeysAt === S.data.learners.length ? S._progKeys : (S._progKeysAt = S.data.learners.length, S._progKeys = [...new Set(S.data.learners.map(progKey))].sort()); const i = keys.indexOf(progKey(l)); return PROG_COLS[(i < 0 ? 0 : i) % PROG_COLS.length]; }
+const isLead = l => l.status === "present" && !l._late && /-01$/.test(codeOf(l));
+const leadTag = l => isLead(l) ? `<span class="leadtag" style="--pc:${progColor(l)}" title="First of ${esc(l.programme || "")} to arrive: leads this programme to the stage">★ 1st · ${esc(l.programme || "")}</span>` : "";
 const seatTag = l => l.seat ? `<span class="seat" title="Seat">💺 ${hl(l.seat)}</span>` : "";
 /* ---------- learner notes & queries (travel with the learner to the graduate list) ---------- */
 const NOTE_KIND = {name:["✏️","Name correction"], query:["⚠","Query"], note:["💬","Note"]};
@@ -1519,7 +1539,7 @@ function noteDialog(id){
 }
 document.addEventListener("click", e => { const b = e.target.closest("[data-note]"); if (b && S.data){ e.preventDefault(); noteDialog(b.dataset.note); } });
 function lInfo(l, extra=""){
-  return `<div class="info"><div class="nm">${hl(fullName(l))} ${seatTag(l)}</div>
+  return `<div class="info"><div class="nm">${hl(fullName(l))} ${seatTag(l)} ${leadTag(l)}</div>
     <div class="small muted">NQF ${esc(l.nqf ?? "?")} · ${hl(l.programme||"")}${l.client?" · "+hl(l.client):""}${l.pm?" · PM: "+hl(l.pm):""}${l.learner_ref && qWords().some(w => String(l.learner_ref).toLowerCase().includes(w)) ? " · ID " + hl(l.learner_ref) : ""}</div>${extra}${notesLine(l)}</div>`;
 }
 function listOut(el, list, rowFn, empty){
@@ -1582,6 +1602,7 @@ async function markPrinted(list){
 /* ======================================================================
    CHECK-IN  (present learners move on to Robes)
    ====================================================================== */
+const dcode = l => l.seat || codeOf(l);   // one code everywhere: the seat (seat order = stage order)
 function codeOf(l){ if (!l._code) stageList(); return l._code || ""; }
 function viewCheckin(){
   if (!$("#ciView")){
@@ -1625,7 +1646,7 @@ function drawCheckin(){
   groupedOut($("#cilist"), L.filter(l => l.status === S.f.ciFilter), (l, i, prog) => `<div class="lrow ${l.status}">${posTag(i, prog)}${lInfo(l,
       `<div class="meta" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:3px">${/^n/i.test(l.rsvp||"")?`<span class="tag red">RSVP: not attending</span>`:""}${/^y/i.test(l.robe||"")?`<span class="tag gold">Needs robe</span>`:""}${l.status!=="present"&&l.phone?`<a class="tag" href="tel:${esc(String(l.phone).split("/")[0].trim())}">📞 ${esc(l.phone)}</a>`:""}</div>
        ${l.status==="present"?`<div class="small" style="color:var(--ok)">Arrived ${fmtTime(l.arrived_at)} · by ${esc(l.checked_by||"")} · now ${l.cert_issued?"graduated":l.stage_status==="done"?"collecting certificate":l.robe_issued?"in the stage line":"at robes"}</div>`:""}`)}
-    <div class="pacts">${l.status==="present" ? `<span class="pill s-Completed">✓ Present</span><span class="tag gold" title="Stage number">${esc(codeOf(l))}</span>${tagBtn(l)}${true?`<button class="btn ghost sm" data-ci="${l.id}" data-s="expected">Undo</button>`:""}`
+    <div class="pacts">${l.status==="present" ? `<span class="pill s-Completed">✓ Present</span><span class="tag gold" title="Seat (also their place in the stage line)">${esc(dcode(l))}</span>${tagBtn(l)}${true?`<button class="btn ghost sm" data-ci="${l.id}" data-s="expected">Undo</button>`:""}`
       : l.status==="absent" ? `<span class="tag">Absent</span>${true?`<button class="btn ghost sm" data-ci="${l.id}" data-s="expected">Undo</button><button class="btn green bigbtn" data-ci="${l.id}" data-s="present">Arrived</button>`:""}`
       : `<span class="notarr">Not arrived</span>${true?`<button class="btn ghost sm" data-ci="${l.id}" data-s="absent">Absent</button><button class="btn green bigbtn" data-ci="${l.id}" data-s="present">✓ Mark present</button>`:""}`}</div></div>`,
     fActive() ? "No graduate matches these filters." : S.f.ciFilter === "expected" ? "Everyone has arrived. 🎉" : "Nobody here yet.", "checkin", present ? byArrival : byName, drawCheckin, present);
@@ -1662,7 +1683,7 @@ function drawRobes(){
   $$("#rbc .chip").forEach(b => b.onclick = () => { S.f.rb = b.dataset.c; drawRobes(); });
   groupedOut($("#rblist"), S.f.rb === "wait" ? wait : done, (l, i, prog) => `<div class="lrow ${l.robe_issued?"present":"expected"}">${posTag(i, prog)}${lInfo(l,
       `<div class="small" style="margin-top:2px">${/^y/i.test(l.robe||"")?`<span class="tag gold">Needs robe</span> `:""}${l.belt?`<span class="tag">Belt: ${esc(l.belt)}</span> `:""}<span class="muted">Arrived ${fmtTime(l.arrived_at)}</span>${l.robe_issued?` · <span style="color:var(--ok)">${l.robe_skip?"Own robe":"Robe issued"} ${fmtTime(l.robe_at)}${l.robe_by?" by "+esc(l.robe_by):""}</span>`:""}</div>`)}
-    <div class="pacts"><span class="tag gold" title="Stage number">${esc(codeOf(l))}</span>${tagBtn(l)}
+    <div class="pacts"><span class="tag gold" title="Seat (also their place in the stage line)">${esc(dcode(l))}</span>${tagBtn(l)}
       ${true ? (l.robe_issued ? `<span class="pill s-Completed">✓ ${l.robe_skip?"Own robe":"Robed"}</span><button class="btn ghost sm" data-rb="${l.id}" data-v="0">Undo</button>`
         : `<button class="btn ghost sm" data-rb="${l.id}" data-v="1" data-skip="1" title="Has their own robe or does not need one">Own robe</button><button class="btn gold bigbtn" data-rb="${l.id}" data-v="1">🎓 Robe issued</button>`) : ""}</div></div>`,
     fActive() ? "No graduate matches these filters." : S.f.rb === "wait" ? "Nobody waiting for a robe right now." : "No robes issued yet.", "robes", byArrival, drawRobes);
@@ -1694,7 +1715,7 @@ function drawCerts(){
   const byStage = (a, b) => new Date(a.stage_at || 0) - new Date(b.stage_at || 0);
   groupedOut($("#ctlist"), S.f.ct === "due" ? due : notYet, (l, i, prog) => `<div class="lrow ${l.stage_status==="done"?"called":"expected"}">${posTag(i, prog)}${lInfo(l,
       `<div class="small muted" style="margin-top:2px">${l.stage_status==="done"?`Crossed ${fmtTime(l.stage_at)}`:l.robe_issued?"In the stage line":"Waiting for robe"}</div>`)}
-    <div class="pacts"><span class="tag gold">${esc(codeOf(l))}</span>${tagBtn(l)}${l.stage_status === "done" ? `<button class="btn green bigbtn" data-ct="${l.id}" data-v="1">📜 Certificate issued</button>` : ""}</div></div>`,
+    <div class="pacts"><span class="tag gold" title="Seat">${esc(dcode(l))}</span>${tagBtn(l)}${l.stage_status === "done" ? `<button class="btn green bigbtn" data-ct="${l.id}" data-v="1">📜 Certificate issued</button>` : ""}</div></div>`,
     fActive() ? "No graduate matches these filters." : S.f.ct === "due" ? "No certificates waiting right now." : "Nobody waiting to go on stage.", "certs", S.f.ct === "due" ? byStage : byArrival, drawCerts);
   wireTags($("#ctlist"));
   $$("#ctlist [data-ct]").forEach(b => b.onclick = async () => { b.disabled = true; const l = S.data.learners.find(x=>x.id===b.dataset.ct);
@@ -1730,7 +1751,7 @@ function drawGrads(){
   const byCert = (a, b) => new Date(a.cert_at || 0) - new Date(b.cert_at || 0);
   groupedOut($("#grlist"), G, (l, i, prog) => `<div class="lrow grad">${posTag(i, prog)}${lInfo(l,
       `<div class="small" style="margin-top:2px;color:var(--ok)">🎓 Graduated ${fmtTime(l.cert_at)}${l.cert_by ? " · certificate from " + esc(l.cert_by) : ""} <span class="muted">· crossed ${fmtTime(l.stage_at)}</span></div>`)}
-    <div class="pacts"><span class="tag gold">${esc(codeOf(l))}</span>${tagBtn(l)}${true ? `<button class="btn ghost sm" data-ct="${l.id}" title="Move back to Certificates">Undo</button>` : ""}</div></div>`,
+    <div class="pacts"><span class="tag gold" title="Seat">${esc(dcode(l))}</span>${tagBtn(l)}${true ? `<button class="btn ghost sm" data-ct="${l.id}" title="Move back to Certificates">Undo</button>` : ""}</div></div>`,
     fActive() ? "No graduate matches these filters." : "No graduates yet. They appear here once their certificate is issued.", "grads", byCert, drawGrads);
   wireTags($("#grlist"));
   $$("#grlist [data-ct]").forEach(b => b.onclick = async () => { const l = S.data.learners.find(x=>x.id===b.dataset.ct); if (!confirm(`Move ${fullName(l)} back to Certificates?`)) return; b.disabled = true; await act("grad_cert", {p_learner:l.id, p_issued:false}, null); });
@@ -1777,10 +1798,11 @@ const HALL = { name:"Great Hall, Wits", sections:[
     blocks:[{name:"Left", from:35, to:25}, {name:"Centre", from:24, to:12}, {name:"Right", from:11, to:1}] },
   { name:"Upper", rows:["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","R"],
     blocks:[{name:"Left", from:44, to:33}, {name:"Centre left", from:32, to:23}, {name:"Centre right", from:22, to:12}, {name:"Right", from:11, to:1}] }],
-  reserved: s => s.section === "Lower" && s.block === "Left" && ["AA","BB","CC"].includes(s.row) };
+  reserved: s => s.section === "Lower" && ["AA","BB","CC"].includes(s.row) };
+const SEAT_LBL = (r, n) => `${r}-${String(n).padStart(2, "0")}`;
 function hallSeats(){
   const out = [];
-  HALL.sections.forEach(sec => sec.rows.forEach(r => sec.blocks.forEach(b => { for (let n = b.from; n >= b.to; n--) out.push({section:sec.name, row:r, block:b.name, n, label:`${r}-${n}`}); })));
+  HALL.sections.forEach(sec => sec.rows.forEach(r => sec.blocks.forEach(b => { for (let n = b.from; n >= b.to; n--) out.push({section:sec.name, row:r, block:b.name, n, label:SEAT_LBL(r, n)}); })));
   out.forEach(s => s.reserved = HALL.reserved(s));
   return out;
 }
@@ -1797,7 +1819,7 @@ function seatPlan(){
   return { plan, unseated: Math.max(0, todo.length - free.length), lower: hallSeats().filter(s => s.section === "Lower" && !s.reserved).length };
 }
 async function assignSeats(){
-  if (!confirm("Assign seats by programme? Graduates who are already checked in keep their seats; absent and not-attending graduates give theirs up.")) return;
+  if (!confirm("Recalculate all seats by programme? This happens automatically at every check-in; use this after uploading or editing the learner list.")) return;
   try { S.lastActAt = Date.now(); const r = await rpc("grad_seats_assign", {p_code:CODE, p_pin:S.pin, p_actor:S.me});
     toast(`Seats assigned: ${r.seated} seated${r.unseated ? `, ${r.unseated} did not fit in the hall` : ""}`, r.unseated ? "red" : "green"); rtPing(); await pull(true); }
   catch(e){ toast("Could not assign seats: " + e.message, "red"); }
@@ -1824,7 +1846,7 @@ function planSeats(){
     const r = planRowR(sec.name, ri);
     sec.blocks.forEach(b => { const u0 = planBlockStart(sec.name, b.name); let i = 0;
       for (let n = b.from; n >= b.to; n--, i++){ const th = planAngle(sec.name, u0 + i + .5, r); const [x, y] = planXY(r, th);
-        out.push({section:sec.name, row, block:b.name, n, label:`${row}-${n}`, x, y, deg:th * 180 / Math.PI + 90, r, u:u0 + i + .5, reserved:HALL.reserved({section:sec.name, row, block:b.name}) }); } });
+        out.push({section:sec.name, row, block:b.name, n, label:SEAT_LBL(row, n), x, y, deg:th * 180 / Math.PI + 90, r, u:u0 + i + .5, reserved:HALL.reserved({section:sec.name, row, block:b.name}) }); } });
   }));
   return out;
 }
@@ -1914,7 +1936,7 @@ function planGuide(l){
     <ol><li>Enter through the <b>Learner Entrance ${door === "left" ? "Left (stage-left door)" : "Right (stage-right door)"}</b>.</li>
       <li>Go up the ${s.section === "Lower" ? (s.block === "Centre" ? "aisle between the centre and right blocks" : s.block === "Left" ? "left aisle" : "right aisle") : door === "left" ? "left aisle to the upper section" : "right aisle to the upper section"}. Usher <b style="color:${USH_COL[uu[2]]}">${u}</b> (${uu[1].toLowerCase()}) will help.</li>
       <li>Row <b>${esc(s.row)}</b>, seat <b>${s.n}</b> in the ${blockTxt}.</li></ol>
-    <div class="small muted">${esc(l.programme || "")}${l.client ? " · " + esc(l.client) : ""}${l._code ? " · stage number " + esc(l._code) : ""}</div></div>`;
+    <div class="small muted">${esc(l.programme || "")}${l.client ? " · " + esc(l.client) : ""}${l._code ? " · stage position " + esc(l._code.split("-").pop().replace(/^0/,"")) + " in their programme" : ""}</div></div>`;
 }
 function seatMap(preselect){
   stageList();
@@ -2053,14 +2075,11 @@ function pmTable(L){
    ====================================================================== */
 function reportDialog(){
   modal(`<h3>Graduation report</h3><p class="small muted">A landscape report of the day: attendance, robes, the stage, certificates, programmes, clients, project managers, tasks and announcements. ${fActive() ? "<b>Your current filters apply.</b>" : ""}</p>
-    <div class="row" style="margin-top:12px;flex-wrap:wrap"><button class="btn gold" id="rPdf">⬇ Download PDF (landscape)</button><button class="btn ghost" id="rOpen">Open to print</button><button class="btn ghost" id="rDl">Web page version</button><span class="spacer"></span><button class="btn ghost" id="mc">Close</button></div><div id="rMsg" class="small" style="margin-top:8px"></div>`,
+    <div class="row" style="margin-top:12px;flex-wrap:wrap"><button class="btn gold" id="rPdf">⬇ Download PDF (landscape)</button><button class="btn ghost" id="rDl">Web page version</button><span class="spacer"></span><button class="btn ghost" id="mc">Close</button></div><div id="rMsg" class="small" style="margin-top:8px"></div>`,
     (m, close) => { $("#mc",m).onclick = close;
       const base = `Graduation report ${S.data.event.name} ${new Date().toISOString().slice(0,10)}`.replace(/[\\/:*?"<>|]/g, "");
       $("#rPdf",m).onclick = async () => { $("#rPdf",m).disabled = true; $("#rMsg",m).textContent = "Building the PDF…"; const ok = await reportPdf(base + ".pdf"); $("#rPdf",m).disabled = false; $("#rMsg",m).textContent = ok ? "Done." : ""; };
       $("#rDl",m).onclick = () => saveFile(base + ".html", buildReport());
-      $("#rOpen",m).onclick = () => { const html = buildReport().replace("</body>", `<script>setTimeout(()=>print(),700)<\/script></body>`);
-        if (DESKTOP() && DESKTOP().save_file) return saveFile(base + ".html", html, true);
-        const w = window.open(URL.createObjectURL(new Blob([html], {type:"text/html"})), "_blank"); if (!w) saveFile(base + ".html", html); };
     });
 }
 async function reportPdf(name, htmlIn){
@@ -2081,7 +2100,7 @@ function printHTML(html, asPdf){
   return new Promise(res => {
     const f = document.createElement("iframe"); f.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0"; f.srcdoc = html; document.body.appendChild(f);
     f.onload = () => setTimeout(() => {
-      try { f.contentWindow.focus(); f.contentWindow.print(); if (asPdf) toast("In the print window choose “Save as PDF” as the printer, then Save. The layout is already set to landscape.", "gold big"); res(true); }
+      try { f.contentWindow.focus(); f.contentWindow.print(); if (asPdf) toast("In the print window set Destination to “Save as PDF” (not Microsoft Print to PDF), turn on “Background graphics”, then Save. Pages come out landscape.", "gold big"); res(true); }
       catch(e){ toast("Could not open printing: " + e.message, "red"); res(false); }
       setTimeout(() => f.remove(), 60000);
     }, 700);
@@ -2134,8 +2153,8 @@ function stageOrderHTML(Lf){
     <p class="sonote">Programmes go up by NQF level, lowest first. Within a programme it is first come, first on stage.${robing ? ` ${robing} graduate${robing === 1 ? " is" : "s are"} still being robed and will join the line.` : ""}</p>
     ${groups.length ? groups.map(G => { const m = G.g.match(/^NQF (\S+) · (.*)$/); const done = G.items.filter(l => l.stage_status === "done").length;
       return `<section class="sog"><div class="glh"><span class="gln">${esc(m ? m[2] : G.g)}</span>${m ? `<span class="glq">NQF ${esc(m[1])}</span>` : ""}<span class="sp"></span><span class="glq">${done} of ${G.items.length} crossed</span>${notYetBy[G.g] ? `<span class="glq">${notYetBy[G.g]} not yet arrived</span>` : ""}<span class="glc">${G.items.length} in line</span></div>
-      <table class="sot"><thead><tr><th>#</th><th>Code</th><th>Graduate</th><th>Client</th><th>Seat</th><th style="text-align:right">Status</th></tr></thead><tbody>
-      ${G.items.map(l => `<tr class="${l.stage_status}"><td class="no">${++n}</td><td class="cd"><span>${esc(l._code || "")}</span></td><td class="nm">${esc(fullName(l))}</td><td class="cl">${esc([l.client, l.cohort].filter(Boolean).join(" · "))}</td><td class="se">${esc(l.seat || "–")}</td><td class="stt">${st(l)}</td></tr>`).join("")}
+      <table class="sot"><thead><tr><th>#</th><th>Seat</th><th>Graduate</th><th>Client</th><th>Seat</th><th style="text-align:right">Status</th></tr></thead><tbody>
+      ${G.items.map(l => `<tr class="${l.stage_status}"><td class="no">${++n}</td><td class="cd"><span>${esc(dcode(l) || "")}</span></td><td class="nm">${esc(fullName(l))}</td><td class="cl">${esc([l.client, l.cohort].filter(Boolean).join(" · "))}</td><td class="se">${esc(l.seat || "–")}</td><td class="stt">${st(l)}</td></tr>`).join("")}
       </tbody></table></section>`; }).join("") : `<p class="muted" style="font-size:13px">Nobody is in the stage line yet. Graduates join once their robe is issued.</p>`}`;
 }
 function stageDialog(){
@@ -2174,7 +2193,7 @@ function buildReport(mode){
   const story = `${J.arrived} of ${J.total} graduates arrived (${pct(J.arrived,J.total)}%)${J.absent ? `, ${J.absent} were marked absent` : ""}. ${J.robed} received their robes, ${J.crossed} crossed the stage and ${J.cert} received their certificates.`
     + (arr.length ? ` Registration opened with the first arrival at ${fmt(arr[0])} and the last graduate checked in at ${fmt(arr[arr.length-1])}.` : "")
     + (st.length > 1 ? ` The ceremony ran from ${fmt(st[0])} to ${fmt(st[st.length-1])}: ${stageMins} minute${stageMins===1?"":"s"} on stage, typically about ${perGrad} second${perGrad===1?"":"s"} between graduates.` : "") + dropNote;
-  const css = `@page{size:A4 landscape;margin:9mm}*{box-sizing:border-box}body{font-family:Montserrat,"Segoe UI",Arial,sans-serif;color:#0d1b3e;margin:0;background:#eef2fb}
+  const css = `@page{size:A4 landscape;margin:0}*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}body{font-family:Montserrat,"Segoe UI",Arial,sans-serif;color:#0d1b3e;margin:0;background:#eef2fb}
     .page{max-width:1100px;margin:0 auto;background:#fff;padding:0 0 30px;box-shadow:0 10px 40px -20px rgba(8,26,69,.4)}
     .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}.two h2{margin-top:22px}
     .two table{font-size:11px;table-layout:fixed}.two th{font-size:8.5px;padding:6px 3px;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.two td{padding:5px 3px;word-wrap:break-word}.two td:first-child,.two th:first-child{width:31%}
@@ -2184,6 +2203,7 @@ function buildReport(mode){
     .cover:after{content:"";position:absolute;right:-60px;top:-40px;width:260px;height:260px;border:2px solid rgba(212,175,55,.5);transform:rotate(30deg)}
     .cover img{width:100px;height:100px;border-radius:50%;background:#fff;padding:7px;float:right;object-fit:contain;box-shadow:0 0 0 3px rgba(212,175,55,.75),0 8px 20px -8px rgba(0,0,0,.5);position:relative;z-index:1}
     .cover h1{margin:0;font-size:30px;letter-spacing:-.3px}.cover h1 span{color:#f3d27a}.cover p{margin:6px 0 0;color:#c9d3f2}
+    .cover{border-bottom:5px solid #d4af37}.prep{display:inline-flex;align-items:center;gap:8px;margin-top:14px;background:rgba(255,255,255,.1);border:1px solid rgba(243,210,122,.55);border-radius:30px;padding:5px 14px;font-size:12px;color:#fff}.prep b{color:#f3d27a}
     .tag{display:inline-block;color:#f3d27a;font-weight:700;letter-spacing:.6px;margin-top:14px;font-size:12px;text-transform:uppercase}
     .in{padding:0 40px}h2{font-size:17px;margin:28px 0 10px;padding-bottom:6px;border-bottom:2px solid #d4af37}
     .story{font-size:15px;line-height:1.6;background:#f6f8fd;border-left:4px solid #d4af37;padding:14px 18px;margin-top:22px;border-radius:0 10px 10px 0}
@@ -2198,11 +2218,11 @@ function buildReport(mode){
     .foot{text-align:center;color:#8a93a8;font-size:11px;margin-top:30px}.foot .c{font-size:8px;opacity:.4}
     ${GL_CSS}
     ${SO_CSS}
-    @media print{body{background:#fff}.page{box-shadow:none;max-width:none}h2{break-after:avoid}.pb,.fr,tr,.kp,.rings,.ann{break-inside:avoid}.newpage{break-before:page}}`;
+    @media print{html,body{background:#fff;width:297mm}.page{box-shadow:none;max-width:none;padding:0}.in{padding:10mm 14mm 12mm;-webkit-box-decoration-break:clone;box-decoration-break:clone}.cover{padding:10mm 14mm 8mm}.story{margin-top:12px;padding:10px 16px;font-size:13.5px}.rings{margin-top:10px}.ring svg{max-height:96px}h2{margin:16px 0 8px}.two h2{margin-top:14px}h2{break-after:avoid}.pb,.fr,tr,.kp,.rings,.ann{break-inside:avoid}.newpage{break-before:page}}`;
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${stageMode ? "Stage order" : listOnly ? "Graduate list" : "Graduation report"} · ${esc(d.event.name)}</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=swap" rel="stylesheet"><style>${css}</style></head><body><div class="page">
     <div class="cover"><img src="${document.querySelector('.top img').src}" alt="Camblish crest"><div class="tag">${stageMode ? "Stage order · for the MC" : listOnly ? "Graduate list" : "Graduation day report"}</div><h1>${esc(d.event.name)}</h1>
-      <p>${esc([dateTxt, d.event.venue].filter(Boolean).join(" · "))}</p><p style="font-size:12px">Prepared ${new Date().toLocaleString("en-ZA",{day:"numeric",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"})} by ${esc(S.me)}${fActive() ? " · filtered view" : ""}</p></div>
+      <p>${esc([dateTxt, d.event.venue].filter(Boolean).join(" · "))}</p><div class="prep">Prepared by <b>Eddie Bila</b> · ${new Date().toLocaleString("en-ZA",{day:"numeric",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"})}${fActive() ? " · filtered view" : ""}</div></div>
     <div class="in">${stageMode ? stageOrderHTML(L) : listOnly ? `
       ${(() => { const Q = L.filter(l => l.cert_issued && openQ(l).length); return Q.length ? `<div class="story" style="border-left-color:#b3261e;background:#fdf1ef"><b>⚠ ${Q.length} graduate${Q.length === 1 ? " has" : "s have"} an open query</b> (marked in red below): ${Q.map(l => esc(fullName(l))).join(", ")}.</div>` : ""; })()}
       <div class="story">${J.cert} graduate${J.cert === 1 ? "" : "s"} received their certificates${J.total ? ` (${Math.round(100*J.cert/J.total)}% of the ${J.total} expected)` : ""}, listed by programme in the order they were capped.</div>
@@ -2217,7 +2237,7 @@ function buildReport(mode){
       ${T.filter(t => t.status !== "Completed").length ? `<p style="font-size:13px"><b>Still open:</b> ${T.filter(t => t.status !== "Completed").map(t => esc(t.title) + ` (${esc(t.status)})`).join("; ")}</p>` : ""}
       ${anns.length ? `<h2>Announcements</h2>${anns.map(a => `<div class="ann"><small>${fmt(a.created_at)} · ${esc(a.actor)}</small><br>${esc(a.text)}</div>`).join("")}` : ""}
       <h2 class="newpage">Graduate list</h2>${(() => { const Q = L.filter(l => l.cert_issued && openQ(l).length); return Q.length ? `<div class="story" style="border-left-color:#b3261e;background:#fdf1ef"><b>⚠ ${Q.length} open quer${Q.length === 1 ? "y" : "ies"}:</b> ${Q.map(l => esc(fullName(l))).join(", ")}.</div>` : ""; })()}${gradListHTML(L)}`}
-      <div class="foot">Camblish Training Institute · Taking the Lead, Shaping the Future<br><span class="c">Designed and developed by Eddie Bila</span></div>
+      <div class="foot"><b style="color:#0d1b3e">Camblish Training Institute</b> · Taking the Lead, Shaping the Future<br>Report prepared by Eddie Bila<br><span class="c">Designed and developed by Eddie Bila</span></div>
     </div></div></body></html>`;
 }
 
@@ -2232,27 +2252,31 @@ function viewStage(){
   const notYetBy = {}; notYet.forEach(l => { const g = groupOf(l); notYetBy[g] = (notYetBy[g]||0)+1; });
   const late = waiting.filter(l=>l._late);
   // the stage manager can call one programme at a time; inside it, first to arrive goes first
-  const progOrder = [...new Set(P.filter(l => l.stage_status !== "done").sort((a,b) => progKey(a).localeCompare(progKey(b))).map(l => l.programme || "No programme"))];
+  const cliSel = S.f.stageCli || "", inCli = l => !cliSel || (l.client || "") === cliSel;
+  const cliOpts = [...new Set(P.filter(l => l.stage_status !== "done").map(l => l.client || ""))].filter(Boolean).sort()
+    .map(c => `<option value="${esc(c)}" ${c === cliSel ? "selected" : ""}>${esc(c)} · ${waiting.filter(l => l.client === c).length} waiting</option>`).join("");
+  const progOrder = [...new Set(P.filter(l => l.stage_status !== "done" && inCli(l)).sort((a,b) => progKey(a).localeCompare(progKey(b))).map(l => l.programme || "No programme"))];
   if (S.f.stageProg && !progOrder.includes(S.f.stageProg)) progOrder.push(S.f.stageProg);
   const sel = S.f.stageProg || "";
-  const queue = sel ? waiting.filter(l => (l.programme || "No programme") === sel).sort(byArrival) : waiting;
+  const queue = waiting.filter(l => inCli(l) && (!sel || (l.programme || "No programme") === sel)).sort(sel || cliSel ? byArrival : () => 0);
   const nextUp = queue.slice(0,5);
-  const progOpts = progOrder.map(p => { const n = waiting.filter(l => (l.programme || "No programme") === p).length; return `<option value="${esc(p)}" ${p === sel ? "selected" : ""}>${esc(p)} · ${n} waiting</option>`; }).join("");
+  const progOpts = progOrder.map(p => { const n = waiting.filter(l => inCli(l) && (l.programme || "No programme") === p).length; return `<option value="${esc(p)}" ${p === sel ? "selected" : ""}>${esc(p)} · ${n} waiting</option>`; }).join("");
   let html = bannerHTML() + `<div class="card flowcard noprint"><div id="flow" class="flowwrap"></div></div>
   ${stageTiles(journey(S.data.learners), "noprint")}
   <div class="stagebox noprint">
     <div class="now"><div class="l">Now on stage</div>
-      ${called.length ? called.map(l=>`<div class="big">${esc(fullName(l))}</div><div class="pr">${l.seat?"Seat "+esc(l.seat)+" · ":""}Tag ${l._code} · #${l._seq} · NQF ${esc(l.nqf??"?")} · ${esc(l.programme||"")}${l.client?" · "+esc(l.client):""}</div>`).join("") : `<div class="big" style="opacity:.7">Nobody called yet</div><div class="pr">${P.length} arrived graduates in the line-up</div>`}
+      ${called.length ? called.map(l=>`<div class="big">${esc(fullName(l))}</div><div class="pr">Seat ${esc(dcode(l))} · #${l._seq} · NQF ${esc(l.nqf??"?")} · ${esc(l.programme||"")}${l.client?" · "+esc(l.client):""}</div>`).join("") : `<div class="big" style="opacity:.7">Nobody called yet</div><div class="pr">${P.length} arrived graduates in the line-up</div>`}
       <div class="row" style="margin-top:12px;position:relative;z-index:1">
         <button class="btn gold lg" id="callNext" ${queue.length || called.length ? "" : "disabled"}>${called.length ? (queue.length ? "✓ Done, call next" : "✓ Done") : "▶ Call first graduate"}</button>
         ${called.length?`<button class="btn ghost sm" id="undoCall">Back to waiting</button>`:""}
       </div>
-      <label class="callsel"><span>Programme up next</span><select id="stProg" aria-label="Programme up next"><option value="">All programmes, in stage order</option>${progOpts}</select></label>
+      <label class="callsel"><span>Client</span><select id="stCli" aria-label="Client up next"><option value="">All clients</option>${cliOpts}</select></label>
+      <label class="callsel"><span>Programme up next</span><select id="stProg" aria-label="Programme up next"><option value="">${cliSel ? "All of this client's programmes" : "All programmes, in stage order"}</option>${progOpts}</select></label>
       <div class="small" style="margin-top:10px;color:#c9d3f2">${done} of ${P.length} crossed · ${robing} still getting robes · ${notYet.length} not yet arrived</div>
     </div>
     <div class="card upnext" style="margin:0">
       <h2>Up next${sel ? ` <span class="tag gold">${esc(sel)}</span>` : ""}<span class="spacer"></span><span class="small muted">${queue.length} waiting</span></h2>
-      ${nextUp.length ? nextUp.map((l,i)=>`<div class="row" style="padding:6px 0;border-bottom:1px solid var(--line)"><span class="seq" style="width:auto;min-width:30px;height:30px;font-size:12px;padding:0 6px;border-radius:15px">${l._code}</span><div style="flex:1"><b>${esc(fullName(l))}</b><div class="small muted">${esc(l.programme||"")}${l.client?" · "+esc(l.client):""}</div></div>${l._late?`<span class="tag red">Late arrival</span>`:""}${i===0?`<span class="tag gold">Next</span>`:""}</div>`).join("") : `<div class="empty">No one waiting.</div>`}
+      ${nextUp.length ? nextUp.map((l,i)=>`<div class="row" style="padding:6px 0;border-bottom:1px solid var(--line)"><span class="seq" style="width:auto;min-width:30px;height:30px;font-size:12px;padding:0 6px;border-radius:15px">${esc(dcode(l))}</span><div style="flex:1"><b>${esc(fullName(l))}</b><div class="small muted">${esc(l.programme||"")}${l.client?" · "+esc(l.client):""}</div></div>${l._late?`<span class="tag red">Late arrival</span>`:""}${i===0?`<span class="tag gold">Next</span>`:""}</div>`).join("") : `<div class="empty">No one waiting.</div>`}
     </div>
   </div>
   ${late.length?`<div class="err noprint" style="margin-top:12px">${late.length} late arrival${late.length>1?"s":""} after their programme had finished: ${late.map(l=>esc(fullName(l))).join(", ")}. They have been moved to the end of the ceremony.</div>`:""}
@@ -2272,8 +2296,8 @@ function viewStage(){
       const gg = gOf(l); const closed = scol.has(gg) && !searching;
       if (gg !== g){ g = gg; const inG = P.filter(x=>gOf(x)===gg); const dn = inG.filter(x => x.stage_status === "done").length; html += `<div class="group-h sgh${closed ? " closed" : ""}" data-sgk="${esc(gg)}" role="button" tabindex="0" aria-expanded="${!closed}"><span class="chev" aria-hidden="true">▾</span>${esc(gg)}<span class="spacer"></span><span class="tag">${dn} of ${inG.length} crossed</span><span class="tag">${inG.length} present</span>${notYetBy[gg]?`<span class="tag">${notYetBy[gg]} not yet arrived</span>`:""}</div>`; }
       if (closed) return;
-      html += `<div class="lrow ${l.stage_status}"><span class="seq" style="width:auto;min-width:38px;padding:0 6px;border-radius:19px">${l.stage_status==="done"?"✓ "+l._code:l._code}</span>
-        <div class="info"><div class="nm">${hl(fullName(l))} ${seatTag(l)}</div><div class="small muted">${l._late?esc(l.programme||"")+" · ":""}${esc(l.client||"")}${l.cohort?" · "+esc(l.cohort):""} · arrived ${fmtTime(l.arrived_at)}</div>${notesLine(l)}</div>
+      html += `<div class="lrow ${l.stage_status}"><span class="seq" style="width:auto;min-width:38px;padding:0 6px;border-radius:19px">${l.stage_status==="done"?"✓ "+esc(dcode(l)):esc(dcode(l))}</span>
+        <div class="info"><div class="nm">${hl(fullName(l))} ${seatTag(l)} ${leadTag(l)}</div><div class="small muted">${l._late?esc(l.programme||"")+" · ":""}${esc(l.client||"")}${l.cohort?" · "+esc(l.cohort):""} · arrived ${fmtTime(l.arrived_at)}</div>${notesLine(l)}</div>
         ${l._late?`<span class="tag red">Late arrival</span>`:""}
         ${l.stage_status==="called"?`<span class="tag gold">On stage</span>`:""}
         <span class="noprint pacts">${tagBtn(l)}${l.stage_status==="waiting"?`<button class="sbtn p" data-sg="${l.id}" data-s="called">Call</button>`:""}
@@ -2297,9 +2321,10 @@ function viewStage(){
   const cn = $("#callNext"); if (cn) cn.onclick = async () => {
     cn.disabled = true;
     for (const l of called) await rpc("grad_stage", {p_code:CODE,p_pin:S.pin,p_actor:S.me,p_learner:l.id,p_stage:"done"}).catch(()=>{});
-    const nxt = queue[0]; if (nxt) await act("grad_stage", {p_learner:nxt.id, p_stage:"called"}); else { if (sel) toast(`Everyone in ${sel} who is ready has crossed`, "green"); await pull(true); }
+    const nxt = queue[0]; if (nxt) await act("grad_stage", {p_learner:nxt.id, p_stage:"called"}); else { if (sel || cliSel) toast(`Everyone in ${sel || cliSel} who is ready has crossed`, "green"); await pull(true); }
   };
   const sp = $("#stProg"); if (sp) sp.onchange = () => { S.f.stageProg = sp.value; viewStage(); };
+  const sc = $("#stCli"); if (sc) sc.onchange = () => { S.f.stageCli = sc.value; S.f.stageProg = ""; viewStage(); };
   const uc = $("#undoCall"); if (uc) uc.onclick = async () => { for (const l of called) await rpc("grad_stage",{p_code:CODE,p_pin:S.pin,p_actor:S.me,p_learner:l.id,p_stage:"waiting"}).catch(()=>{}); pull(true); };
 }
 
@@ -2399,7 +2424,7 @@ function viewManage(){
       <button class="btn sm" id="esave" style="margin-top:10px">Save settings</button></div>
   </div>
   <div class="card"><h2>Seating plan · ${HALL.name}<span class="spacer"></span><button class="btn ghost sm" id="smOpen">💺 View seating plan</button>${can("seating")?`<button class="btn gold sm" id="smAssign">Assign seats by programme</button>`:""}</h2>
-    ${(() => { const st = seatStats(), sp = seatPlan(); return `<p class="small">Seats are filled front to back in the lower section first (rows AA–LL), keeping each programme together in stage order (NQF level, then programme). Left-block rows AA, BB and CC (seats 25–35) are kept for clients. Anyone who doesn't fit downstairs continues in the upper section from row A. Graduates who are already checked in keep their seats; absent graduates and anyone marked "not attending" lose theirs.</p>
+    ${(() => { const st = seatStats(), sp = seatPlan(); return `<p class="small">Seats follow the stage order: NQF 1 first, then 2, 3 and up, one programme at a time. Filling starts in the <b>lower right block at DD-01</b>, then the lower centre and lower left blocks, then the upper blocks from right to left. Rows AA, BB and CC downstairs are kept for VIPs and clients. A programme that would run over into the next block moves there as a whole. Inside a programme the first graduate to arrive takes the first seat and the first stage spot; everyone not yet arrived keeps a provisional seat that moves up as others arrive. Absent graduates and anyone marked "not attending" give their seat up.</p>
     <div class="row" style="gap:18px"><div><div class="big2">${st.seated}</div><div class="small muted">seated</div></div><div><div class="big2">${st.lower}</div><div class="small muted">lower section (of ${sp.lower})</div></div><div><div class="big2">${st.upper}</div><div class="small muted">upper section</div></div><div><div class="big2" style="color:${st.none?"var(--bad)":"inherit"}">${st.none}</div><div class="small muted">without a seat</div></div></div>`; })()}
   </div>
   <div class="card"><h2>Learner list<span class="spacer"></span></h2>
