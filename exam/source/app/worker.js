@@ -106,7 +106,9 @@ async function init() {
   py = await loadPyodide({ indexURL: PYODIDE_URL });
   postMessage({ type: 'status', text: 'Loading pandas, numpy, matplotlib, scikit-learn…' });
   await py.loadPackage(['numpy', 'pandas', 'matplotlib', 'scikit-learn', 'sqlite3']);
-  try { await py.loadPackage(['seaborn']); } catch (e) { /* optional */ }
+  try { await py.loadPackage(['seaborn']); } catch (e) {
+    try { await py.loadPackage('micropip'); await py.runPythonAsync("import micropip\nawait micropip.install('seaborn')"); } catch (e2) { /* optional */ }
+  }
   py.runPython(HELPER);
   return true;
 }
@@ -125,8 +127,17 @@ onmessage = async (e) => {
       const parts = m.name.split('/');
       if (parts.length > 1) py.FS.mkdirTree('/data/' + parts.slice(0, -1).join('/'));
       py.FS.writeFile('/data/' + m.name, new Uint8Array(m.buf));
+      // Zipped datasets are unpacked next to the zip (the zip itself is kept)
+      if (/\.zip$/i.test(m.name)) {
+        try {
+          py.globals.set('_zp', '/data/' + m.name);
+          py.runPython("import zipfile, os\nwith zipfile.ZipFile(_zp) as z:\n    z.extractall(os.path.dirname(_zp) or '/data')");
+        } catch (ze) { /* leave zip as is */ }
+      }
       postMessage({ type: 'done', id: m.id, result: { ok: true } });
     } else if (m.type === 'run') {
+      // Load any extra Pyodide packages the cell imports (scipy, statsmodels, ...)
+      if (m.lang !== 'sql') { try { await py.loadPackagesFromImports(m.code); } catch (le) { /* the import error will show in the output */ } }
       const fnName = m.lang === 'sql' ? 'run_sql' : 'run_py';
       const f = py.globals.get(fnName);
       const res = m.lang === 'sql' ? f(m.db || '', m.code) : f(m.code);
