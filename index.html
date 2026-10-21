@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-b0aBA43DGmheo4xk/PRH5XwF6dO2OyWn4IkBK2F8jMg=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="author" content="Eddie Bila">
 <meta name="robots" content="noindex,nofollow">
@@ -415,6 +417,7 @@ nav.tabs .badge.green{background:var(--ok);color:#fff}
 .sigbox{position:relative;border:2px dashed #b9c5e4;border-radius:12px;background:#fff;height:170px}.sigbox canvas{width:100%;height:100%;display:block;cursor:crosshair;border-radius:12px}
 .sigbox .sigx{position:absolute;left:14px;bottom:30px;color:#9aa6c4;font-size:18px;pointer-events:none}.sigbox .sigline{position:absolute;left:40px;right:16px;bottom:34px;border-bottom:1.5px solid #c9d3ea;color:#9aa6c4;font-size:11px;padding-bottom:2px;pointer-events:none;text-align:right}
 .cqbtn{color:#b3261e!important;border-color:#f1b8b2!important}.lrow.cq{border-left:4px solid #b3261e}.cqtxt{margin-top:4px;font-size:12px;color:#b3261e;background:#fdf1ef;border-radius:8px;padding:5px 8px}.cqtxt i{color:#8a5a55;font-style:normal;font-size:11px}
+.seat.oc{background:#eef1f7;color:#5b6785}
 .leadtag{display:inline-block;background:var(--pc);color:#fff;border-radius:99px;padding:2px 9px;font-size:11px;font-weight:900;letter-spacing:.2px;vertical-align:2px;box-shadow:0 0 0 2px #fff,0 0 0 3.5px var(--pc);max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sgh{cursor:pointer;user-select:none}.sgh .chev{display:inline-block;margin-right:8px;transition:transform .15s}.sgh.closed .chev{transform:rotate(-90deg)}.sgh:hover{filter:brightness(1.12)}
 .lnotes{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:4px;font-size:12px}
@@ -553,8 +556,8 @@ table.t td .acc{margin:0}
 <div class="netbar hidden" id="netbar"></div>
 <div class="foot"><b>Camblish Alumni Hub V1.0</b> · Taking the Lead, Shaping the Future<br>Camblish Training Institute<span class="sig">Designed and developed by Eddie Bila</span></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" integrity="sha384-vtjasyidUo0kW94K5MXDXntzOJpQgBKXmE7e2Ga4LG0skTTLeBi97eFAXsqewJjw" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
 <script>
 "use strict";
 const SB_URL = "https://jrbihuegqydoqnsxxvma.supabase.co";
@@ -567,7 +570,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202610151100";
+const BUILD = "202610211400";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -1179,7 +1182,7 @@ function orderKey(a, b){
 }
 const groupOf = l => `NQF ${l.nqf ?? "?"} · ${l.programme || "Programme not set"}`;
 function stageList(){
-  // Groups run NQF level (low to high), then programme. Inside a group it is first come, first on stage.
+  // Groups run NQF level (low to high), then programme. Inside a group graduates go up in seat order (seats are fixed in advance).
   const present = S.data.learners.filter(l => l.status === "present");
   const gkey = l => [String(l.nqf ?? 99).padStart(3,"0"), l.programme||""].join("|");
   const keys = [...new Set(present.map(gkey))].sort();
@@ -1193,7 +1196,7 @@ function stageList(){
   });
   const main = [], late = [];
   present.forEach(l => { l._late = l.stage_status === "waiting" && t(l) > closedAt[gkey(l)]; (l._late ? late : main).push(l); });
-  main.sort((a,b) => keys.indexOf(gkey(a)) - keys.indexOf(gkey(b)) || t(a) - t(b));
+  main.sort((a,b) => keys.indexOf(gkey(a)) - keys.indexOf(gkey(b)) || seatRank(a.seat) - seatRank(b.seat) || t(a) - t(b));   // within a programme: seat order
   late.sort((a,b) => t(a) - t(b));
   const all = main.concat(late);
   all.forEach((l,i) => l._seq = i+1);
@@ -1241,7 +1244,7 @@ async function renderTag(l){
     x.fillStyle = "#1d3fae"; fitText(x, cli, 340 * k, Math.round(13 * k), '700 {s}px Montserrat, "Segoe UI", Arial, sans-serif'); x.fillText(cli, X(305), Y(342));
     stageList(); const pc = progColor(l);
     x.fillStyle = pc; x.fillRect(X(0), Y(358), 612 * k, 8 * k);   // programme colour strip for ushers
-    if (isLead(l)){   // first of the programme: bright ribbon across the top-left corner
+    if (tagLead(l)){   // first of the programme: bright ribbon across the top-left corner
       x.save(); x.translate(X(0), Y(0)); x.rotate(-Math.PI / 4);
       x.fillStyle = pc; x.fillRect(-140 * k, 46 * k, 280 * k, 34 * k);
       x.fillStyle = "#fff"; x.textAlign = "center"; x.font = `900 ${Math.round(15 * k)}px Montserrat, Arial, sans-serif`; x.fillText("★ 1ST IN CLASS ★", 0, 69 * k);
@@ -1512,8 +1515,12 @@ function chipsHTML(id, opts, cur){ return `<div class="chips" id="${id}" style="
 const PROG_COLS = ["#e11d48","#f59e0b","#10b981","#3b82f6","#8b5cf6","#ec4899","#14b8a6","#f97316","#65a30d","#0891b2","#a855f7","#dc2626","#ca8a04","#2563eb","#db2777","#059669"];
 function progColor(l){ const keys = S._progKeys && S._progKeysAt === S.data.learners.length ? S._progKeys : (S._progKeysAt = S.data.learners.length, S._progKeys = [...new Set(S.data.learners.map(progKey))].sort()); const i = keys.indexOf(progKey(l)); return PROG_COLS[(i < 0 ? 0 : i) % PROG_COLS.length]; }
 const isLead = l => l.status === "present" && !l._late && /-01$/.test(codeOf(l));
-const leadTag = l => isLead(l) ? `<span class="leadtag" style="--pc:${progColor(l)}" title="First of ${esc(l.programme || "")} to arrive: leads this programme to the stage">★ 1st · ${esc(l.programme || "")}</span>` : "";
-const seatTag = l => l.seat ? `<span class="seat" title="Seat">💺 ${hl(l.seat)}</span>` : "";
+function tagLead(l){   // name tags: the programme's first seat (seats are fixed in advance), else the first to arrive
+  if (!l.seat) return isLead(l);
+  const k = progKey(l); return !S.data.learners.some(x => x !== l && x.seat && progKey(x) === k && seatRank(x.seat) < seatRank(l.seat));
+}
+const leadTag = l => isLead(l) ? `<span class="leadtag" style="--pc:${progColor(l)}" title="First seat of ${esc(l.programme || "")} among those present: leads this programme to the stage">★ 1st · ${esc(l.programme || "")}</span>` : "";
+const seatTag = l => l.seat ? `<span class="seat" title="Seat">💺 ${hl(l.seat)}</span>` : otherCeremony(l) ? `<span class="seat oc" title="This region has its own graduation ceremony">🏙 ${esc(l.region)} ceremony</span>` : "";
 /* ---------- learner notes & queries (travel with the learner to the graduate list) ---------- */
 const NOTE_KIND = {name:["✏️","Name correction"], query:["⚠","Query"], note:["💬","Note"]};
 const notesOf = l => Array.isArray(l.queries) ? l.queries : [];
@@ -1540,6 +1547,7 @@ function noteDialog(id){
         $("#mo", m).disabled = false; };
       const mo = $("#mo", m); if (mo){ mo.onclick = save; $("#nt", m).addEventListener("keydown", e => { if (e.key === "Enter") save(); }); setTimeout(() => $("#nt", m).focus(), 50); } });
 }
+document.addEventListener("click", e => { const a = e.target.closest("[data-act=stageDialog]"); if (a){ e.preventDefault(); stageDialog(); } });
 document.addEventListener("click", e => { const b = e.target.closest("[data-note]"); if (b && S.data){ e.preventDefault(); noteDialog(b.dataset.note); } });
 function lInfo(l, extra=""){
   return `<div class="info"><div class="nm">${hl(fullName(l))} ${seatTag(l)} ${leadTag(l)}</div>
@@ -1605,7 +1613,7 @@ async function markPrinted(list){
 /* ======================================================================
    CHECK-IN  (present learners move on to Robes)
    ====================================================================== */
-const dcode = l => l.seat || codeOf(l);   // one code everywhere: the seat (seat order = stage order)
+const dcode = l => l.seat || (otherCeremony(l) ? "Own ceremony" : codeOf(l));   // one code everywhere: the seat (seat order = stage order)
 function codeOf(l){ if (!l._code) stageList(); return l._code || ""; }
 function viewCheckin(){
   if (!$("#ciView")){
@@ -1926,7 +1934,15 @@ const HALL = { name:"Great Hall, Wits", sections:[
     blocks:[{name:"Left", from:35, to:25}, {name:"Centre", from:24, to:12}, {name:"Right", from:11, to:1}] },
   { name:"Upper", rows:["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","R"],
     blocks:[{name:"Left", from:44, to:33}, {name:"Centre left", from:32, to:23}, {name:"Centre right", from:22, to:12}, {name:"Right", from:11, to:1}] }],
-  reserved: s => s.section === "Lower" && ["AA","BB","CC"].includes(s.row) };
+  reserved: s => s.section === "Lower" && ((["AA","BB","CC"].includes(s.row) && s.block === "Right") || s.row === "DD") };   // VIP rows lower right; DD = camera walkway
+const BLK_ORDER = {"Lower|Right":1, "Lower|Centre":2, "Lower|Left":3, "Upper|Right":4, "Upper|Centre right":5, "Upper|Centre left":6, "Upper|Left":7};
+function seatRank(label){
+  if (!label) return 1e9; const [r, n0] = label.split("-"), n = +n0, low = r.length === 2;
+  const blk = low ? (n <= 11 ? 1 : n <= 24 ? 2 : 3) : (n <= 11 ? 4 : n <= 22 ? 5 : n <= 32 ? 6 : 7);
+  const rows = HALL.sections[low ? 0 : 1].rows; return blk * 1e5 + rows.indexOf(r) * 100 + n;
+}
+const skipRegions = () => ((S.data && S.data.event && S.data.event.skip_regions) || []).map(x => String(x).toUpperCase());
+const otherCeremony = l => !!l.region && skipRegions().includes(String(l.region).trim().toUpperCase());
 const SEAT_LBL = (r, n) => `${r}-${String(n).padStart(2, "0")}`;
 function hallSeats(){
   const out = [];
@@ -1936,15 +1952,8 @@ function hallSeats(){
 }
 const seatSort = (a, b) => ((a.nqf ?? 99) - (b.nqf ?? 99)) || (a.programme||"").localeCompare(b.programme||"") || (a.client||"").localeCompare(b.client||"") || (a.surname||"").localeCompare(b.surname||"") || (a.first_name||"").localeCompare(b.first_name||"");
 function seatPlan(){
-  const L = S.data.learners;
-  const keep = L.filter(l => l.seat && l.status === "present"), taken = new Set(keep.map(l => l.seat));
-  const out = L.filter(l => l.status === "absent" || /^n/i.test(l.rsvp||""));
-  const todo = L.filter(l => !keep.includes(l) && !out.includes(l)).sort(seatSort);
-  const free = hallSeats().filter(s => !s.reserved && !taken.has(s.label));
-  const plan = new Map();
-  todo.forEach((l, i) => plan.set(l.id, free[i] ? free[i].label : ""));
-  out.forEach(l => { if (l.status !== "present") plan.set(l.id, ""); });
-  return { plan, unseated: Math.max(0, todo.length - free.length), lower: hallSeats().filter(s => s.section === "Lower" && !s.reserved).length };
+  const L = S.data.learners, want = L.filter(l => !/^n/i.test(l.rsvp||"") && !otherCeremony(l));
+  return { unseated: want.filter(l => !l.seat).length, lower: hallSeats().filter(s => s.section === "Lower" && !s.reserved).length, other: L.filter(otherCeremony).length };
 }
 async function assignSeats(){
   if (!confirm("Recalculate all seats by programme? This happens automatically at every check-in; use this after uploading or editing the learner list.")) return;
@@ -1955,7 +1964,7 @@ async function assignSeats(){
 function seatStats(){
   const L = S.data.learners, seated = L.filter(l => l.seat);
   const low = new Set(HALL.sections[0].rows);
-  return { seated:seated.length, lower:seated.filter(l => low.has(l.seat.split(/[- ]/)[0])).length, upper:seated.filter(l => !low.has(l.seat.split(/[- ]/)[0])).length, none:L.filter(l => !l.seat && l.status !== "absent").length };
+  return { seated:seated.length, lower:seated.filter(l => low.has(l.seat.split(/[- ]/)[0])).length, upper:seated.filter(l => !low.has(l.seat.split(/[- ]/)[0])).length, none:L.filter(l => !l.seat && !/^n/i.test(l.rsvp||"") && !otherCeremony(l)).length };
 }
 /* ======================================================================
    GREAT HALL FLOOR PLAN  (interactive copy of the venue plan, with routes)
@@ -2012,7 +2021,7 @@ function planRoute(s){
 }
 function planSVG(sel){
   const seats = planSeats(), by = new Map(S.data.learners.filter(l => l.seat).map(l => [l.seat, l]));
-  const fill = (s, l) => s.reserved ? "url(#resv)" : !l ? "#eef1f7" : l.cert_issued ? "#0f2462" : l.stage_status === "done" ? "#2a47a8" : l.robe_issued ? "#5577d8" : l.status === "present" ? "#9db3ec" : "#cfd8ef";
+  const fill = (s, l) => s.reserved ? (s.row === "DD" ? "url(#cam)" : "url(#resv)") : !l ? "#eef1f7" : l.cert_issued ? "#0f2462" : l.stage_status === "done" ? "#2a47a8" : l.robe_issued ? "#5577d8" : l.status === "present" ? "#9db3ec" : "#cfd8ef";
   const hit = sel && sel.seat ? seats.find(s => s.label === sel.seat) : null;
   const rows = [];
   HALL.sections.forEach(sec => sec.rows.forEach((row, ri) => { const r = planRowR(sec.name, ri);
@@ -2026,7 +2035,7 @@ function planSVG(sel){
   const top = arc(1865, .249), hallPath = `M 40 1130 L 40 ${top[0][1].toFixed(0)} ` + top.map(p => `L ${p[0].toFixed(0)} ${p[1].toFixed(0)}`).join(" ") + ` L 960 ${top[40][1].toFixed(0)} L 960 1130 Z`;
   const divR = PLAN.lowR + 11 * PLAN.rowH + 30, div = arc(divR, .29), divPath = "M " + div.map(p => p[0].toFixed(0) + " " + p[1].toFixed(0)).join(" L ");
   return `<svg viewBox="0 286 1000 950" class="hallsvg" role="img" aria-label="Great Hall seating plan">
-    <defs><pattern id="resv" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" fill="#f7efd2"/><rect width="2.5" height="5" fill="#e3cf8e"/></pattern>
+    <defs><pattern id="resv" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" fill="#f7efd2"/><rect width="2.5" height="5" fill="#e3cf8e"/></pattern><pattern id="cam" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)"><rect width="5" height="5" fill="#eceff4"/><rect width="1.5" height="5" fill="#b8c0cf"/></pattern>
       <marker id="arw" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#d4af37"/></marker>
       <marker id="arwR" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#c62828"/></marker>
       <marker id="arwB" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#1d4fb8"/></marker></defs>
@@ -2078,10 +2087,10 @@ function seatMap(preselect){
     <div class="row" style="margin-top:10px"><span class="small muted">Tap any seat to see who sits there. Gold arrows show the learner route; red the guest route; blue the VIP route.</span><span class="spacer"></span><button class="btn ghost" id="mc">Close</button></div>`,
     (m, close) => { m.classList.add("wide");
       const draw = () => { $("#pplan", m).innerHTML = planSVG(sel); $("#pside", m).innerHTML = sel ? planGuide(sel) : `<div class="pguide muted small">Search for a graduate, or tap a seat, to see their route from the learner entrance, the usher to look for, and their row and seat.</div>`;
-        $$(".pseat", m).forEach(r => r.onclick = () => { const l = S.data.learners.find(x => x.seat === r.dataset.seat); if (l){ sel = l; draw(); } else toast(r.dataset.seat + (r.getAttribute("fill") === "url(#resv)" ? " is reserved for clients" : " is empty")); });
+        $$(".pseat", m).forEach(r => r.onclick = () => { const l = S.data.learners.find(x => x.seat === r.dataset.seat); if (l){ sel = l; draw(); } else toast(r.dataset.seat + (r.getAttribute("fill") === "url(#resv)" ? " is reserved for VIPs" : r.getAttribute("fill") === "url(#cam)" ? " is kept empty: camera walkway" : " is empty")); });
         const on = $(".pseat.on", m); if (on && on.scrollIntoView) on.scrollIntoView({block:"center", inline:"center", behavior:"smooth"}); };
       $("#mc", m).onclick = close;
-      $("#smPrint", m).onclick = () => { const w = window.open("", "_blank"); if (!w) return toast("Allow pop-ups to print the plan", "red"); w.document.write(`<title>Great Hall seating plan</title><style>body{margin:0;font-family:Arial}svg{width:100%;height:auto}${PLAN_CSS}</style>${planSVG(sel)}${sel ? planGuide(sel) : ""}<script>setTimeout(()=>print(),400)<\/script>`); w.document.close(); };
+      $("#smPrint", m).onclick = () => { const w = window.open("", "_blank"); if (!w) return toast("Allow pop-ups to print the plan", "red"); w.document.write(`<title>Great Hall seating plan</title><style>body{margin:0;font-family:Arial}svg{width:100%;height:auto}${PLAN_CSS}</style>${planSVG(sel)}${sel ? planGuide(sel) : ""}`); w.document.close(); setTimeout(() => { try { w.focus(); w.print(); } catch(e){} }, 400); };
       $("#smq", m).oninput = e => { const q = e.target.value.toLowerCase().trim(); if (!q){ $("#smres", m).innerHTML = ""; return; }
         const hits = S.data.learners.filter(l => l.seat && (fullName(l).toLowerCase().includes(q) || (l.seat || "").toLowerCase() === q)).slice(0, 8);
         $("#smres", m).innerHTML = hits.map(l => `<button class="chip" data-pick="${l.id}">${esc(fullName(l))} · ${esc(l.seat)}</button>`).join("") || `<span class="small muted">No graduate with a seat matches.</span>`;
@@ -2278,7 +2287,7 @@ function stageOrderHTML(Lf){
   let n = 0;
   const st = l => l._late && l.stage_status === "waiting" ? `<span class="pill p-late">Late arrival</span>` : l.stage_status === "done" ? `<span class="pill p-done">✓ Crossed</span>` : l.stage_status === "called" ? `<span class="pill p-called">On stage</span>` : `<span class="pill p-wait">Waiting</span>`;
   return `<div class="sok"><div><b>${P.length}</b><span>In the stage line</span></div><div><b>${cnt("done")}</b><span>Crossed</span></div><div><b>${cnt("called")}</b><span>On stage now</span></div><div><b>${cnt("waiting")}</b><span>Still to cross</span></div></div>
-    <p class="sonote">Programmes go up by NQF level, lowest first. Within a programme it is first come, first on stage.${robing ? ` ${robing} graduate${robing === 1 ? " is" : "s are"} still being robed and will join the line.` : ""}</p>
+    <p class="sonote">Programmes go up by NQF level, lowest first. Within a programme graduates go up in seat order.${robing ? ` ${robing} graduate${robing === 1 ? " is" : "s are"} still being robed and will join the line.` : ""}</p>
     ${groups.length ? groups.map(G => { const m = G.g.match(/^NQF (\S+) · (.*)$/); const done = G.items.filter(l => l.stage_status === "done").length;
       return `<section class="sog"><div class="glh"><span class="gln">${esc(m ? m[2] : G.g)}</span>${m ? `<span class="glq">NQF ${esc(m[1])}</span>` : ""}<span class="sp"></span><span class="glq">${done} of ${G.items.length} crossed</span>${notYetBy[G.g] ? `<span class="glq">${notYetBy[G.g]} not yet arrived</span>` : ""}<span class="glc">${G.items.length} in line</span></div>
       <table class="sot"><thead><tr><th>#</th><th>Seat</th><th>Graduate</th><th>Client</th><th>Seat</th><th style="text-align:right">Status</th></tr></thead><tbody>
@@ -2408,8 +2417,8 @@ function viewStage(){
     </div>
   </div>
   ${late.length?`<div class="err noprint" style="margin-top:12px">${late.length} late arrival${late.length>1?"s":""} after their programme had finished: ${late.map(l=>esc(fullName(l))).join(", ")}. They have been moved to the end of the ceremony.</div>`:""}
-  <div class="card" style="margin-top:14px"><h2>Full stage order<span class="spacer"></span><button class="btn ghost sm noprint" id="printAllTags">Reprint all tags</button><button class="btn gold sm noprint" onclick="stageDialog()">🖨 Print for MC</button></h2>
-    <p class="small muted noprint">Graduates join this line once their robe is issued. Programmes go up by NQF level (lowest first); within a programme it is first come, first on stage. Once they cross they leave this list and move to the <b>Certificates</b> tab.</p>${filterBar()}<div id="stList">`;
+  <div class="card" style="margin-top:14px"><h2>Full stage order<span class="spacer"></span><button class="btn ghost sm noprint" id="printAllTags">Reprint all tags</button><button class="btn gold sm noprint" data-act="stageDialog">🖨 Print for MC</button></h2>
+    <p class="small muted noprint">Graduates join this line once their robe is issued. Programmes go up by NQF level (lowest first); within a programme graduates go up in seat order. Once they cross they leave this list and move to the <b>Certificates</b> tab.</p>${filterBar()}<div id="stList">`;
   const PFall = applyF(P), doneN = PFall.filter(l => l.stage_status === "done").length;
   const PF = S.f.stShowDone || qWords().length ? PFall : PFall.filter(l => l.stage_status !== "done");
   html += `<div class="row noprint" style="margin:8px 0 4px;gap:8px;flex-wrap:wrap"><button class="chip ${S.f.stShowDone ? "" : "on"}" data-stdone="0" type="button">Still to cross (${PFall.length - doneN})</button><button class="chip ${S.f.stShowDone ? "on" : ""}" data-stdone="1" type="button">Everyone, incl. crossed (${PFall.length})</button>${doneN ? `<span class="small muted">${doneN} who crossed are on the <a href="#" data-go2="certs">Certificates</a> tab.</span>` : ""}</div>`;
@@ -2552,8 +2561,9 @@ function viewManage(){
       <button class="btn sm" id="esave" style="margin-top:10px">Save settings</button></div>
   </div>
   <div class="card"><h2>Seating plan · ${HALL.name}<span class="spacer"></span><button class="btn ghost sm" id="smOpen">💺 View seating plan</button>${can("seating")?`<button class="btn gold sm" id="smAssign">Assign seats by programme</button>`:""}</h2>
-    ${(() => { const st = seatStats(), sp = seatPlan(); return `<p class="small">Seats follow the stage order: NQF 1 first, then 2, 3 and up, one programme at a time. Filling starts in the <b>lower right block at DD-01</b>, then the lower centre and lower left blocks, then the upper blocks from right to left. Rows AA, BB and CC downstairs are kept for VIPs and clients. A programme that would run over into the next block moves there as a whole. Inside a programme the first graduate to arrive takes the first seat and the first stage spot; everyone not yet arrived keeps a provisional seat that moves up as others arrive. Absent graduates and anyone marked "not attending" give their seat up.</p>
-    <div class="row" style="gap:18px"><div><div class="big2">${st.seated}</div><div class="small muted">seated</div></div><div><div class="big2">${st.lower}</div><div class="small muted">lower section (of ${sp.lower})</div></div><div><div class="big2">${st.upper}</div><div class="small muted">upper section</div></div><div><div class="big2" style="color:${st.none?"var(--bad)":"inherit"}">${st.none}</div><div class="small muted">without a seat</div></div></div>`; })()}
+    ${(() => { const st = seatStats(), sp = seatPlan(); return `<p class="small">Every expected graduate gets a fixed seat in advance, so name tags can be printed early. Programmes go in stage order (NQF 1 first, then 2, 3 and up), surname order inside a programme, and each programme starts at the end of a row. Filling starts in the <b>lower right block at EE-01</b>, then the lower centre and lower left blocks, then the upper blocks from right to left; guests use the remaining upper seats. Rows AA, BB and CC on the lower right are for VIPs and row DD across the lower section stays empty as the camera walkway. Absent graduates keep their seat open in case they arrive later; graduates go on stage in seat order. Anyone marked "not attending" or from a region with its own ceremony gets no seat.</p>
+    ${can("seating") ? `<div class="row" style="gap:8px;flex-wrap:wrap;margin:8px 0"><label class="lbl" style="margin:0">Regions with their own ceremony (no seat here)</label><input type="text" id="skr" style="flex:1;min-width:220px" value="${esc(skipRegions().join(", "))}" placeholder="e.g. DBN, KZN, WC, CPT"><button class="btn sm" id="skrSave">Save and reseat</button></div>` : skipRegions().length ? `<p class="small muted">Own ceremony (no seat here): ${esc(skipRegions().join(", "))}</p>` : ""}
+    <div class="row" style="gap:18px"><div><div class="big2">${st.seated}</div><div class="small muted">seated</div></div><div><div class="big2">${st.lower}</div><div class="small muted">lower section (of ${sp.lower})</div></div><div><div class="big2">${st.upper}</div><div class="small muted">upper section</div></div><div><div class="big2" style="color:${st.none?"var(--bad)":"inherit"}">${st.none}</div><div class="small muted">without a seat</div></div><div><div class="big2">${sp.other}</div><div class="small muted">own regional ceremony</div></div></div>`; })()}
   </div>
   <div class="card"><h2>Learner list<span class="spacer"></span></h2>
     <p class="small">Upload an Excel or CSV file to add more learners at any time. Learners already on the list are skipped automatically. The system recognises columns such as <b>First name, Middle name, Last name, Program, Client, Project Manager, Region, SETA, Contact number, Attending, Robe, Belt colour, Name tag</b> and <b>ID number</b> (only the last 4 digits are kept). The NQF level is read from the programme name (for example "EUC L3" is NQF 3) when there is no NQF column. One sheet with all programmes, or several sheets (one per programme or client) both work.</p>
@@ -2569,6 +2579,9 @@ function viewManage(){
   $("#imf").onchange = importPreview;
   $("#exp").onclick = exportCsv;
   $("#smOpen").onclick = seatMap; const sa = $("#smAssign"); if (sa) sa.onclick = assignSeats;
+  const skb = $("#skrSave"); if (skb) skb.onclick = async () => { const regs = $("#skr").value.split(/[,;\s]+/).map(x => x.trim()).filter(Boolean);
+    if (!confirm(`Reseat everyone? Learners from ${regs.length ? regs.join(", ") : "no region"} will have no seat at this ceremony, and other seats may move. Reprint name tags afterwards.`)) return;
+    skb.disabled = true; try { const r = await rpc("grad_seat_regions_set", {p_code:CODE, p_pin:S.pin, p_actor:S.me, p_regions:regs}); toast(`Saved. ${r.changed} seats changed.`, "green"); rtPing(); await pull(true); render(); } catch(e){ toast("Could not save: " + e.message, "red"); } skb.disabled = false; };
   const rs = $("#rsBtn"); if (rs) rs.onclick = resetDialog;
 }
 const HMAP = [
