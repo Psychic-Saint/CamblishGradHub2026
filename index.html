@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-b0aBA43DGmheo4xk/PRH5XwF6dO2OyWn4IkBK2F8jMg=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-OwEpBm2ovUUuxGzZJ8pZ1T46ES7rY2VtU3xzo2Y8S1w=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="author" content="Eddie Bila">
@@ -570,7 +570,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202610211400";
+const BUILD = "202610221200";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -1814,7 +1814,7 @@ function registerDialog(){
     });
 }
 function registerHTML(groups, sigs){
-  const d = S.data, LS = (sigs && sigs.learners) || {}, IS = (sigs && sigs.issuers) || {};
+  const d = S.data, LS = (sigs && sigs.learners) || {}, IS = (sigs && sigs.issuers) || {}, IDS = (sigs && sigs.ids) || {};
   const dateTxt = d.event.event_date || d.event.date ? new Date(d.event.event_date || d.event.date).toLocaleDateString("en-ZA", {weekday:"long", day:"numeric", month:"long", year:"numeric"}) : "";
   const uniq = a => [...new Set(a.filter(Boolean))];
   const crest = document.querySelector('.top img').src;
@@ -1849,8 +1849,8 @@ function registerHTML(groups, sigs){
         <div><small>Certificates issued</small><b>${items.length} of ${all.length}</b></div><div><small>Signed by graduates</small><b>${items.filter(l => LS[l.id]).length} of ${items.length}</b></div><div><small>Region</small><b>${esc(uniq(all.map(l => l.region)).join(", ") || "–")}</b></div><div><small>Printed</small><b>${new Date().toLocaleString("en-ZA", {day:"numeric", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit"})} by ${esc(S.me)}</b></div>
       </div>
       <div class="iss">${issuers.map(n => `<div class="isc"><div style="flex:1"><small>Certificates handed over by</small><b>${esc(n)}</b>${IS[n] ? `<small>Signed ${fmtTime(IS[n].at)}</small>` : ""}</div>${IS[n] ? `<img src="${IS[n].sig}" alt="Signature of ${esc(n)}">` : `<span class="no">Not signed yet</span>`}</div>`).join("")}</div>
-      <table><thead><tr><th>#</th><th>First name</th><th>Middle name</th><th>Surname</th><th>Learner ID / ref</th><th>Seat</th><th>Client</th><th>Time issued</th><th>Issued by</th><th style="text-align:center">Graduate signature</th></tr></thead><tbody>
-      ${items.map((l, i) => `<tr><td class="n">${i + 1}</td><td><b>${esc(l.first_name || "")}</b></td><td>${esc(l.middle_name || "")}</td><td><b>${esc(l.surname || "")}</b>${notesOf(l).filter(n => n.kind !== "note").map(n => `<span class="q">${n.resolved ? "✓" : "⚠"} ${esc(n.text)}${n.resolved ? " (resolved)" : ""}</span>`).join("")}</td><td>${esc(l.learner_ref || "")}</td><td>${esc(l.seat || "")}</td><td>${esc(l.client || "")}</td><td>${fmtTime(l.cert_at)}</td><td>${esc(l.cert_by || "")}</td>
+      <table><thead><tr><th>#</th><th>First name</th><th>Middle name</th><th>Surname</th><th>ID number</th><th>Seat</th><th>Client</th><th>Time issued</th><th>Issued by</th><th style="text-align:center">Graduate signature</th></tr></thead><tbody>
+      ${items.map((l, i) => `<tr><td class="n">${i + 1}</td><td><b>${esc(l.first_name || "")}</b></td><td>${esc(l.middle_name || "")}</td><td><b>${esc(l.surname || "")}</b>${notesOf(l).filter(n => n.kind !== "note").map(n => `<span class="q">${n.resolved ? "✓" : "⚠"} ${esc(n.text)}${n.resolved ? " (resolved)" : ""}</span>`).join("")}</td><td style="white-space:nowrap">${esc(IDS[l.id] || l.learner_ref || "")}</td><td>${esc(l.seat || "")}</td><td>${esc(l.client || "")}</td><td>${fmtTime(l.cert_at)}</td><td>${esc(l.cert_by || "")}</td>
         <td class="sg">${LS[l.id] ? `<img src="${LS[l.id].sig}" alt="">` : `<span class="no">Not signed</span>`}</td></tr>`).join("")}
       </tbody></table>
       <div class="ft"><span>Camblish Training Institute · info@camblish.co.za · www.camblish.co.za</span><span>${esc(prog)} · Certificate issue register</span><span>Designed and developed by Eddie Bila</span></div></div></section>`;
@@ -2566,7 +2566,7 @@ function viewManage(){
     <div class="row" style="gap:18px"><div><div class="big2">${st.seated}</div><div class="small muted">seated</div></div><div><div class="big2">${st.lower}</div><div class="small muted">lower section (of ${sp.lower})</div></div><div><div class="big2">${st.upper}</div><div class="small muted">upper section</div></div><div><div class="big2" style="color:${st.none?"var(--bad)":"inherit"}">${st.none}</div><div class="small muted">without a seat</div></div><div><div class="big2">${sp.other}</div><div class="small muted">own regional ceremony</div></div></div>`; })()}
   </div>
   <div class="card"><h2>Learner list<span class="spacer"></span></h2>
-    <p class="small">Upload an Excel or CSV file to add more learners at any time. Learners already on the list are skipped automatically. The system recognises columns such as <b>First name, Middle name, Last name, Program, Client, Project Manager, Region, SETA, Contact number, Attending, Robe, Belt colour, Name tag</b> and <b>ID number</b> (only the last 4 digits are kept). The NQF level is read from the programme name (for example "EUC L3" is NQF 3) when there is no NQF column. One sheet with all programmes, or several sheets (one per programme or client) both work.</p>
+    <p class="small">Upload an Excel or CSV file to add more learners at any time. Learners already on the list are skipped automatically. The system recognises columns such as <b>First name, Middle name, Last name, Program, Client, Project Manager, Region, SETA, Contact number, Attending, Robe, Belt colour, Name tag</b> and <b>ID number</b> (shown in full only on the signed certificate register; everywhere else only the last 4 digits show). To add full ID numbers for learners already loaded, upload the same list again. The NQF level is read from the programme name (for example "EUC L3" is NQF 3) when there is no NQF column. One sheet with all programmes, or several sheets (one per programme or client) both work.</p>
     <input type="file" id="imf" accept=".xlsx,.xls,.csv">
     <div id="imPrev"></div>
     <div class="row" style="margin-top:12px"><button class="btn ghost sm" id="exp">Export attendance and stage order (CSV)</button><span class="small muted">${d.learners.length} graduates loaded</span></div>
@@ -2624,11 +2624,11 @@ async function importPreview(e){
         let first = g("first_name"), sur = g("surname");
         if (!first && !sur && g("full_name")){ const p = g("full_name").split(/\s+/); sur = p.pop(); first = p.join(" "); }
         if (!first && !sur) continue;
-        let ref = g("learner_ref").replace(/\s/g,""); if (/^\d{11,13}$/.test(ref)) ref = "…" + ref.slice(-4);
+        let ref = g("learner_ref").replace(/\s/g,""); const idFull = ref; if (/^\d{11,13}$/.test(ref)) ref = "…" + ref.slice(-4);   // full ID kept separately, only for the certificate register
         let prog = g("programme").replace(/\s+/g," ") || (map.programme===undefined && wb.SheetNames.length>1 ? sn : "");
         let nqf = g("nqf"); if (!/\d/.test(nqf)){ const m = prog.match(/(?:\bNQF\s*|\bLevel\s*|\bL\s*)(\d{1,2})\b/i); if (m) nqf = m[1]; }
         let phone = g("phone").replace(/\s/g,""); phone = phone.split("/").map(x => /^\d{9}$/.test(x) ? "0"+x : x).join(" / ");
-        rows.push({ first_name:first, middle_name:g("middle_name"), surname:sur, learner_ref:ref, programme:prog, nqf, client:g("client"), cohort:g("cohort"), notes:g("notes"),
+        rows.push({ first_name:first, middle_name:g("middle_name"), surname:sur, learner_ref:ref, id_number:idFull, programme:prog, nqf, client:g("client"), cohort:g("cohort"), notes:g("notes"),
           pm:g("pm"), region:g("region"), seta:g("seta"), phone, rsvp:g("rsvp"), robe:g("robe"), belt:g("belt"), name_tag:g("name_tag") });
       }
     });
@@ -2644,7 +2644,7 @@ async function importPreview(e){
       const rep = $("#imRep").checked;
       if (rep && S.data.learners.some(l=>l.status!=="expected") && !confirm("Some graduates are already checked in. Replace the list anyway?")) return;
       $("#imGo").disabled = true;
-      if (await act("grad_import", {p_rows:rows, p_replace:rep}, `Upload complete`)){ out.innerHTML = `<div class="okm">Done. ${rep ? "The list was replaced." : "New learners were added; anyone already on the list was skipped."}</div>`; }
+      if (await act("grad_import", {p_rows:rows, p_replace:rep}, `Upload complete`)){ out.innerHTML = `<div class="okm">Done. ${rep ? "The list was replaced." : "New learners were added; anyone already on the list was skipped, but their ID numbers were updated for the certificate register."}</div>`; }
     };
   } catch(err){ out.innerHTML = `<div class="err">${esc(err.message)}</div>`; }
 }
