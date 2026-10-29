@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-oex7bUwtG1oorppQvD7U+Qa0thlG/5oKcJg1u6aCCu8=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-t0/WmY5IlgnzpALooolk0f1aESDI7TqibVKXaHdtVFg=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="author" content="Eddie Bila">
@@ -570,7 +570,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202610281000";
+const BUILD = "202610291100";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -1410,7 +1410,7 @@ async function taskForm(t){
     <label class="lbl">Assign to</label><div class="assn" id="fas"></div>
     <div class="row"><select id="fsel" style="flex:1;min-width:180px"></select><button class="btn sm" id="fadd" type="button">+ Add</button></div>
     <div class="row hidden" id="fothr" style="margin-top:6px"><input type="text" id="fon" placeholder="Name of someone not on the system" style="flex:1"><button class="btn sm ghost" id="fonadd" type="button">Add name</button></div>
-    <div class="grid g2" style="gap:10px"><div><label class="lbl">Category</label><select id="fc">${CATEGORIES.map(c=>`<option ${c===(t.category||"")?"selected":""}>${c}</option>`).join("")}</select></div>
+    <div class="grid g2" style="gap:10px"><div><label class="lbl">Category</label><select id="fc">${[...new Set([...S.data.tasks.map(x => x.category).filter(Boolean), ...CATEGORIES])].map(c=>`<option ${c===(t.category||"")?"selected":""}>${c}</option>`).join("")}</select></div>
     <div><label class="lbl">Due</label><input type="datetime-local" id="fdue" value="${dueLocal}"></div>
     <div><label class="lbl">Priority</label><select id="fp">${["Normal","High","Low"].map(p=>`<option ${p===(t.priority||"Normal")?"selected":""}>${p}</option>`).join("")}</select></div></div>
     <div class="row" style="margin-top:14px"><span class="spacer"></span><button class="btn ghost" id="mc">Cancel</button><button class="btn" id="mo">${t.id?"Save changes":"Add task"}</button></div><div id="me"></div>`,
