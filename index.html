@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-bk+YIPnpJra6xdJpF7+7JrZFj61iUwCnJlj9M5wCcMo=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-jvieZb6YF2wq5xzEaZNWmDYsBIzfAUo+QAKeDYuQJlo=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="author" content="Eddie Bila">
@@ -418,8 +418,17 @@ nav.tabs .badge.green{background:var(--ok);color:#fff}
 .sigbox .sigx{position:absolute;left:14px;bottom:30px;color:#9aa6c4;font-size:18px;pointer-events:none}.sigbox .sigline{position:absolute;left:40px;right:16px;bottom:34px;border-bottom:1.5px solid #c9d3ea;color:#9aa6c4;font-size:11px;padding-bottom:2px;pointer-events:none;text-align:right}
 .cqbtn{color:#b3261e!important;border-color:#f1b8b2!important}.lrow.cq{border-left:4px solid #b3261e}.cqtxt{margin-top:4px;font-size:12px;color:#b3261e;background:#fdf1ef;border-radius:8px;padding:5px 8px}.cqtxt i{color:#8a5a55;font-style:normal;font-size:11px}
 .seat.oc{background:#eef1f7;color:#5b6785}
-.tcat{margin-top:12px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--card,#fff)}
-.tcath{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:10px;width:100%;padding:10px 14px;cursor:pointer;background:linear-gradient(90deg,#0d1b3e,#1d3fae);color:#fff;flex-wrap:wrap}
+.tcat{--cc:#1d3fae;--cl:#dbe4fb;margin-top:14px;border:1px solid color-mix(in srgb,var(--cc) 35%,transparent);border-radius:16px;overflow:hidden;background:color-mix(in srgb,var(--cl) 45%,#fff);box-shadow:0 10px 24px -18px color-mix(in srgb,var(--cc) 80%,#000)}
+.tcath{box-sizing:border-box;display:flex;align-items:center;gap:10px;width:100%;padding:11px 14px;cursor:pointer;background:linear-gradient(100deg,color-mix(in srgb,var(--cc) 88%,#000),var(--cc) 55%,color-mix(in srgb,var(--cc) 78%,#fff));color:#fff;flex-wrap:wrap;user-select:none}
+.tcpal{all:unset;cursor:pointer;margin-left:auto;font-size:15px;padding:2px 6px;border-radius:8px;background:rgba(255,255,255,.16)}.tcpal:hover{background:rgba(255,255,255,.3)}
+.tsec{display:flex;align-items:center;gap:8px;margin:12px 4px 2px;font-weight:800;font-size:12px;letter-spacing:.5px;text-transform:uppercase;color:color-mix(in srgb,var(--cc) 85%,#000)}
+.tsec:after{content:"";flex:1;height:2px;border-radius:2px;background:color-mix(in srgb,var(--cc) 30%,transparent)}.tsec small{background:var(--cc);color:#fff;border-radius:20px;padding:1px 7px;font-size:10.5px;letter-spacing:0}
+.tcat .task{border-left-color:var(--cc);background:#fff}.tcat .task.st-Completed{background:#f6fcf8}.tcat .task.st-Roadblock{border-left-color:var(--bad)}
+.pchip{display:inline-flex;align-items:center;gap:6px;background:color-mix(in srgb,var(--pc) 12%,#fff);color:color-mix(in srgb,var(--pc) 80%,#000);border:1px solid color-mix(in srgb,var(--pc) 30%,#fff);border-radius:20px;padding:2px 10px 2px 2px;font-size:12.5px;font-weight:700}
+.pchip i{font-style:normal;display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--pc);color:#fff;font-size:10px;font-weight:800;letter-spacing:.3px}
+.pchip.sm{font-size:11.5px;font-weight:600;padding:1px 8px 1px 1px}.pchip.sm i{width:18px;height:18px;font-size:9px}.pchip.none{--pc:#94a3b8}
+.dchip{display:inline-flex;align-items:center;border-radius:20px;padding:3px 10px;font-size:12px;font-weight:700;background:#e9f0fc;color:#183e75}.dchip.over{background:#fde2df;color:#b3261e}.dchip.soon{background:#fdecc8;color:#8a5300}.dchip.ok{background:#e0f2ea;color:#176c5b}.dchip.none{background:#f1f4fa;color:#8a93a8;font-weight:600}
+.tteam{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin:2px 0 6px}.tnote{font-size:13px;background:color-mix(in srgb,var(--cl) 55%,#fff);border-radius:10px;padding:7px 10px;margin:4px 0 6px}.tfoot{margin-top:4px}
 .tcath b{font-size:14px;letter-spacing:.3px}.tcarr{width:12px;color:#f3d27a}.tcbar{flex:1;min-width:80px;max-width:220px;height:7px;background:rgba(255,255,255,.18);border-radius:6px;overflow:hidden}.tcbar i{display:block;height:100%;background:#d4af37}
 .tcn{font-size:12px;color:#dbe3f8}.tcn.muted{opacity:.7}.tcath .tag.red{background:#b3261e;color:#fff;border:0}.tcb{padding:4px 10px 8px}.tcat.shut .tcb{display:none}
 .leadtag{display:inline-block;background:var(--pc);color:#fff;border-radius:99px;padding:2px 9px;font-size:11px;font-weight:900;letter-spacing:.2px;vertical-align:2px;box-shadow:0 0 0 2px #fff,0 0 0 3.5px var(--pc);max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -574,7 +583,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202610291500";
+const BUILD = "202610291800";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -1374,16 +1383,46 @@ function drawTasks(){
   const groups = cats.map(c => [c, list.filter(t => (t.category||"Other") === c)]).filter(([, ts]) => ts.length);
   $("#tlist").innerHTML = list.length ? `<div class="grp-tools small noprint"><span class="muted">${groups.length} categor${groups.length === 1 ? "y" : "ies"} · ${list.length} task${list.length === 1 ? "" : "s"}</span><span class="spacer"></span><button class="lnk" id="tcOpen">Expand all</button><button class="lnk" id="tcShut">Collapse all</button></div>`
     + groups.map(([c, ts]) => { const all = T.filter(t => (t.category||"Other") === c), done = all.filter(t => t.status === "Completed").length, over = all.filter(t => t.due_at && new Date(t.due_at) < now && t.status !== "Completed").length, rb = all.filter(t => t.status === "Roadblock").length, shut = col.has(c);
-      return `<div class="tcat ${shut ? "shut" : ""}"><button class="tcath" data-tc="${esc(c)}"><span class="tcarr">${shut ? "▸" : "▾"}</span><b>${esc(c)}</b><span class="tcbar"><i style="width:${all.length ? Math.round(100*done/all.length) : 0}%"></i></span><span class="tcn">${done}/${all.length} done</span>${over ? `<span class="tag red">${over} overdue</span>` : ""}${rb ? `<span class="tag red">⚠ ${rb}</span>` : ""}<span class="tcn muted">${ts.length} shown</span></button>
-        <div class="tcb">${shut ? "" : ts.map(taskCard).join("")}</div></div>`; }).join("")
+      const cc = catColor(c);
+      return `<div class="tcat ${shut ? "shut" : ""}" style="--cc:${cc.c};--cl:${cc.l}"><div class="tcath" data-tc="${esc(c)}" role="button" tabindex="0"><span class="tcarr">${shut ? "▸" : "▾"}</span><b>${esc(c)}</b><span class="tcbar"><i style="width:${all.length ? Math.round(100*done/all.length) : 0}%"></i></span><span class="tcn">${done}/${all.length} done</span>${over ? `<span class="tag red">${over} overdue</span>` : ""}${rb ? `<span class="tag red">⚠ ${rb}</span>` : ""}<span class="tcn muted">${ts.length} shown</span>${can("tasks_create") ? `<button class="tcpal noprint" data-tcol="${esc(c)}" title="Change this category's colours">🎨</button>` : ""}</div>
+        <div class="tcb">${shut ? "" : sectionsHTML(ts)}</div></div>`; }).join("")
     : `<div class="empty">No tasks match these filters.</div>`;
-  $$("#tlist [data-tc]").forEach(b => b.onclick = () => { const c = b.dataset.tc; col.has(c) ? col.delete(c) : col.add(c); saveCol(); drawTasks(); });
+  $$("#tlist [data-tc]").forEach(b => b.onclick = e => { if (e.target.closest("[data-tcol]")) return; const c = b.dataset.tc; col.has(c) ? col.delete(c) : col.add(c); saveCol(); drawTasks(); });
+  $$("#tlist [data-tcol]").forEach(b => b.onclick = e => { e.stopPropagation(); catColorDialog(b.dataset.tcol); });
   const o = $("#tcOpen"), sh = $("#tcShut");
   if (o) o.onclick = () => { col.clear(); saveCol(); drawTasks(); };
   if (sh) sh.onclick = () => { groups.forEach(([c]) => col.add(c)); saveCol(); drawTasks(); };
   wireTasks();
 }
 const owners = t => (t.owner||"").split(",").map(x=>x.trim()).filter(Boolean);
+/* ---------- task colours: categories keep the colours from the imported plan; people get their own colour ---------- */
+const CAT_PAL = [["#1d3fae","#dbe4fb"],["#3B7D23","#D9F2D0"],["#7E350E","#F7C7AC"],["#104861","#A6C9EC"],["#78206E","#F2CFEE"],["#97A202","#EFFCA2"],["#b3261e","#f8d4d0"],["#0f766e","#ccefe9"],["#a16207","#fbe7b2"],["#475569","#e2e8f0"]];
+function catColor(c){
+  const tc = (S.data && S.data.event && S.data.event.task_colors) || {}, v = tc[c];
+  if (v && v.c) return {c:v.c, l:v.l || mixHex(v.c, "#ffffff", .82)};
+  let h = 0; for (const ch of String(c)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; const p = CAT_PAL[h % CAT_PAL.length]; return {c:p[0], l:p[1]};
+}
+function mixHex(a, b, t){ const p = x => [1,3,5].map(i => parseInt(x.slice(i, i + 2), 16)); const A = p(a), B = p(b); return "#" + A.map((v, i) => Math.round(v + (B[i] - v) * t).toString(16).padStart(2, "0")).join(""); }
+const PEOPLE_PAL = ["#1d4ed8","#b91c1c","#047857","#7c3aed","#c2410c","#0e7490","#be185d","#4d7c0f","#a16207","#334155","#9333ea","#0f766e"];
+function personColor(n){ let h = 0; for (const ch of String(n).toLowerCase()) h = (h * 33 + ch.charCodeAt(0)) >>> 0; return PEOPLE_PAL[h % PEOPLE_PAL.length]; }
+const initials = n => String(n).replace(/[^A-Za-z .]/g, "").split(/[\s.]+/).filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join("") || "?";
+const personChip = (n, small) => `<span class="pchip ${small ? "sm" : ""}" style="--pc:${personColor(n)}"><i>${esc(initials(n))}</i>${esc(n)}</span>`;
+function sectionsHTML(ts){
+  const g = []; ts.forEach(t => { const sec = taskParts(t).section || ""; let G = g.find(x => x.s === sec); if (!G) g.push(G = {s:sec, items:[]}); G.items.push(t); });
+  return g.map(G => (G.s && g.length > 0 ? `<div class="tsec">${esc(G.s.replace(/\s*:\s*$/, ""))}<small>${G.items.length}</small></div>` : "") + G.items.map(taskCard).join("")).join("");
+}
+function catColorDialog(c){
+  const cc = catColor(c);
+  modal(`<h3>🎨 Colours for ${esc(c)}</h3><p class="small muted">The header colour and the background behind its tasks. Everyone sees the same colours.</p>
+    <div class="row" style="gap:18px;margin:10px 0"><label class="small">Header <input type="color" id="cc1" value="${cc.c}"></label><label class="small">Background <input type="color" id="cc2" value="${cc.l}"></label></div>
+    <div id="ccPrev" class="tcat" style="--cc:${cc.c};--cl:${cc.l}"><div class="tcath"><b>${esc(c)}</b></div><div class="tcb"><div class="task" style="margin:6px 0">Example task</div></div></div>
+    <div class="row" style="margin-top:12px"><button class="btn ghost sm" id="ccReset">Use default</button><span class="spacer"></span><button class="btn ghost" id="mc">Cancel</button><button class="btn gold" id="mo">Save colours</button></div>`,
+    (m, close) => { const upd = () => { const pv = $("#ccPrev", m); pv.style.setProperty("--cc", $("#cc1", m).value); pv.style.setProperty("--cl", $("#cc2", m).value); };
+      $("#cc1", m).oninput = upd; $("#cc2", m).oninput = upd; $("#mc", m).onclick = close;
+      const save = async (v) => { try { const r = await rpc("grad_task_colors_set", {p_code:CODE, p_pin:S.pin, p_actor:S.me, p_colors:{[c]: v}, p_merge:true}); S.data.event.task_colors = r; close(); drawTasks(); toast("Colours saved", "green"); } catch(e){ toast("Could not save: " + e.message, "red"); } };
+      $("#mo", m).onclick = () => save({c:$("#cc1", m).value, l:$("#cc2", m).value});
+      $("#ccReset", m).onclick = () => save(null); });
+}
 // categories in plan order: the order they were added (an imported plan keeps its sheet order), then earliest deadline
 function taskCats(T){
   const made = {}, due = {}; T.forEach(t => { const c = t.category || "Other", m = t.created_at || "9999", d = t.due_at || "9999";
@@ -1436,19 +1475,26 @@ async function importTasksPreview(f){
   try {
     if (typeof XLSX === "undefined") throw new Error("The spreadsheet reader did not load. Check your internet connection and try again.");
     await loadPeople();
-    const wb = XLSX.read(await f.arrayBuffer(), {type:"array"}), rows = [];
+    const wb = XLSX.read(await f.arrayBuffer(), {type:"array", cellStyles:true}), rows = [], colors = {};
+    const scheme = (((wb.Themes||{}).themeElements||{}).clrScheme||[]).map(x => x.rgb);
+    const fillOf = cell => { const fg = cell && cell.s && cell.s.patternType === "solid" && cell.s.fgColor; if (!fg) return null;
+      let hex = fg.rgb && /^[0-9A-Fa-f]{6,8}$/.test(fg.rgb) ? fg.rgb.slice(-6) : (fg.theme !== undefined && scheme[fg.theme]) || null; if (!hex) return null;
+      hex = "#" + hex; if (!fg.rgb && fg.tint) hex = fg.tint < 0 ? mixHex(hex, "#000000", -fg.tint) : mixHex(hex, "#ffffff", fg.tint);
+      return /^#ffffff$/i.test(hex) ? null : hex; };
     wb.SheetNames.forEach(sn => {
       const aoa = XLSX.utils.sheet_to_json(wb.Sheets[sn], {header:1, defval:"", raw:true});
       const hi = aoa.findIndex(r => { const hs = r.map(c => String(c).trim().toLowerCase()); return hs.some(h => TASK_COLS[3][1].test(h)) && hs.some(h => TASK_COLS[4][1].test(h) || TASK_COLS[5][1].test(h) || TASK_COLS[8][1].test(h)); });
       if (hi < 0) return;
       const map = {}; aoa[hi].forEach((c, i) => { const h = String(c).trim().toLowerCase(); const m = TASK_COLS.find(([k, re]) => map[k] === undefined && re.test(h)); if (m) map[m[0]] = i; });
+      const wsh = wb.Sheets[sn], cellAt = (r, k) => map[k] === undefined ? null : wsh[XLSX.utils.encode_cell({r, c:map[k]})];
       let cat = "", stage = "", section = "";
       for (let r = hi + 1; r < aoa.length; r++){
         const row = aoa[r], g = k => map[k] !== undefined ? String(row[map[k]] ?? "").trim() : "", raw = k => map[k] !== undefined ? row[map[k]] : "";
         const c0 = g("category"), title = g("title"), rest = ["due","owner","team","status","status_note","notes","priority"].some(k => g(k));
         if (c0 && !title && /graduation/i.test(c0)){ stage = c0.replace(/\s*-\s*/g, "-").replace(/^(\w)(\w*)/, (a, b, c) => b.toUpperCase() + c.toLowerCase()).replace(/-graduation/i, "-graduation"); continue; }
-        if (c0) cat = c0;
+        if (c0){ cat = c0; const dk = fillOf(cellAt(r, "category")); if (dk && !colors[cat]) colors[cat] = {c:dk}; }
         if (!title) continue;
+        if (cat && colors[cat] && !colors[cat].l){ const lt = fillOf(cellAt(r, "title")); if (lt) colors[cat].l = lt; }
         if (!rest && map.section === undefined){ section = title; continue; }   // a sub-heading row
         const sec = g("section") || section, stg = g("stage") || stage;
         const det = [[stg, sec].filter(Boolean).join(" · ")].filter(Boolean);
@@ -1462,7 +1508,7 @@ async function importTasksPreview(f){
     const dup = rows.filter(r => have.has(r.category + "|" + r.title.toLowerCase())).length;
     const byCat = {}; rows.forEach(r => byCat[r.category] = (byCat[r.category]||0) + 1);
     modal(`<h3>⬆ Import tasks</h3><p class="small muted">${esc(f.name)}: <b>${rows.length} tasks</b> in ${Object.keys(byCat).length} categories${rows.filter(r => r.status === "Completed").length ? `, ${rows.filter(r => r.status === "Completed").length} already completed` : ""}.</p>
-      <div class="chips" style="margin:6px 0">${Object.entries(byCat).map(([c, n]) => `<span class="chip">${esc(c)} (${n})</span>`).join("")}</div>
+      <div class="chips" style="margin:6px 0">${Object.entries(byCat).map(([c, n]) => `<span class="chip" style="${colors[c] ? `background:${colors[c].l || "#fff"};border-color:${colors[c].c};color:#111` : ""}">${colors[c] ? `<i style="display:inline-block;width:9px;height:9px;border-radius:3px;background:${colors[c].c};margin-right:5px"></i>` : ""}${esc(c)} (${n})</span>`).join("")}</div>${Object.keys(colors).length ? `<p class="small muted">The sheet's category colours will be kept.</p>` : ""}
       <div style="max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:10px"><table class="t small"><thead><tr><th>Task</th><th>Category</th><th>Deadline</th><th>Owner</th><th>Status</th></tr></thead><tbody>
         ${rows.slice(0, 60).map(r => `<tr><td>${esc(r.title)}</td><td>${esc(r.category)}</td><td>${r.due_at ? esc(r.due_at.slice(0,10)) : "–"}</td><td>${esc(r.owner || "Unassigned")}</td><td>${esc(r.status)}</td></tr>`).join("")}</tbody></table></div>
       ${rows.length > 60 ? `<p class="small muted">Showing the first 60.</p>` : ""}
@@ -1477,6 +1523,7 @@ async function importTasksPreview(f){
           if (rep2 && !confirm(`Replace all ${S.data.tasks.length} current tasks with the ${send.length} in this file?`)) return;
           $("#mo", m).disabled = true;
           try { S.lastActAt = Date.now(); const r = await rpc("grad_tasks_import", {p_code:CODE, p_pin:S.pin, p_actor:S.me, p_rows:send, p_replace:rep2});
+            const cols = Object.fromEntries(Object.entries(colors).filter(([, v]) => v.c)); if (Object.keys(cols).length) { try { S.data.event.task_colors = await rpc("grad_task_colors_set", {p_code:CODE, p_pin:S.pin, p_actor:S.me, p_colors:cols, p_merge:true}); } catch(e){} }
             toast(`Imported ${r.added} tasks${r.archived ? `; ${r.archived} earlier tasks archived` : ""}`, "green"); rtPing(); close(); await pull(true); }
           catch(e){ toast("Could not import: " + e.message, "red"); $("#mo", m).disabled = false; } };
       });
@@ -1484,17 +1531,20 @@ async function importTasksPreview(f){
 }
 async function loadPeople(){ try { S.people = await rpc("hub_people", {p_token:S.pin}); } catch(e){ S.people = S.people || []; } return S.people; }
 function taskCard(t){
-  const now = new Date(), over = t.due_at && new Date(t.due_at) < now && t.status!=="Completed";
+  const now = new Date(), due = t.due_at ? new Date(t.due_at) : null, done = t.status === "Completed";
+  const over = due && due < now && !done, soon = due && !over && !done && (due - now) < 3 * 864e5;
   const thread = S.data.feed.filter(f => f.ref_id === t.id && f.kind === "comment").reverse();
-  const open = S.f.openThreads.has(t.id);
-  const btn = (s,c,label) => can("tasks_update") ? `<button class="sbtn ${c} ${t.status===s?"on":""}" data-st="${s}" data-id="${t.id}">${label}</button>` : "";
+  const open = S.f.openThreads.has(t.id), P = taskParts(t);
+  const btn = (s2,c,label) => can("tasks_update") ? `<button class="sbtn ${c} ${t.status===s2?"on":""}" data-st="${s2}" data-id="${t.id}">${label}</button>` : "";
   const mine = S.user && t.created_by_user && t.created_by_user === S.user.id;
+  const own = owners(t), team = P.team ? P.team.split(/\s*(?:,|&|\band\b)\s*/i).filter(Boolean) : [];
   return `<div class="task st-${cls(t.status)}">
     <div class="row"><h3>${esc(t.title)}</h3><span class="pill s-${cls(t.status)}">${esc(t.status)}</span></div>
-    <div class="meta"><span class="tag">👤 ${esc(t.owner||"Unassigned")}</span><span class="tag" title="Only the person who issued a task can edit it">🔒 Issued by ${esc(t.created_by||"")}</span>${t.due_at?`<span class="tag ${over?"red":""}">⏰ ${fmtDue(t.due_at)}${over?" · overdue":""}</span>`:""}${t.priority==="High"?`<span class="tag red">High priority</span>`:""}${t.priority==="Low"?`<span class="tag">Low priority</span>`:""}</div>
-    ${t.details?`<div class="small" style="white-space:pre-wrap">${esc(t.details)}</div>`:""}
+    <div class="meta">${own.length ? own.map(n => personChip(n)).join("") : `<span class="pchip none"><i>?</i>Unassigned</span>`}${due ? `<span class="dchip ${done ? "ok" : over ? "over" : soon ? "soon" : ""}">⏰ ${fmtDue(t.due_at)}${over ? " · overdue" : soon ? " · due soon" : ""}</span>` : `<span class="dchip none">No deadline</span>`}${t.priority==="High"?`<span class="tag red">High priority</span>`:""}${t.priority==="Low"?`<span class="tag">Low priority</span>`:""}</div>
+    ${team.length ? `<div class="tteam"><span class="small muted">Supporting:</span> ${team.map(n => personChip(n, true)).join("")}</div>` : ""}
+    ${P.notes ? `<div class="tnote">📝 ${esc(P.notes)}</div>` : ""}
     ${t.status_note?`<div class="note ${t.status==="Roadblock"?"":"ok"}">${t.status==="Roadblock"?"⚠ ":""}${esc(t.status_note)}</div>`:""}
-    <div class="small muted">Updated by ${esc(t.updated_by||t.created_by||"")} · ${ago(t.updated_at)}</div>
+    <div class="small muted tfoot">Updated by ${esc(t.updated_by||t.created_by||"")} · ${ago(t.updated_at)}<span title="Only the person who issued a task can edit it"> · 🔒 issued by ${esc(t.created_by||"")}</span></div>
     <div class="acts">${btn("Completed","c","✓ Completed")}${btn("In progress","p","In progress")}${btn("Roadblock","r","⚠ Roadblock")}${btn("On hold","h","On hold")}${btn("Not started","n","Reset")}
       <span class="spacer"></span><button class="sbtn n" data-th="${t.id}">💬 ${thread.length||""} Comments</button>${mine?`<button class="sbtn n" data-ed="${t.id}">Edit</button><button class="sbtn n" data-rm="${t.id}">Remove</button>`:""}</div>
     ${open?`<div class="thread">${thread.map(f=>`<div class="msg"><b>${esc(f.actor)}</b> <span class="small muted">${ago(f.created_at)}</span><br>${esc(f.text)}</div>`).join("")||`<div class="small muted">No comments yet.</div>`}
