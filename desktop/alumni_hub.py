@@ -182,6 +182,27 @@ class Bridge:
         except Exception as e:
             return {"ok": False, "error": str(e)}
 
+    def save_b64(self, name, data_b64, open_after=True):
+        """Save a binary export (for example a formatted .xlsx) to Downloads and open it."""
+        try:
+            import base64
+            folder = os.path.join(os.path.expanduser("~"), "Downloads")
+            os.makedirs(folder, exist_ok=True)
+            safe = re.sub(r'[\\/:*?"<>|]', "", str(name)).strip()[:150] or "Alumni Hub export.xlsx"
+            path = os.path.join(folder, safe)
+            base, ext = os.path.splitext(path)
+            i = 1
+            while os.path.exists(path):
+                path = f"{base} ({i}){ext}"
+                i += 1
+            with open(path, "wb") as f:
+                f.write(base64.b64decode(data_b64))
+            if open_after:
+                os.startfile(path)
+            return {"ok": True, "path": path}
+        except Exception as e:
+            return {"ok": False, "error": str(e)}
+
     def save_pdf(self, name, html):
         """Turn the report into a landscape PDF with Microsoft Edge (built into Windows), save it to Downloads and open it."""
         try:

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-jvieZb6YF2wq5xzEaZNWmDYsBIzfAUo+QAKeDYuQJlo=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-0psaGwaaObObvulPMdFEVgrHCFKUWCzGP0r1gjhUPkQ=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="author" content="Eddie Bila">
@@ -583,7 +583,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202610291800";
+const BUILD = "202610301200";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -1145,7 +1145,7 @@ function liveBar(){
   $("#goLive").onclick = () => { CODE = live.code; try { sessionStorage.removeItem("hub_pick"); } catch {} enterApp(); };
 }
 /* view-only: everyone sees every list; buttons they can't use are blurred and switched off */
-const RO_MAP = [["checkin","[data-ci]"],["robes","[data-rb]"],["certs","[data-ct]"],["stage","#callNext,#undoCall,[data-sg]"],["print_tags","[data-tag],#printAllTags"]];
+const RO_MAP = [["checkin","[data-ci]"],["robes","[data-rb]"],["certs","[data-ct]"],["stage","#callNext,#undoCall,[data-sg]"],["print_tags","[data-tag],#printAllTags,#ciPrintAll"]];
 function roLock(){
   let locked = 0;
   RO_MAP.forEach(([p, sel]) => { if (can(p)) return; $$(sel, main).forEach(b => { if (b.classList.contains("ro")) { locked++; return; } b.disabled = true; b.classList.add("ro"); b.title = "View only: ask the administrator for access"; b.setAttribute("aria-disabled", "true"); locked++; }); });
@@ -1290,6 +1290,23 @@ async function renderTag(l){
 function rotateCanvas(c){
   const r = document.createElement("canvas"); r.width = c.height; r.height = c.width;
   const x = r.getContext("2d"); x.translate(r.width, 0); x.rotate(Math.PI / 2); x.drawImage(c, 0, 0); return r;
+}
+// print a batch of tags from Check-in: whoever the filters show, optionally only those not printed yet
+function bulkTagDialog(){
+  if (!can("print_tags")) return toast("You can view only. Ask the admin for access to print name tags.", "red");
+  stageList();
+  const L = applyF(S.data.learners.filter(l => !/^n/i.test(l.rsvp||"") && (l.seat || l.status === "present")));
+  const byProg = (a, b) => seatRank(a.seat) - seatRank(b.seat) || orderKey(a, b);
+  const sets = { todo: L.filter(l => !l.tag_printed_at), present: L.filter(l => l.status === "present" && !l.tag_printed_at), all: L };
+  if (!L.length) return toast(fActive() ? "Nobody matches these filters." : "Nobody has a seat yet, so there are no tags to print.", "gold");
+  modal(`<h3>🖨 Print name tags</h3><p class="small muted">${fActive() ? "Your current filters apply (programme, client and so on). " : ""}Tags print in seat order, one programme after another, using the label size set under <b>Name tag printer</b>.</p>
+    <label class="row small" style="gap:6px;margin-top:8px"><input type="radio" name="bt" value="todo" checked> Not printed yet <b>(${sets.todo.length})</b></label>
+    <label class="row small" style="gap:6px"><input type="radio" name="bt" value="present"> Arrived, not printed yet <b>(${sets.present.length})</b></label>
+    <label class="row small" style="gap:6px"><input type="radio" name="bt" value="all"> Everyone shown, including reprints <b>(${sets.all.length})</b></label>
+    <div class="row" style="margin-top:14px"><span class="spacer"></span><button class="btn ghost" id="mc">Cancel</button><button class="btn gold" id="mo">🖨 Print</button></div>`,
+    (m, close) => { $("#mc", m).onclick = close;
+      $("#mo", m).onclick = () => { const k = (m.querySelector("[name=bt]:checked") || {}).value, list = (sets[k] || []).slice().sort(byProg);
+        if (!list.length) return toast("No tags in that group.", "gold"); close(); printTags(list); }; });
 }
 async function printTags(list){
   list = list.filter(Boolean); if (!list.length) return;
@@ -1438,21 +1455,103 @@ function taskParts(t){
     else if (ln.trim()) out.other.push(ln); });
   return {...out, notes:[...out.other, ...out.notes].join(" | ")};
 }
-function exportTasks(){
+const XLSX_STYLE_URL = "https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js", XLSX_STYLE_SRI = "sha384-OUW9euuUyxyHcAhTqbhI+Iyb8LMssXt/cpz0yXhs9UWG2/R/uaWdakx/4cfww7Vb";
+function loadXlsxStyle(){
+  if (window.XLSXS) return Promise.resolve(window.XLSXS);
+  return new Promise((res, rej) => { const prev = window.XLSX, sc = document.createElement("script");
+    sc.src = XLSX_STYLE_URL; sc.integrity = XLSX_STYLE_SRI; sc.crossOrigin = "anonymous"; sc.referrerPolicy = "no-referrer";
+    sc.onload = () => { window.XLSXS = window.XLSX; if (prev) window.XLSX = prev; res(window.XLSXS); };
+    sc.onerror = () => rej(new Error("Could not load the Excel formatter. Check your internet connection."));
+    document.head.appendChild(sc); });
+}
+// rows in plan order: categories as on screen, tasks in the order they were added (an imported sheet keeps its order)
+function taskExportRows(){
+  const T = S.data.tasks, order = taskCats(T);
+  return T.slice().sort((a, b) => order.indexOf(a.category||"Other") - order.indexOf(b.category||"Other") || (a.created_at||"").localeCompare(b.created_at||"") || (a.due_at||"9").localeCompare(b.due_at||"9"));
+}
+const STATUS_XL = {"Completed":["C6EFCE","006100"], "In progress":["DDEBF7","1F4E79"], "Roadblock":["FFC7CE","9C0006"], "On hold":["FFEB9C","7F6000"], "Not started":["EDEDED","404040"]};
+async function exportTasks(){
   const T = S.data.tasks; if (!T.length) return toast("There are no tasks to export.", "gold");
-  const order = taskCats(T), dt = v => v ? new Date(v).toLocaleDateString("en-CA") : "";
-  const L = T.slice().sort((a, b) => order.indexOf(a.category||"Other") - order.indexOf(b.category||"Other") || (a.due_at||"9").localeCompare(b.due_at||"9"));
-  const head = ["Category","Stage","Section","Task","Deadline","Person assigned","Supporting team","Status","Status note","Notes","Priority","Issued by","Last updated by","Last updated"];
-  const rows = L.map(t => { const p = taskParts(t); return [t.category||"Other", p.stage, p.section, t.title, dt(t.due_at), t.owner||"", p.team, t.status, t.status_note||"", p.notes, t.priority||"Normal", t.created_by||"", t.updated_by||"", t.updated_at ? new Date(t.updated_at).toLocaleString("en-ZA") : ""]; });
   const base = `Graduation tasks ${S.data.event.name} ${new Date().toISOString().slice(0,10)}`.replace(/[\\/:*?"<>|]/g, "");
-  if (typeof XLSX !== "undefined" && !(DESKTOP() && DESKTOP().save_file)){
-    const ws = XLSX.utils.aoa_to_sheet([head, ...rows]);
-    ws["!cols"] = [18,16,24,46,12,24,30,12,24,40,9,14,14,18].map(w => ({wch:w})); ws["!autofilter"] = {ref: ws["!ref"]};
-    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Tasks");
-    XLSX.writeFile(wb, base + ".xlsx"); toast(`Exported ${rows.length} tasks to Excel`, "green"); return;
-  }
-  const csv = [head, ...rows].map(r => r.map(v => `"${String(v ?? "").replace(/"/g,'""')}"`).join(",")).join("\r\n");
-  saveFile(base + ".csv", "﻿" + csv);
+  const desk = DESKTOP() && DESKTOP().save_file;
+  if (desk && !DESKTOP().save_b64) return saveFile(base + ".xls", tasksExcelHTML());   // installed app: Excel opens this with all the colours
+  let X; try { X = await loadXlsxStyle(); } catch(e){ return saveFile(base + ".xls", tasksExcelHTML()); }
+  const wb = buildTasksWorkbook(X);
+  if (desk) { const r = await DESKTOP().save_b64(base + ".xlsx", X.write(wb, {type:"base64", bookType:"xlsx"}), true); return toast(r && r.ok ? "Saved to Downloads and opened: " + base + ".xlsx" : "Could not save: " + (r && r.error), r && r.ok ? "green" : "red"); }
+  X.writeFile(wb, base + ".xlsx"); toast(`Exported ${T.length} tasks to Excel`, "green");
+}
+function buildTasksWorkbook(X){
+  const H = s2 => s2.replace("#", "").toUpperCase(), now = new Date();
+  const thin = {style:"thin", color:{rgb:"BFC7D5"}}, B = {top:thin, bottom:thin, left:thin, right:thin};
+  const st = (fill, font = {}, extra = {}) => ({ fill: fill ? {patternType:"solid", fgColor:{rgb:fill}} : undefined, font: {name:"Calibri", sz:11, ...font}, border:B, alignment:{vertical:"center", wrapText:true, ...(extra.alignment||{})} });
+  const L = taskExportRows(), cols = ["Categories","Section","Task Description","Deadline","Person Assigned","Supporting Team","Task Status","Status Note","Comments/Notes","Last Updated"];
+  const aoa = [], S2 = {}, merges = []; let r = 0;
+  const put = (R, C, v, style, t) => { const ref = X.utils.encode_cell({r:R, c:C}); S2[ref] = {v: v ?? "", t: t || (typeof v === "number" ? "n" : "s"), s: style}; };
+  const ev = S.data.event, dTxt = ev.date ? new Date(ev.date).toLocaleDateString("en-ZA", {day:"numeric", month:"long", year:"numeric"}) : "";
+  put(r, 0, "GRADUATION TASK PLAN", st("0D1B3E", {bold:true, sz:16, color:{rgb:"FFFFFF"}}, {alignment:{horizontal:"left"}})); for (let c = 1; c < cols.length; c++) put(r, c, "", st("0D1B3E")); merges.push({s:{r, c:0}, e:{r, c:cols.length - 1}}); r++;
+  put(r, 0, [ev.name, ev.venue, dTxt].filter(Boolean).join("  ·  "), st("D4AF37", {bold:true, color:{rgb:"0D1B3E"}})); for (let c = 1; c < cols.length; c++) put(r, c, "", st("D4AF37")); merges.push({s:{r, c:0}, e:{r, c:cols.length - 1}}); r++;
+  const done = T => T.filter(t => t.status === "Completed").length, overdue = L.filter(t => t.due_at && new Date(t.due_at) < now && t.status !== "Completed").length;
+  put(r, 0, `${L.length} tasks · ${done(L)} completed · ${overdue} overdue · exported ${now.toLocaleString("en-ZA", {day:"numeric", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit"})} · Prepared by Eddie Bila`, st("F2F4F9", {italic:true, color:{rgb:"5B6785"}}));
+  for (let c = 1; c < cols.length; c++) put(r, c, "", st("F2F4F9")); merges.push({s:{r, c:0}, e:{r, c:cols.length - 1}}); r++;
+  r++;
+  const hr = r; cols.forEach((h, c) => put(r, c, h, st("215C98", {bold:true, color:{rgb:"FFFFFF"}}, {alignment:{horizontal:"center"}}))); r++;
+  let stage = null;
+  taskCats(L).forEach(cat => {
+    const items = L.filter(t => (t.category||"Other") === cat); if (!items.length) return;
+    const cc = catColor(cat), dark = H(cc.c), light = H(cc.l);
+    const stg = (taskParts(items[0]).stage || "").toUpperCase();
+    if (stg && stg !== stage){ stage = stg; put(r, 0, stg.replace("-", " - "), st("215C98", {bold:true, color:{rgb:"FFFFFF"}, sz:12})); for (let c = 1; c < cols.length; c++) put(r, c, "", st("215C98")); merges.push({s:{r, c:0}, e:{r, c:cols.length - 1}}); r++; }
+    const r0 = r; let sec = null;
+    items.forEach(t => {
+      const P = taskParts(t), due = t.due_at ? new Date(t.due_at) : null, over = due && due < now && t.status !== "Completed";
+      if ((P.section || "") !== (sec || "") && P.section){ sec = P.section; put(r, 1, sec.replace(/\s*:\s*$/, ""), st(light, {bold:true})); for (let c = 2; c < cols.length; c++) put(r, c, "", st(light)); merges.push({s:{r, c:1}, e:{r, c:cols.length - 1}}); r++; }
+      const [sf, sc] = STATUS_XL[t.status] || STATUS_XL["Not started"];
+      put(r, 1, "", st(light));
+      put(r, 2, t.title, st(light, t.status === "Completed" ? {strike:true, color:{rgb:"5B6785"}} : {}));
+      if (due){ const d = new Date(due.getFullYear(), due.getMonth(), due.getDate()); S2[X.utils.encode_cell({r, c:3})] = {v: d, t:"d", z:"dd mmm yyyy", s: st(over ? "FDE2DF" : t.status === "Completed" ? "E0F2EA" : "E9F4FC", {bold:true, color:{rgb: over ? "B3261E" : t.status === "Completed" ? "176C5B" : "183E75"}}, {alignment:{horizontal:"center"}})}; }
+      else put(r, 3, "No date", st("F2F2F2", {italic:true, color:{rgb:"8A93A8"}}, {alignment:{horizontal:"center"}}));
+      const own = owners(t); put(r, 4, own.join(", ") || "Unassigned", st(light, {bold:true, color:{rgb: own.length ? H(personColor(own[0])) : "8A93A8"}}));
+      put(r, 5, P.team, st(light));
+      put(r, 6, t.status, st(sf, {bold:true, color:{rgb:sc}}, {alignment:{horizontal:"center"}}));
+      put(r, 7, t.status_note || "", st(light, t.status === "Roadblock" ? {color:{rgb:"9C0006"}, bold:true} : {}));
+      put(r, 8, P.notes, st(light, {sz:10}));
+      put(r, 9, t.updated_at ? `${new Date(t.updated_at).toLocaleDateString("en-ZA", {day:"numeric", month:"short"})} · ${t.updated_by || ""}` : "", st(light, {sz:9, color:{rgb:"5B6785"}}));
+      r++;
+    });
+    for (let R = r0; R < r; R++) put(R, 0, R === r0 ? `${cat}\n${done(items)}/${items.length} done` : "", st(dark, {bold:true, color:{rgb:"FFFFFF"}, sz:12}, {alignment:{horizontal:"center", vertical:"center", wrapText:true}}));
+    if (r - 1 > r0) merges.push({s:{r:r0, c:0}, e:{r:r - 1, c:0}});
+  });
+  const ws = Object.assign(S2, {"!ref": X.utils.encode_range({s:{r:0, c:0}, e:{r:r - 1, c:cols.length - 1}}), "!merges": merges,
+    "!cols": [22,24,48,14,24,34,14,24,44,18].map(w => ({wch:w})), "!autofilter": {ref: X.utils.encode_range({s:{r:hr, c:0}, e:{r:r - 1, c:cols.length - 1}})},
+    "!rows": Object.assign([], {0:{hpt:30}, [hr]:{hpt:22}})});
+  // summary sheet: one line per category and per person
+  const S3 = {}; let q = 0; const p3 = (R, C, v, style) => { S3[X.utils.encode_cell({r:R, c:C})] = {v, t: typeof v === "number" ? "n" : "s", s: style}; };
+  ["Category","Tasks","Completed","In progress","Roadblock","Overdue","% done"].forEach((h, c) => p3(q, c, h, st("215C98", {bold:true, color:{rgb:"FFFFFF"}}, {alignment:{horizontal:"center"}}))); q++;
+  taskCats(L).forEach(cat => { const it = L.filter(t => (t.category||"Other") === cat), cc = catColor(cat), dn = done(it);
+    p3(q, 0, cat, st(H(cc.c), {bold:true, color:{rgb:"FFFFFF"}})); [it.length, dn, it.filter(t => t.status === "In progress").length, it.filter(t => t.status === "Roadblock").length, it.filter(t => t.due_at && new Date(t.due_at) < now && t.status !== "Completed").length].forEach((v, c) => p3(q, c + 1, v, st(H(cc.l), {}, {alignment:{horizontal:"center"}})));
+    p3(q, 6, it.length ? Math.round(100 * dn / it.length) + "%" : "–", st(H(cc.l), {bold:true}, {alignment:{horizontal:"center"}})); q++; });
+  q++; ["Person","Tasks","Completed","Open","Overdue"].forEach((h, c) => p3(q, c, h, st("215C98", {bold:true, color:{rgb:"FFFFFF"}}, {alignment:{horizontal:"center"}}))); q++;
+  const ppl = {}; L.forEach(t => owners(t).forEach(n => (ppl[n] = ppl[n] || []).push(t)));
+  Object.entries(ppl).sort((a, b) => b[1].length - a[1].length).forEach(([n, it]) => { const pc = H(personColor(n));
+    p3(q, 0, n, st(null, {bold:true, color:{rgb:pc}})); [it.length, done(it), it.length - done(it), it.filter(t => t.due_at && new Date(t.due_at) < now && t.status !== "Completed").length].forEach((v, c) => p3(q, c + 1, v, st(null, c === 3 && v ? {bold:true, color:{rgb:"B3261E"}} : {}, {alignment:{horizontal:"center"}}))); q++; });
+  Object.assign(S3, {"!ref": X.utils.encode_range({s:{r:0, c:0}, e:{r:q - 1, c:6}}), "!cols": [28,9,11,11,11,10,9].map(w => ({wch:w}))});
+  const wb = X.utils.book_new(); X.utils.book_append_sheet(wb, ws, "Task Plan"); X.utils.book_append_sheet(wb, S3, "Summary");
+  wb.Props = {Title: "Graduation task plan", Author: "Eddie Bila", Company: "Camblish Training Institute"};
+  return wb;
+}
+// the same layout as an Excel-readable HTML table, for the installed desktop app (it can only save text files)
+function tasksExcelHTML(){
+  const L = taskExportRows(), now = new Date(), cols = ["Categories","Section","Task Description","Deadline","Person Assigned","Supporting Team","Task Status","Status Note","Comments/Notes"];
+  const td = (v, bg, x = "") => `<td style="border:1px solid #BFC7D5;vertical-align:middle;${bg ? `background:${bg};` : ""}${x}">${esc(v ?? "")}</td>`;
+  let h = `<tr><td colspan="${cols.length}" style="background:#0D1B3E;color:#fff;font-size:16pt;font-weight:bold">GRADUATION TASK PLAN</td></tr><tr><td colspan="${cols.length}" style="background:#D4AF37;color:#0D1B3E;font-weight:bold">${esc(S.data.event.name)} · Prepared by Eddie Bila</td></tr><tr></tr><tr>${cols.map(c => `<td style="background:#215C98;color:#fff;font-weight:bold;border:1px solid #BFC7D5;text-align:center">${c}</td>`).join("")}</tr>`;
+  taskCats(L).forEach(cat => { const it = L.filter(t => (t.category||"Other") === cat), cc = catColor(cat); let sec = null; const rows = [];
+    it.forEach(t => { const P = taskParts(t), due = t.due_at ? new Date(t.due_at) : null, over = due && due < now && t.status !== "Completed", [sf, sc] = STATUS_XL[t.status] || STATUS_XL["Not started"];
+      if (P.section && P.section !== sec){ sec = P.section; rows.push(`<td colspan="${cols.length - 1}" style="background:${cc.l};font-weight:bold;border:1px solid #BFC7D5">${esc(sec)}</td>`); }
+      const own = owners(t);
+      rows.push(td("", cc.l) + td(t.title, cc.l) + td(due ? due.toLocaleDateString("en-ZA", {day:"2-digit", month:"short", year:"numeric"}) : "No date", over ? "#FDE2DF" : "#E9F4FC", `font-weight:bold;color:${over ? "#B3261E" : "#183E75"};text-align:center`)
+        + td(own.join(", ") || "Unassigned", cc.l, `font-weight:bold;color:${own.length ? personColor(own[0]) : "#8A93A8"}`) + td(P.team, cc.l) + td(t.status, "#" + sf, `font-weight:bold;color:#${sc};text-align:center`) + td(t.status_note, cc.l) + td(P.notes, cc.l)); });
+    rows.forEach((row, k) => { h += `<tr>${k === 0 ? `<td rowspan="${rows.length}" style="background:${cc.c};color:#fff;font-weight:bold;text-align:center;vertical-align:middle;border:1px solid #BFC7D5">${esc(cat)}</td>` : ""}${row}</tr>`; }); });
+  return `<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="utf-8"><style>td{font-family:Calibri,Arial;font-size:11pt;mso-number-format:"\\@"}</style></head><body><table>${h}</table></body></html>`;
 }
 const TASK_COLS = [["category", /^(categor(y|ies)|phase)$/], ["stage", /^stage$/], ["section", /^(section|sub.?categor(y|ies)|group)$/], ["title", /^(task( description| name)?|title|description)$/],
   ["due", /(deadline|due( date)?|target date)/], ["owner", /(person assigned|owner|assigned( to)?|responsible)/], ["team", /support/], ["status_note", /status note/], ["status", /status/],
@@ -1790,7 +1889,7 @@ function codeOf(l){ if (!l._code) stageList(); return l._code || ""; }
 function viewCheckin(){
   if (!$("#ciView")){
     main.innerHTML = `<div id="bn"></div><div class="card" id="ciView"><div id="flow" class="flowwrap"></div>
-      <h2>Check-in<span class="spacer"></span><span id="ciSum" class="small muted"></span><button class="btn gold sm hidden" id="upl">⬆ Upload learners</button><button class="btn ghost sm hidden ciReset" id="ciRs" title="Start the whole sequence again (admin reset password needed)">↺ Reset</button></h2>
+      <h2>Check-in<span class="spacer"></span><span id="ciSum" class="small muted"></span><button class="btn sm noprint" id="ciPrintAll" type="button">🖨 Print name tags</button><button class="btn gold sm hidden" id="upl">⬆ Upload learners</button><button class="btn ghost sm hidden ciReset" id="ciRs" title="Start the whole sequence again (admin reset password needed)">↺ Reset</button></h2>
       <p class="small muted" style="margin-top:-6px">Mark graduates present as they arrive. They then move to <b>Robes</b>. Within each programme they are numbered in the order they arrive.</p>
       ${filterBar(`<button class="btn ghost sm" data-seatmap type="button">💺 Seating plan</button>`)}
       <details class="noprint" style="margin-top:8px"><summary class="small" style="cursor:pointer;color:var(--royal);font-weight:600">🖨 Name tag printer</summary>
@@ -1810,6 +1909,7 @@ function viewCheckin(){
       <input type="file" id="imf" accept=".xlsx,.xls,.csv"><div id="imPrev"></div>
       <div class="row" style="margin-top:12px"><span class="spacer"></span><button class="btn ghost" id="mc">Close</button></div>`, (m, close) => { $("#mc",m).onclick = close; $("#imf",m).onchange = importPreview; });
     wireFilterBar(drawCheckin);
+    $("#ciPrintAll").onclick = bulkTagDialog;
   }
   $("#bn").innerHTML = bannerHTML(); wireBanner();
   $("#upl").classList.toggle("hidden", !can("upload"));
@@ -1830,8 +1930,8 @@ function drawCheckin(){
       `<div class="meta" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:3px">${/^n/i.test(l.rsvp||"")?`<span class="tag red">RSVP: not attending</span>`:""}${/^y/i.test(l.robe||"")?`<span class="tag gold">Needs robe</span>`:""}${l.status!=="present"&&l.phone?`<a class="tag" href="tel:${esc(String(l.phone).split("/")[0].trim())}">📞 ${esc(l.phone)}</a>`:""}</div>
        ${l.status==="present"?`<div class="small" style="color:var(--ok)">Arrived ${fmtTime(l.arrived_at)} · by ${esc(l.checked_by||"")} · now ${l.cert_issued?"graduated":l.stage_status==="done"?"collecting certificate":l.robe_issued?"in the stage line":"at robes"}</div>`:""}`)}
     <div class="pacts">${l.status==="present" ? `<span class="pill s-Completed">✓ Present</span><span class="tag gold" title="Seat (also their place in the stage line)">${esc(dcode(l))}</span>${tagBtn(l)}${true?`<button class="btn ghost sm" data-ci="${l.id}" data-s="expected">Undo</button>`:""}`
-      : l.status==="absent" ? `<span class="tag">Absent</span>${true?`<button class="btn ghost sm" data-ci="${l.id}" data-s="expected">Undo</button><button class="btn green bigbtn" data-ci="${l.id}" data-s="present">Arrived</button>`:""}`
-      : `<span class="notarr">Not arrived</span>${true?`<button class="btn ghost sm" data-ci="${l.id}" data-s="absent">Absent</button><button class="btn green bigbtn" data-ci="${l.id}" data-s="present">✓ Mark present</button>`:""}`}</div></div>`,
+      : l.status==="absent" ? `<span class="tag">Absent</span>${l.seat ? `<span class="tag gold" title="Seat kept open">${esc(l.seat)}</span>` : ""}${tagBtn(l)}${true?`<button class="btn ghost sm" data-ci="${l.id}" data-s="expected">Undo</button><button class="btn green bigbtn" data-ci="${l.id}" data-s="present">Arrived</button>`:""}`
+      : `<span class="notarr">Not arrived</span>${l.seat ? `<span class="tag gold" title="Seat">${esc(l.seat)}</span>` : ""}${tagBtn(l)}${true?`<button class="btn ghost sm" data-ci="${l.id}" data-s="absent">Absent</button><button class="btn green bigbtn" data-ci="${l.id}" data-s="present">✓ Mark present</button>`:""}`}</div></div>`,
     fActive() ? "No graduate matches these filters." : S.f.ciFilter === "expected" ? "Everyone has arrived. 🎉" : "Nobody here yet.", "checkin", present ? byArrival : byName, drawCheckin, present);
   wireTags($("#cilist"));
   $$("#cilist [data-ci]").forEach(b => b.onclick = async () => {
