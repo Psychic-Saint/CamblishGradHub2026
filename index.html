@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-t0/WmY5IlgnzpALooolk0f1aESDI7TqibVKXaHdtVFg=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-bk+YIPnpJra6xdJpF7+7JrZFj61iUwCnJlj9M5wCcMo=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="author" content="Eddie Bila">
@@ -418,6 +418,10 @@ nav.tabs .badge.green{background:var(--ok);color:#fff}
 .sigbox .sigx{position:absolute;left:14px;bottom:30px;color:#9aa6c4;font-size:18px;pointer-events:none}.sigbox .sigline{position:absolute;left:40px;right:16px;bottom:34px;border-bottom:1.5px solid #c9d3ea;color:#9aa6c4;font-size:11px;padding-bottom:2px;pointer-events:none;text-align:right}
 .cqbtn{color:#b3261e!important;border-color:#f1b8b2!important}.lrow.cq{border-left:4px solid #b3261e}.cqtxt{margin-top:4px;font-size:12px;color:#b3261e;background:#fdf1ef;border-radius:8px;padding:5px 8px}.cqtxt i{color:#8a5a55;font-style:normal;font-size:11px}
 .seat.oc{background:#eef1f7;color:#5b6785}
+.tcat{margin-top:12px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--card,#fff)}
+.tcath{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:10px;width:100%;padding:10px 14px;cursor:pointer;background:linear-gradient(90deg,#0d1b3e,#1d3fae);color:#fff;flex-wrap:wrap}
+.tcath b{font-size:14px;letter-spacing:.3px}.tcarr{width:12px;color:#f3d27a}.tcbar{flex:1;min-width:80px;max-width:220px;height:7px;background:rgba(255,255,255,.18);border-radius:6px;overflow:hidden}.tcbar i{display:block;height:100%;background:#d4af37}
+.tcn{font-size:12px;color:#dbe3f8}.tcn.muted{opacity:.7}.tcath .tag.red{background:#b3261e;color:#fff;border:0}.tcb{padding:4px 10px 8px}.tcat.shut .tcb{display:none}
 .leadtag{display:inline-block;background:var(--pc);color:#fff;border-radius:99px;padding:2px 9px;font-size:11px;font-weight:900;letter-spacing:.2px;vertical-align:2px;box-shadow:0 0 0 2px #fff,0 0 0 3.5px var(--pc);max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sgh{cursor:pointer;user-select:none}.sgh .chev{display:inline-block;margin-right:8px;transition:transform .15s}.sgh.closed .chev{transform:rotate(-90deg)}.sgh:hover{filter:brightness(1.12)}
 .lnotes{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:4px;font-size:12px}
@@ -570,7 +574,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202610291100";
+const BUILD = "202610291500";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -813,7 +817,7 @@ function ask(title, label, {required=false, placeholder="", okText="Save", okCla
    ====================================================================== */
 const S = { tick:0, pin:null, me:null, role:null, data:null, version:0, lastFeedId:0, tab:"overview", ok:true, lastSync:0,
   maxRev:0, lastActAt:0,
-  f:{ taskStatus:"Active", taskOwner:"", taskQ:"", ciQ:"", ciFilter:"expected", rb:"wait", ct:"due", L:{q:"", prog:"", nqf:"", pm:"", client:""}, collapsed:{}, showAll:new Set(), feedKind:"All", openThreads:new Set() } };
+  f:{ taskStatus:"Active", taskOwner:"", taskQ:"", taskCat:"", ciQ:"", ciFilter:"expected", rb:"wait", ct:"due", L:{q:"", prog:"", nqf:"", pm:"", client:""}, collapsed:{}, showAll:new Set(), feedKind:"All", openThreads:new Set() } };
 const sessKey = () => "grad_" + CODE;
 
 function mergeDelta(d){
@@ -1325,15 +1329,20 @@ async function previewTag(l){ printTags([l]); }
 function viewTasks(){
   if (!$("#taskView")){
     main.innerHTML = `<div id="bn"></div><div class="card" id="taskView">
-      <h2>Graduation tasks<span class="spacer"></span><button class="btn gold sm" id="addTask">+ Add task</button></h2>
-      <div class="row noprint" style="margin-bottom:6px"><input type="search" id="tq" placeholder="Search tasks" style="flex:2;min-width:160px"><select id="towner" style="flex:1;min-width:140px"></select></div>
+      <h2>Graduation tasks<span class="spacer"></span><button class="btn ghost sm noprint" id="tExp">⬇ Export</button><button class="btn ghost sm noprint" id="tImp">⬆ Import</button><button class="btn gold sm" id="addTask">+ Add task</button></h2>
+      <input type="file" id="tImpF" accept=".xlsx,.xls,.csv" class="hidden">
+      <div class="row noprint" style="margin-bottom:6px;flex-wrap:wrap"><input type="search" id="tq" placeholder="Search tasks" style="flex:2;min-width:160px"><select id="tcat" style="flex:1;min-width:150px"></select><select id="towner" style="flex:1;min-width:140px"></select></div>
       <div class="chips noprint" id="tchips"></div>
       <div id="tlist"></div></div>`;
     $("#tq").value = S.f.taskQ; $("#tq").oninput = e => { S.f.taskQ = e.target.value; drawTasks(); };
     $("#towner").onchange = e => { S.f.taskOwner = e.target.value; drawTasks(); };
+    $("#tcat").onchange = e => { S.f.taskCat = e.target.value; drawTasks(); };
     $("#addTask").onclick = () => taskForm();
+    $("#tExp").onclick = exportTasks;
+    $("#tImp").onclick = () => { $("#tImpF").value = ""; $("#tImpF").click(); };
+    $("#tImpF").onchange = e => { const f = e.target.files[0]; if (f) importTasksPreview(f); };
   }
-  $("#addTask").classList.toggle("hidden", !can("tasks_create"));
+  $("#addTask").classList.toggle("hidden", !can("tasks_create")); $("#tImp").classList.toggle("hidden", !can("tasks_create"));
   $("#bn").innerHTML = bannerHTML(); wireBanner();
   const ownList = [...new Set(S.data.tasks.flatMap(owners).concat(S.data.members.map(m=>m.name)).concat((S.people||[]).map(p=>p.name)))].sort();
   $("#towner").innerHTML = `<option value="">Everyone</option><option value="__me">My tasks</option>` + ownList.map(o=>`<option ${o===S.f.taskOwner?"selected":""}>${esc(o)}</option>`).join("");
@@ -1345,21 +1354,134 @@ function drawTasks(){
   const filters = ["Active","All",...STATUSES];
   $("#tchips").innerHTML = filters.map(f=>{ const n = f==="All"?T.length : f==="Active"?T.filter(t=>t.status!=="Completed").length : T.filter(t=>t.status===f).length; return `<button class="chip ${S.f.taskStatus===f?"on":""}" data-f="${f}">${f} (${n})</button>`; }).join("");
   $$("#tchips .chip").forEach(c => c.onclick = () => { S.f.taskStatus = c.dataset.f; drawTasks(); });
+  const cats = taskCats(T);
+  $("#tcat").innerHTML = `<option value="">All categories (${T.length})</option>` + cats.map(c => `<option value="${esc(c)}" ${c===S.f.taskCat?"selected":""}>${esc(c)} (${T.filter(t => (t.category||"Other") === c).length})</option>`).join("");
+  if (S.f.taskCat && !cats.includes(S.f.taskCat)) S.f.taskCat = "";
   const q = S.f.taskQ.toLowerCase();
   let list = T.filter(t => (S.f.taskStatus==="All" || (S.f.taskStatus==="Active" ? t.status!=="Completed" : t.status===S.f.taskStatus))
+    && (!S.f.taskCat || (t.category||"Other") === S.f.taskCat)
     && (!S.f.taskOwner || (S.f.taskOwner==="__me" ? owners(t).includes(S.me) : owners(t).includes(S.f.taskOwner)))
     && (!q || [t.title,t.details,t.category,t.owner].join(" ").toLowerCase().includes(q)));
   const rank = {Roadblock:0,"In progress":1,"Not started":2,"On hold":3,Completed:4};
   list.sort((a,b)=> rank[a.status]-rank[b.status] || (a.due_at||"9").localeCompare(b.due_at||"9"));
-  const byCat = {}; list.forEach(t => (byCat[t.category||"Other"] = byCat[t.category||"Other"] || []).push(t));
   if (!T.length){
-    $("#tlist").innerHTML = `<div class="empty">No tasks yet.${can("tasks_create")?`<br><br><button class="btn" id="seed">Load the standard graduation checklist</button>`:""}</div>`;
-    const sb = $("#seed"); if (sb) sb.onclick = seedTasks; return;
+    $("#tlist").innerHTML = `<div class="empty">No tasks yet.${can("tasks_create")?`<br><br><button class="btn" id="seed">Load the standard graduation checklist</button> <button class="btn ghost" id="seedImp">⬆ Import from Excel</button>`:""}</div>`;
+    const sb = $("#seed"); if (sb) sb.onclick = seedTasks; const si = $("#seedImp"); if (si) si.onclick = () => $("#tImp").click(); return;
   }
-  $("#tlist").innerHTML = list.length ? Object.entries(byCat).map(([c,ts]) => `<div class="small muted" style="margin-top:14px;font-weight:700;text-transform:uppercase;letter-spacing:.6px">${esc(c)}</div>` + ts.map(taskCard).join("")).join("") : `<div class="empty">No tasks match these filters.</div>`;
+  const col = S.f.taskCol || (S.f.taskCol = new Set(store.get("task_col_" + CODE) || []));
+  const saveCol = () => store.set("task_col_" + CODE, [...col]);
+  const now = new Date();
+  const groups = cats.map(c => [c, list.filter(t => (t.category||"Other") === c)]).filter(([, ts]) => ts.length);
+  $("#tlist").innerHTML = list.length ? `<div class="grp-tools small noprint"><span class="muted">${groups.length} categor${groups.length === 1 ? "y" : "ies"} · ${list.length} task${list.length === 1 ? "" : "s"}</span><span class="spacer"></span><button class="lnk" id="tcOpen">Expand all</button><button class="lnk" id="tcShut">Collapse all</button></div>`
+    + groups.map(([c, ts]) => { const all = T.filter(t => (t.category||"Other") === c), done = all.filter(t => t.status === "Completed").length, over = all.filter(t => t.due_at && new Date(t.due_at) < now && t.status !== "Completed").length, rb = all.filter(t => t.status === "Roadblock").length, shut = col.has(c);
+      return `<div class="tcat ${shut ? "shut" : ""}"><button class="tcath" data-tc="${esc(c)}"><span class="tcarr">${shut ? "▸" : "▾"}</span><b>${esc(c)}</b><span class="tcbar"><i style="width:${all.length ? Math.round(100*done/all.length) : 0}%"></i></span><span class="tcn">${done}/${all.length} done</span>${over ? `<span class="tag red">${over} overdue</span>` : ""}${rb ? `<span class="tag red">⚠ ${rb}</span>` : ""}<span class="tcn muted">${ts.length} shown</span></button>
+        <div class="tcb">${shut ? "" : ts.map(taskCard).join("")}</div></div>`; }).join("")
+    : `<div class="empty">No tasks match these filters.</div>`;
+  $$("#tlist [data-tc]").forEach(b => b.onclick = () => { const c = b.dataset.tc; col.has(c) ? col.delete(c) : col.add(c); saveCol(); drawTasks(); });
+  const o = $("#tcOpen"), sh = $("#tcShut");
+  if (o) o.onclick = () => { col.clear(); saveCol(); drawTasks(); };
+  if (sh) sh.onclick = () => { groups.forEach(([c]) => col.add(c)); saveCol(); drawTasks(); };
   wireTasks();
 }
 const owners = t => (t.owner||"").split(",").map(x=>x.trim()).filter(Boolean);
+// categories in plan order: the order they were added (an imported plan keeps its sheet order), then earliest deadline
+function taskCats(T){
+  const made = {}, due = {}; T.forEach(t => { const c = t.category || "Other", m = t.created_at || "9999", d = t.due_at || "9999";
+    if (!(c in made) || m < made[c]) made[c] = m; if (!(c in due) || d < due[c]) due[c] = d; });
+  return Object.keys(made).sort((a, b) => made[a].localeCompare(made[b]) || due[a].localeCompare(due[b]) || a.localeCompare(b));
+}
+// details are stored as "Stage · Section / Supporting team: … / Notes: …"
+function taskParts(t){
+  const L = String(t.details || "").split("\n"), out = {stage:"", section:"", team:"", notes:[], other:[]};
+  L.forEach((ln, i) => { const m = ln.match(/^(Supporting team|Notes|Owner):\s*(.*)$/);
+    if (m){ if (m[1] === "Supporting team") out.team = m[2]; else out.notes.push(m[1] === "Owner" ? "Owner " + m[2] : m[2]); }
+    else if (i === 0 && /^(Pre|During|Post)-graduation/i.test(ln)){ const [a, b] = ln.split(" · "); out.stage = a; out.section = b || ""; }
+    else if (ln.trim()) out.other.push(ln); });
+  return {...out, notes:[...out.other, ...out.notes].join(" | ")};
+}
+function exportTasks(){
+  const T = S.data.tasks; if (!T.length) return toast("There are no tasks to export.", "gold");
+  const order = taskCats(T), dt = v => v ? new Date(v).toLocaleDateString("en-CA") : "";
+  const L = T.slice().sort((a, b) => order.indexOf(a.category||"Other") - order.indexOf(b.category||"Other") || (a.due_at||"9").localeCompare(b.due_at||"9"));
+  const head = ["Category","Stage","Section","Task","Deadline","Person assigned","Supporting team","Status","Status note","Notes","Priority","Issued by","Last updated by","Last updated"];
+  const rows = L.map(t => { const p = taskParts(t); return [t.category||"Other", p.stage, p.section, t.title, dt(t.due_at), t.owner||"", p.team, t.status, t.status_note||"", p.notes, t.priority||"Normal", t.created_by||"", t.updated_by||"", t.updated_at ? new Date(t.updated_at).toLocaleString("en-ZA") : ""]; });
+  const base = `Graduation tasks ${S.data.event.name} ${new Date().toISOString().slice(0,10)}`.replace(/[\\/:*?"<>|]/g, "");
+  if (typeof XLSX !== "undefined" && !(DESKTOP() && DESKTOP().save_file)){
+    const ws = XLSX.utils.aoa_to_sheet([head, ...rows]);
+    ws["!cols"] = [18,16,24,46,12,24,30,12,24,40,9,14,14,18].map(w => ({wch:w})); ws["!autofilter"] = {ref: ws["!ref"]};
+    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Tasks");
+    XLSX.writeFile(wb, base + ".xlsx"); toast(`Exported ${rows.length} tasks to Excel`, "green"); return;
+  }
+  const csv = [head, ...rows].map(r => r.map(v => `"${String(v ?? "").replace(/"/g,'""')}"`).join(",")).join("\r\n");
+  saveFile(base + ".csv", "﻿" + csv);
+}
+const TASK_COLS = [["category", /^(categor(y|ies)|phase)$/], ["stage", /^stage$/], ["section", /^(section|sub.?categor(y|ies)|group)$/], ["title", /^(task( description| name)?|title|description)$/],
+  ["due", /(deadline|due( date)?|target date)/], ["owner", /(person assigned|owner|assigned( to)?|responsible)/], ["team", /support/], ["status_note", /status note/], ["status", /status/],
+  ["notes", /(comments?|notes?|remarks?)/], ["priority", /priority/]];
+function taskStatusOf(v){ v = String(v||"").toLowerCase(); return /complete|done|finished/.test(v) ? "Completed" : /roadblock|block/.test(v) ? "Roadblock" : /hold/.test(v) ? "On hold" : /progress|ongoing|pending|started$/.test(v) && !/not started/.test(v) ? "In progress" : "Not started"; }
+function taskDateOf(v){
+  if (v === "" || v == null) return null;
+  if (typeof v === "number" || /^\d{5}(\.\d+)?$/.test(String(v))){ const d = new Date(Math.round((+v - 25569) * 864e5)); return isNaN(d) ? null : d.toISOString().slice(0,10); }
+  const s2 = String(v).trim(); let m = s2.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/); if (m) return `${m[1]}-${m[2].padStart(2,"0")}-${m[3].padStart(2,"0")}`;
+  m = s2.match(/^(\d{1,2})[-/. ](\d{1,2})[-/. ](\d{4})$/); if (m) return `${m[3]}-${m[2].padStart(2,"0")}-${m[1].padStart(2,"0")}`;
+  const d = new Date(s2); return isNaN(d) ? null : new Date(d.getTime() - d.getTimezoneOffset()*6e4).toISOString().slice(0,10);
+}
+function taskOwnerOf(v){
+  const names = [...new Set((S.people||[]).map(p => p.name).concat(S.data.members.map(m => m.name)))];
+  return String(v||"").split(/\s*(?:,|&|\band\b|\/)\s*/i).map(x => x.trim()).filter(x => x && !/^n\/?a$/i.test(x)).map(x => {
+    const exact = names.find(n => n.toLowerCase() === x.toLowerCase()); if (exact) return exact;
+    const hits = names.filter(n => n.split(" ")[0].toLowerCase() === x.toLowerCase()); return hits.length === 1 ? hits[0] : x; }).join(", ");
+}
+async function importTasksPreview(f){
+  try {
+    if (typeof XLSX === "undefined") throw new Error("The spreadsheet reader did not load. Check your internet connection and try again.");
+    await loadPeople();
+    const wb = XLSX.read(await f.arrayBuffer(), {type:"array"}), rows = [];
+    wb.SheetNames.forEach(sn => {
+      const aoa = XLSX.utils.sheet_to_json(wb.Sheets[sn], {header:1, defval:"", raw:true});
+      const hi = aoa.findIndex(r => { const hs = r.map(c => String(c).trim().toLowerCase()); return hs.some(h => TASK_COLS[3][1].test(h)) && hs.some(h => TASK_COLS[4][1].test(h) || TASK_COLS[5][1].test(h) || TASK_COLS[8][1].test(h)); });
+      if (hi < 0) return;
+      const map = {}; aoa[hi].forEach((c, i) => { const h = String(c).trim().toLowerCase(); const m = TASK_COLS.find(([k, re]) => map[k] === undefined && re.test(h)); if (m) map[m[0]] = i; });
+      let cat = "", stage = "", section = "";
+      for (let r = hi + 1; r < aoa.length; r++){
+        const row = aoa[r], g = k => map[k] !== undefined ? String(row[map[k]] ?? "").trim() : "", raw = k => map[k] !== undefined ? row[map[k]] : "";
+        const c0 = g("category"), title = g("title"), rest = ["due","owner","team","status","status_note","notes","priority"].some(k => g(k));
+        if (c0 && !title && /graduation/i.test(c0)){ stage = c0.replace(/\s*-\s*/g, "-").replace(/^(\w)(\w*)/, (a, b, c) => b.toUpperCase() + c.toLowerCase()).replace(/-graduation/i, "-graduation"); continue; }
+        if (c0) cat = c0;
+        if (!title) continue;
+        if (!rest && map.section === undefined){ section = title; continue; }   // a sub-heading row
+        const sec = g("section") || section, stg = g("stage") || stage;
+        const det = [[stg, sec].filter(Boolean).join(" · ")].filter(Boolean);
+        if (g("team")) det.push("Supporting team: " + g("team")); if (g("notes")) det.push("Notes: " + g("notes"));
+        rows.push({ title, category: cat || "Other", owner: taskOwnerOf(g("owner")) || null, due_at: (d => d ? d + "T17:00:00+02:00" : null)(taskDateOf(raw("due"))),
+          status: taskStatusOf(g("status")), status_note: g("status_note") || (/pending/i.test(g("status")) ? "Pending" : null), priority: /high|urgent/i.test(g("priority")) ? "High" : "Normal", details: det.join("\n") || null });
+      }
+    });
+    if (!rows.length) throw new Error("No tasks found. The sheet needs a header row with at least a Task column and a Deadline, Person assigned or Status column.");
+    const have = new Set(S.data.tasks.map(t => (t.category||"") + "|" + t.title.trim().toLowerCase()));
+    const dup = rows.filter(r => have.has(r.category + "|" + r.title.toLowerCase())).length;
+    const byCat = {}; rows.forEach(r => byCat[r.category] = (byCat[r.category]||0) + 1);
+    modal(`<h3>⬆ Import tasks</h3><p class="small muted">${esc(f.name)}: <b>${rows.length} tasks</b> in ${Object.keys(byCat).length} categories${rows.filter(r => r.status === "Completed").length ? `, ${rows.filter(r => r.status === "Completed").length} already completed` : ""}.</p>
+      <div class="chips" style="margin:6px 0">${Object.entries(byCat).map(([c, n]) => `<span class="chip">${esc(c)} (${n})</span>`).join("")}</div>
+      <div style="max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:10px"><table class="t small"><thead><tr><th>Task</th><th>Category</th><th>Deadline</th><th>Owner</th><th>Status</th></tr></thead><tbody>
+        ${rows.slice(0, 60).map(r => `<tr><td>${esc(r.title)}</td><td>${esc(r.category)}</td><td>${r.due_at ? esc(r.due_at.slice(0,10)) : "–"}</td><td>${esc(r.owner || "Unassigned")}</td><td>${esc(r.status)}</td></tr>`).join("")}</tbody></table></div>
+      ${rows.length > 60 ? `<p class="small muted">Showing the first 60.</p>` : ""}
+      <label class="lbl">How to load them</label>
+      <label class="row small" style="gap:6px"><input type="radio" name="tim" value="add" checked> Add to the current tasks${dup ? ` (skip ${dup} already on the list)` : ""}</label>
+      ${can("manage_event") ? `<label class="row small" style="gap:6px"><input type="radio" name="tim" value="rep"> Replace all current tasks (the ${S.data.tasks.length} current tasks are archived)</label>` : ""}
+      <div class="row" style="margin-top:12px"><span class="spacer"></span><button class="btn ghost" id="mc">Cancel</button><button class="btn gold" id="mo">Import</button></div>`,
+      (m, close) => { $("#mc", m).onclick = close;
+        $("#mo", m).onclick = async () => { const rep2 = (m.querySelector("[name=tim]:checked") || {}).value === "rep";
+          const send = rep2 ? rows : rows.filter(r => !have.has(r.category + "|" + r.title.toLowerCase()));
+          if (!send.length) return toast("Every task in the file is already on the list.", "gold");
+          if (rep2 && !confirm(`Replace all ${S.data.tasks.length} current tasks with the ${send.length} in this file?`)) return;
+          $("#mo", m).disabled = true;
+          try { S.lastActAt = Date.now(); const r = await rpc("grad_tasks_import", {p_code:CODE, p_pin:S.pin, p_actor:S.me, p_rows:send, p_replace:rep2});
+            toast(`Imported ${r.added} tasks${r.archived ? `; ${r.archived} earlier tasks archived` : ""}`, "green"); rtPing(); close(); await pull(true); }
+          catch(e){ toast("Could not import: " + e.message, "red"); $("#mo", m).disabled = false; } };
+      });
+  } catch(e){ toast(e.message, "red"); }
+}
 async function loadPeople(){ try { S.people = await rpc("hub_people", {p_token:S.pin}); } catch(e){ S.people = S.people || []; } return S.people; }
 function taskCard(t){
   const now = new Date(), over = t.due_at && new Date(t.due_at) < now && t.status!=="Completed";
