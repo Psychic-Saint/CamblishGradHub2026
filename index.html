@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-0psaGwaaObObvulPMdFEVgrHCFKUWCzGP0r1gjhUPkQ=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-vh3KFWlQvElna/DOPDJKrkUMH8biDgJeFxag6buVI24=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="author" content="Eddie Bila">
@@ -583,7 +583,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202610301200";
+const BUILD = "202610301500";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -2107,14 +2107,14 @@ function registerHTML(groups, sigs){
     td{border:1px solid #d5dcec;padding:3px 5px;height:34px;vertical-align:middle}tr{break-inside:avoid}tbody tr:nth-child(even) td{background:#f7f9fd}
     td.n{width:28px;text-align:center;color:#5b6785}td.sg{width:150px;text-align:center}td.sg img{height:30px;max-width:140px;object-fit:contain}td.sg .no{color:#b3261e;font-size:9px}
     .q{color:#b3261e;font-size:9px;display:block}
-    .ft{display:flex;justify-content:space-between;color:#8a93a8;font-size:9px;margin-top:8px;border-top:1px solid #e1e6f2;padding-top:4px}
+    .ft .dev{display:block;font-size:6.5px;color:#b9c0cf;margin-top:2px;letter-spacing:.2px}.ft{display:flex;justify-content:space-between;color:#8a93a8;font-size:9px;margin-top:8px;border-top:1px solid #e1e6f2;padding-top:4px}
     .newpage{break-before:page;page-break-before:always}
     @media print{body{background:#fff}.reg{max-width:none;margin:0}}`;
   const pages = groups.map(([k, L], gi) => {
     const [nq, prog] = k.split("|"), all = d.learners.filter(l => progKey(l) === k);
     const items = L.slice().sort((a, b) => new Date(a.cert_at || 0) - new Date(b.cert_at || 0));
     const issuers = uniq(items.map(l => l.cert_by));
-    return `<section class="reg ${gi ? "newpage" : ""}"><div class="rh"><img src="${crest}" alt=""><div><div class="tg">Camblish Training Institute</div><h1>CERTIFICATE ISSUE REGISTER</h1><p>${esc(d.event.name)}</p></div><span class="sp"></span><div style="text-align:right"><div class="tg">Taking the Lead, Shaping the Future</div><p>Prepared by Eddie Bila</p></div></div>
+    return `<section class="reg ${gi ? "newpage" : ""}"><div class="rh"><img src="${crest}" alt=""><div><div class="tg">Camblish Training Institute</div><h1>CERTIFICATE ISSUE REGISTER</h1><p>${esc(d.event.name)}</p></div><span class="sp"></span><div style="text-align:right"><div class="tg">Taking the Lead, Shaping the Future</div><p>www.camblish.co.za</p></div></div>
       <div class="in"><div class="meta">
         <div><small>Learning programme</small><b>${esc(prog)}</b></div><div><small>NQF level</small><b>${nq === "099" ? "–" : +nq}</b></div><div><small>Client</small><b>${esc(uniq(all.map(l => l.client)).join(", ") || "–")}</b></div><div><small>SETA</small><b>${esc(uniq(all.map(l => l.seta)).join(", ") || "–")}</b></div>
         <div><small>Graduation event</small><b>${esc(d.event.name)}</b></div><div><small>Date</small><b>${esc(dateTxt || "–")}</b></div><div><small>Venue</small><b>${esc(d.event.venue || "–")}</b></div><div><small>Project manager</small><b>${esc(uniq(all.map(l => l.pm)).join(", ") || "–")}</b></div>
@@ -2125,7 +2125,7 @@ function registerHTML(groups, sigs){
       ${items.map((l, i) => `<tr><td class="n">${i + 1}</td><td><b>${esc(l.first_name || "")}</b></td><td>${esc(l.middle_name || "")}</td><td><b>${esc(l.surname || "")}</b>${notesOf(l).filter(n => n.kind !== "note").map(n => `<span class="q">${n.resolved ? "✓" : "⚠"} ${esc(n.text)}${n.resolved ? " (resolved)" : ""}</span>`).join("")}</td><td style="white-space:nowrap">${esc(IDS[l.id] || l.learner_ref || "")}</td><td>${esc(l.seat || "")}</td><td>${esc(l.client || "")}</td><td>${fmtTime(l.cert_at)}</td><td>${esc(l.cert_by || "")}</td>
         <td class="sg">${LS[l.id] ? `<img src="${LS[l.id].sig}" alt="">` : `<span class="no">Not signed</span>`}</td></tr>`).join("")}
       </tbody></table>
-      <div class="ft"><span>Camblish Training Institute · info@camblish.co.za · www.camblish.co.za</span><span>${esc(prog)} · Certificate issue register</span><span>Designed and developed by Eddie Bila</span></div></div></section>`;
+      <div class="ft"><span>Camblish Training Institute · info@camblish.co.za · www.camblish.co.za<small class="dev">Designed and developed by Eddie Bila</small></span><span>${esc(prog)} · Certificate issue register</span></div></div></section>`;
   }).join("");
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Certificate register · ${esc(d.event.name)}</title><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=swap" rel="stylesheet"><style>${css}</style></head><body>${pages}</body></html>`;
 }
