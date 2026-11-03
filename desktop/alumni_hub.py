@@ -12,6 +12,7 @@ import os, time
 import sys
 import re
 import threading
+import time
 import urllib.parse
 
 import webview
@@ -237,49 +238,62 @@ class Bridge:
             return {"ok": False, "error": str(e)}
 
     def send_email(self, to, subject, body):
-        """Send through classic Outlook only when it is open on screen; otherwise open the default mail app (new Outlook, Mail) ready to send."""
-        def classic_visible():
+        """Send through Outlook straight away and wait until it has left this PC.
+        Works whether or not Outlook is open (classic Outlook is started in the background if needed).
+        Falls back to the default mail app (press Send) only on PCs without classic Outlook."""
+        result = {}
+
+        def worker():
             try:
-                import ctypes
-                found = []
-                EnumWindows = ctypes.windll.user32.EnumWindows
-                GetClassNameW = ctypes.windll.user32.GetClassNameW
-                IsWindowVisible = ctypes.windll.user32.IsWindowVisible
-                proto = ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.c_void_p, ctypes.c_void_p)
-                def cb(h, _):
-                    buf = ctypes.create_unicode_buffer(64)
-                    GetClassNameW(h, buf, 64)
-                    if buf.value == "rctrl_renwnd32" and IsWindowVisible(h):   # classic Outlook main window
-                        found.append(h)
-                    return True
-                EnumWindows(proto(cb), 0)
-                return bool(found)
-            except Exception:
-                return False
-        if classic_visible():
-            result = {}
-            def worker():
+                import pythoncom, win32com.client
+                pythoncom.CoInitialize()
+                app = win32com.client.Dispatch("Outlook.Application")
+                ns = app.GetNamespace("MAPI")
                 try:
-                    import pythoncom, win32com.client
-                    pythoncom.CoInitialize()
-                    outlook = win32com.client.Dispatch("Outlook.Application")
-                    mail = outlook.CreateItem(0)
-                    mail.To = to
-                    mail.Subject = subject
-                    mail.Body = body
-                    mail.Send()
-                    result["ok"] = True
-                except Exception as e:
-                    result["err"] = str(e)
-            t = threading.Thread(target=worker, daemon=True)
-            t.start()
-            t.join(12)
-            if result.get("ok"):
-                return {"ok": True, "method": "outlook"}
+                    ns.Logon("", "", False, False)
+                except Exception:
+                    pass
+                outbox = ns.GetDefaultFolder(4)
+                mail = app.CreateItem(0)
+                mail.To = to
+                mail.Subject = subject
+                mail.Body = body
+                mail.Send()
+                result["queued"] = True
+                start = time.time()
+                kicked = 0
+                while time.time() - start < 50:
+                    if time.time() - kicked > 12:      # push it out now, don't wait for Outlook's schedule
+                        try:
+                            ns.SendAndReceive(False)
+                        except Exception:
+                            pass
+                        kicked = time.time()
+                    time.sleep(2)
+                    try:
+                        pythoncom.PumpWaitingMessages()
+                    except Exception:
+                        pass
+                    try:
+                        if outbox.Items.Count == 0:
+                            result["ok"] = True
+                            break
+                    except Exception:
+                        pass
+            except Exception as e:
+                result["err"] = str(e)
+
+        t = threading.Thread(target=worker, daemon=True)
+        t.start()
+        t.join(60)
+        if result.get("ok"):
+            return {"ok": True, "method": "outlook", "delivered": True}
+        if result.get("queued"):
+            return {"ok": True, "method": "outlook", "delivered": False}
         try:
             url = "mailto:%s?subject=%s&body=%s" % (urllib.parse.quote(to), urllib.parse.quote(subject), urllib.parse.quote(body))
             os.startfile(url)
-            return {"ok": True, "method": "mailto"}
+            return {"ok": True, "method": "mailto", "error": result.get("err")}
         except Exception as e:
             return {"ok": False, "error": str(e)}
 

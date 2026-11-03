@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-vh3KFWlQvElna/DOPDJKrkUMH8biDgJeFxag6buVI24=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-ahFsXuAVQH5EqbAVvg9slSB85YYXW9sxswdG8lp5eiE=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="author" content="Eddie Bila">
@@ -583,7 +583,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202610301500";
+const BUILD = "202611031400";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -3019,11 +3019,18 @@ ${S.me}
 Camblish Training Institute`;
   return {subject, body};
 }
+function mailResultToast(res, to){
+  if (!res || !res.ok) return toast("Could not send the email: " + ((res && res.error) || "unknown error") + ". Use Copy message and send it yourself.", "red big");
+  if (res.method === "outlook" && res.delivered !== false) return toast(`✅ Email sent to ${to}`, "green");
+  if (res.method === "outlook") return toast(`The email to ${to} is waiting in Outlook's Outbox. Open Outlook so it can finish sending.`, "gold big");
+  toast("Your email app opened with the login details. Press Send.", "gold big");
+}
 async function autoMail(r, isNew){
   const m = credMail(r, isNew);
   if (DESKTOP() && DESKTOP().send_email){
+    toast(`✉ Sending login details to ${r.email}…`, "gold");
     const res = await DESKTOP().send_email(r.email, m.subject, m.body);
-    toast(res && res.ok ? (res.method === "outlook" ? `✉ Login details emailed to ${r.email} from your Outlook` : "Your email app opened with the login details. Press Send.") : "Could not open email: " + (res && res.error), res && res.ok ? "green" : "red");
+    mailResultToast(res, r.email);
   } else {
     location.href = `mailto:${encodeURIComponent(r.email)}?subject=${encodeURIComponent(m.subject)}&body=${encodeURIComponent(m.body)}`;
     toast("Your email app opened with the login details. Press Send.", "green");
@@ -3043,8 +3050,9 @@ function credCard(el, r, isNew){
   $("#ccopy").onclick = async () => { try { await navigator.clipboard.writeText(m.body); toast("Message copied", "green"); } catch { toast("Copy not available", "red"); } };
   $("#cmail").onclick = async () => {
     if (DESKTOP() && DESKTOP().send_email){
+      toast(`✉ Sending to ${r.email}…`, "gold");
       const res = await DESKTOP().send_email(r.email, m.subject, m.body);
-      toast(res && res.ok ? (res.method === "outlook" ? "Email sent from your Outlook" : "Email opened in your mail app. Press Send.") : "Could not open email: " + (res && res.error), res && res.ok ? "green" : "red");
+      mailResultToast(res, r.email);
     } else {
       location.href = `mailto:${encodeURIComponent(r.email)}?subject=${encodeURIComponent(m.subject)}&body=${encodeURIComponent(m.body)}`;
     }
