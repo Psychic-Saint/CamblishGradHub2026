@@ -226,12 +226,39 @@ class Bridge:
             tmp = os.path.join(tempfile.gettempdir(), "alumni_hub_report.html")
             with open(tmp, "w", encoding="utf-8") as f:
                 f.write(html)
-            profile = os.path.join(tempfile.gettempdir(), "alumni_hub_pdf_profile")
-            subprocess.run([edge, "--headless=new", "--disable-gpu", "--no-first-run", f"--user-data-dir={profile}", "--no-pdf-header-footer",
-                            "--virtual-time-budget=6000", f"--print-to-pdf={path}", "file:///" + tmp.replace("\\", "/")],
-                           timeout=90, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+            # A frozen app changes the DLL search path and PATH; Edge must start with a clean Windows environment
+            try:
+                import ctypes
+                ctypes.windll.kernel32.SetDllDirectoryW(None)
+            except Exception:
+                pass
+            env = dict(os.environ)
+            mei = getattr(sys, "_MEIPASS", "")
+            if mei:
+                env["PATH"] = os.pathsep.join(x for x in env.get("PATH", "").split(os.pathsep) if x and not x.lower().startswith(mei.lower()))
+            for k in ("_MEIPASS2", "_PYI_APPLICATION_HOME_DIR", "_PYI_ARCHIVE_FILE", "_PYI_PARENT_PROCESS_LEVEL", "PYTHONHOME", "PYTHONPATH", "TCL_LIBRARY", "TK_LIBRARY"):
+                env.pop(k, None)
+            logf = os.path.join(tempfile.gettempdir(), "alumni_hub_pdf.log")
+            url = "file:///" + tmp.replace("\\", "/")
+            last = ""
+            for attempt, extra in enumerate((["--headless=new"], ["--headless"])):
+                profile = os.path.join(tempfile.gettempdir(), "alumni_hub_pdf_profile" + ("" if attempt == 0 else "2"))
+                with open(logf, "w", encoding="utf-8", errors="ignore") as lg:
+                    try:
+                        subprocess.run([edge] + extra + ["--disable-gpu", "--no-first-run", "--no-default-browser-check", f"--user-data-dir={profile}",
+                                        "--no-pdf-header-footer", "--virtual-time-budget=6000", f"--print-to-pdf={path}", url],
+                                       timeout=90, env=env, cwd=tempfile.gettempdir(), stdin=subprocess.DEVNULL, stdout=lg, stderr=lg,
+                                       creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+                    except subprocess.TimeoutExpired:
+                        pass
+                if os.path.exists(path) and os.path.getsize(path) > 0:
+                    break
+                try:
+                    last = open(logf, encoding="utf-8", errors="ignore").read()[-300:].strip()
+                except Exception:
+                    last = ""
             if not os.path.exists(path):
-                return {"ok": False, "error": "Edge could not create the PDF"}
+                return {"ok": False, "error": "Edge could not create the PDF" + (": " + last.splitlines()[-1][:160] if last else "")}
             os.startfile(path)
             return {"ok": True, "path": path}
         except Exception as e:
@@ -447,6 +474,11 @@ def window_size():
 
 
 def main():
+    if "--selftest-pdf" in sys.argv:      # diagnostics: Camblish Alumni Hub.exe --selftest-pdf
+        r = Bridge().save_pdf("Alumni Hub PDF test.pdf", "<html><body style='font-family:Arial'><h1>Camblish Alumni Hub</h1><p>PDF test page</p></body></html>")
+        with open(os.path.join(os.path.expanduser("~"), "Downloads", "Alumni Hub PDF test result.txt"), "w") as f:
+            f.write(json.dumps(r))
+        return
     try:
         import ctypes
         ctypes.windll.shcore.SetProcessDpiAwareness(1)
