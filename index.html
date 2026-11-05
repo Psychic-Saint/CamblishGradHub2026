@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-cRlrgj4xpQf1w/0g1mVyayu+3MJ16Aj8iEtTS5m+CaI=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-4nPfinwg2zm5XWCcKM6Eh3lXR8jbl8d7BGKYytKoJps=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="author" content="Eddie Bila">
@@ -583,7 +583,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202611051930";
+const BUILD = "202611052000";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -2504,7 +2504,7 @@ async function reportPdf(name, htmlIn){
     if (DESKTOP() && DESKTOP().save_pdf){
       const r = await DESKTOP().save_pdf(name, html);
       if (r && r.ok){ toast("PDF saved to Downloads and opened: " + name, "green"); return true; }
-      toast("Opening the print window instead. Choose “Save as PDF”.", "gold big");   // never leave someone without their report
+      // never leave someone without their report: fall back to the print window
       return printHTML(html, true);
     }
     if (DESKTOP() && DESKTOP().save_file){   // older desktop installs: open it ready to save as PDF
@@ -2513,16 +2513,26 @@ async function reportPdf(name, htmlIn){
     return printHTML(htmlIn || buildReport(), true);
   } catch(e){ toast("Could not make the PDF: " + e.message, "red"); return false; }
 }
-/* print through the browser's own engine: clean page breaks, then "Save as PDF" */
+/* print through the browser's own engine: clean page breaks, then "Save as PDF".
+   Before the print window opens, show the three settings that keep the page address, date and title off the PDF. */
 function printHTML(html, asPdf){
-  return new Promise(res => {
+  const go = () => new Promise(res => {
     const f = document.createElement("iframe"); f.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0"; f.srcdoc = html; document.body.appendChild(f);
     f.onload = () => setTimeout(() => {
-      try { f.contentWindow.focus(); f.contentWindow.print(); if (asPdf) toast("In the print window set Destination to “Save as PDF” (not Microsoft Print to PDF), turn on “Background graphics”, then Save. Pages come out landscape.", "gold big"); res(true); }
+      try { f.contentWindow.focus(); f.contentWindow.print(); res(true); }
       catch(e){ toast("Could not open printing: " + e.message, "red"); res(false); }
       setTimeout(() => f.remove(), 60000);
     }, 700);
   });
+  if (!asPdf || store.get("pdf_tips_ok")) return go();
+  return new Promise(res => modal(`<h3>⬇ Save as PDF</h3><p class="small muted">The print window opens next. Set these three things once and the PDF comes out clean and landscape:</p>
+    <ol class="small" style="line-height:1.8;margin:8px 0 4px 18px;padding:0"><li><b>Destination / Printer:</b> Save as PDF <span class="muted">(not Microsoft Print to PDF)</span></li>
+    <li>Open <b>More settings</b> and <b>untick “Headers and footers”</b> <span class="muted">(this removes the web address, date and page title)</span></li>
+    <li><b>Tick “Background graphics”</b> <span class="muted">(keeps the colours)</span></li></ol>
+    <label class="row small" style="gap:6px;margin-top:8px"><input type="checkbox" id="ptOk"> Don't show this again on this computer</label>
+    <div class="row" style="margin-top:12px"><span class="spacer"></span><button class="btn ghost" id="mc">Cancel</button><button class="btn gold" id="mo">Open print window</button></div>`,
+    (m, close) => { $("#mc", m).onclick = () => { close(); res(false); };
+      $("#mo", m).onclick = () => { if ($("#ptOk", m).checked) store.set("pdf_tips_ok", 1); close(); go().then(res); }; }));
 }
 async function saveFile(name, content, open){
   if (DESKTOP() && DESKTOP().save_file){ const r = await DESKTOP().save_file(name, content, true); toast(r && r.ok ? "Saved to Downloads and opened: " + name : "Could not save: " + (r && r.error), r && r.ok ? "green" : "red"); return; }
