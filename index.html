@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-4nPfinwg2zm5XWCcKM6Eh3lXR8jbl8d7BGKYytKoJps=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-MKU+bLo9xNh097SMWQ7I47CIC6WKzXa+crLHPZeNYi8=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="author" content="Eddie Bila">
@@ -583,7 +583,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202611052000";
+const BUILD = "202611061000";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -1198,7 +1198,7 @@ function orderKey(a, b){
 }
 const groupOf = l => `NQF ${l.nqf ?? "?"} · ${l.programme || "Programme not set"}`;
 function stageList(){
-  // Groups run NQF level (low to high), then programme. Inside a group graduates go up in seat order (seats are fixed in advance).
+  // Groups run NQF level (low to high), then programme. Inside a group it is first come, first seated, first on stage.
   const present = S.data.learners.filter(l => l.status === "present");
   const gkey = l => [String(l.nqf ?? 99).padStart(3,"0"), l.programme||""].join("|");
   const keys = [...new Set(present.map(gkey))].sort();
@@ -2369,7 +2369,13 @@ function seatMap(preselect){
         $$(".pseat", m).forEach(r => r.onclick = () => { const l = S.data.learners.find(x => x.seat === r.dataset.seat); if (l){ sel = l; draw(); } else toast(r.dataset.seat + (r.getAttribute("fill") === "url(#resv)" ? " is reserved for VIPs" : r.getAttribute("fill") === "url(#cam)" ? " is kept empty: camera walkway" : " is empty")); });
         const on = $(".pseat.on", m); if (on && on.scrollIntoView) on.scrollIntoView({block:"center", inline:"center", behavior:"smooth"}); };
       $("#mc", m).onclick = close;
-      $("#smPrint", m).onclick = () => { const w = window.open("", "_blank"); if (!w) return toast("Allow pop-ups to print the plan", "red"); w.document.write(`<title>Great Hall seating plan</title><style>body{margin:0;font-family:Arial}svg{width:100%;height:auto}${PLAN_CSS}</style>${planSVG(sel)}${sel ? planGuide(sel) : ""}`); w.document.close(); setTimeout(() => { try { w.focus(); w.print(); } catch(e){} }, 400); };
+      $("#smPrint", m).onclick = async () => { const d = S.data.event, crest = document.querySelector('.top img').src;   // works in the desktop app too (no pop-up window)
+        const html = `<!doctype html><html><head><meta charset="utf-8"><title>Seating plan · ${esc(d.name)}</title><style>@page{size:A4 portrait;margin:0}*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+          body{margin:0;font-family:Arial,sans-serif;color:#0d1b3e}.hd{display:flex;align-items:center;gap:12px;background:#0d1b3e;color:#fff;padding:8mm 10mm;border-bottom:3px solid #d4af37}.hd img{width:44px;height:44px;border-radius:50%;background:#fff;padding:3px}
+          .hd h1{margin:0;font-size:18px;letter-spacing:.6px}.hd p{margin:2px 0 0;font-size:11px;color:#c9d3f2}.bd{padding:5mm 8mm}svg{width:100%;height:auto;max-height:235mm}${PLAN_CSS}</style></head><body>
+          <div class="hd"><img src="${crest}" alt=""><div><h1>GREAT HALL SEATING PLAN</h1><p>${esc([d.name, d.date ? new Date(d.date).toLocaleDateString("en-ZA", {day:"numeric", month:"long", year:"numeric"}) : "", d.venue].filter(Boolean).join(" · "))}</p></div></div>
+          <div class="bd">${planSVG(sel)}${sel ? planGuide(sel) : ""}</div></body></html>`;
+        await reportPdf(`Seating plan ${d.name} ${new Date().toISOString().slice(0,10)}.pdf`.replace(/[\\/:*?"<>|]/g, ""), html); };
       $("#smq", m).oninput = e => { const q = e.target.value.toLowerCase().trim(); if (!q){ $("#smres", m).innerHTML = ""; return; }
         const hits = S.data.learners.filter(l => l.seat && (fullName(l).toLowerCase().includes(q) || (l.seat || "").toLowerCase() === q)).slice(0, 8);
         $("#smres", m).innerHTML = hits.map(l => `<button class="chip" data-pick="${l.id}">${esc(fullName(l))} · ${esc(l.seat)}</button>`).join("") || `<span class="small muted">No graduate with a seat matches.</span>`;
@@ -2852,7 +2858,7 @@ function viewManage(){
       <button class="btn sm" id="esave" style="margin-top:10px">Save settings</button></div>
   </div>
   <div class="card"><h2>Seating plan · ${HALL.name}<span class="spacer"></span><button class="btn ghost sm" id="smOpen">💺 View seating plan</button>${can("seating")?`<button class="btn gold sm" id="smAssign">Assign seats by programme</button>`:""}</h2>
-    ${(() => { const st = seatStats(), sp = seatPlan(); return `<p class="small">Every expected graduate gets a fixed seat in advance, so name tags can be printed early. Programmes go in stage order (NQF 1 first, then 2, 3 and up), surname order inside a programme, and each programme starts at the end of a row. Filling starts in the <b>lower right block at EE-01</b>, then the lower centre and lower left blocks, then the upper blocks from right to left; guests use the remaining upper seats. Rows AA, BB and CC on the lower right are for VIPs and row DD across the lower section stays empty as the camera walkway. Absent graduates keep their seat open in case they arrive later; graduates go on stage in seat order. Anyone marked "not attending" or from a region with its own ceremony gets no seat.</p>
+    ${(() => { const st = seatStats(), sp = seatPlan(); return `<p class="small">Each programme gets its own block of seats for everyone expected, in stage order (NQF 1 first, then 2, 3 and up), and each programme starts at the end of a row. <b>Inside a programme it is first come, first seated:</b> the first graduate to arrive takes the first seat and goes on stage first, the next arrival takes the next seat, and so on. Not-yet-arrived graduates hold provisional seats behind them, so print name tags at check-in. Filling starts in the <b>lower right block at EE-01</b>, then the lower centre and lower left blocks, then the upper blocks from right to left; guests use the remaining upper seats. Rows AA, BB and CC on the lower right are for VIPs and row DD across the lower section stays empty as the camera walkway. Absent graduates' seats stay open at the end of their programme's block in case they arrive. Anyone marked "not attending" or from a region with its own ceremony gets no seat.</p>
     ${can("seating") ? `<div class="row" style="gap:8px;flex-wrap:wrap;margin:8px 0"><label class="lbl" style="margin:0">Regions with their own ceremony (no seat here)</label><input type="text" id="skr" style="flex:1;min-width:220px" value="${esc(skipRegions().join(", "))}" placeholder="e.g. DBN, KZN, WC, CPT"><button class="btn sm" id="skrSave">Save and reseat</button></div>` : skipRegions().length ? `<p class="small muted">Own ceremony (no seat here): ${esc(skipRegions().join(", "))}</p>` : ""}
     <div class="row" style="gap:18px"><div><div class="big2">${st.seated}</div><div class="small muted">seated</div></div><div><div class="big2">${st.lower}</div><div class="small muted">lower section (of ${sp.lower})</div></div><div><div class="big2">${st.upper}</div><div class="small muted">upper section</div></div><div><div class="big2" style="color:${st.none?"var(--bad)":"inherit"}">${st.none}</div><div class="small muted">without a seat</div></div><div><div class="big2">${sp.other}</div><div class="small muted">own regional ceremony</div></div></div>`; })()}
   </div>
