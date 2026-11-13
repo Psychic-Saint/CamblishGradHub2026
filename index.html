@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-MKU+bLo9xNh097SMWQ7I47CIC6WKzXa+crLHPZeNYi8=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-57AlahrKSFEV2DFiDFGBXDia6PSS3KtCDHFeXdxzEzs=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="author" content="Eddie Bila">
@@ -208,6 +208,7 @@ body{background:
 .goldbar{height:3px;background:linear-gradient(90deg,transparent,var(--gold),var(--gold-2),var(--gold),transparent)}
 nav.tabs{background:transparent;border:0}
 nav.tabs .in{padding:10px 12px 4px;gap:8px}
+@media (min-width:900px){nav.tabs .in{max-width:1400px;flex-wrap:wrap;justify-content:center;overflow:visible}nav.tabs button{padding:8px 12px!important;font-size:14.5px}}
 nav.tabs button{border-radius:12px!important;padding:9px 16px!important;transition:transform .15s;background:linear-gradient(180deg,#3563e9,#1d3fae)!important;color:#fff!important;border:1px solid rgba(243,210,122,.55)!important;font-weight:800!important;text-shadow:0 1px 0 rgba(0,0,0,.25);box-shadow:0 4px 0 #0b1f5c,0 10px 18px -8px rgba(0,0,0,.55)!important;}
 nav.tabs button:hover{background:linear-gradient(180deg,#4a76f0,#2448c0)!important}
 nav.tabs button.on{background:linear-gradient(180deg,#f8dc85,#d4af37)!important;color:#081a45!important;border-color:#fff3c4!important;text-shadow:none;box-shadow:0 4px 0 #9c7d22,0 12px 22px -8px rgba(212,175,55,.85)!important;transform:translateY(-2px)}
@@ -431,6 +432,8 @@ nav.tabs .badge.green{background:var(--ok);color:#fff}
 .tteam{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin:2px 0 6px}.tnote{font-size:13px;background:color-mix(in srgb,var(--cl) 55%,#fff);border-radius:10px;padding:7px 10px;margin:4px 0 6px}.tfoot{margin-top:4px}
 .tcath b{font-size:14px;letter-spacing:.3px}.tcarr{width:12px;color:#f3d27a}.tcbar{flex:1;min-width:80px;max-width:220px;height:7px;background:rgba(255,255,255,.18);border-radius:6px;overflow:hidden}.tcbar i{display:block;height:100%;background:#d4af37}
 .tcn{font-size:12px;color:#dbe3f8}.tcn.muted{opacity:.7}.tcath .tag.red{background:#b3261e;color:#fff;border:0}.tcb{padding:4px 10px 8px}.tcat.shut .tcb{display:none}
+.vcat{margin-top:12px}.vcath{display:flex;align-items:center;gap:8px;font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:#1d3fae;margin:8px 4px}.vcath small{background:#1d3fae;color:#fff;border-radius:20px;padding:1px 8px;font-size:10.5px}
+.lrow.vip.arrived{border-left:4px solid var(--ok)}.lrow.vip.absent{opacity:.7}
 .leadtag{display:inline-block;background:var(--pc);color:#fff;border-radius:99px;padding:2px 9px;font-size:11px;font-weight:900;letter-spacing:.2px;vertical-align:2px;box-shadow:0 0 0 2px #fff,0 0 0 3.5px var(--pc);max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sgh{cursor:pointer;user-select:none}.sgh .chev{display:inline-block;margin-right:8px;transition:transform .15s}.sgh.closed .chev{transform:rotate(-90deg)}.sgh:hover{filter:brightness(1.12)}
 .lnotes{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:4px;font-size:12px}
@@ -463,7 +466,7 @@ button.ro,.btn.ro,.sbtn.ro{filter:blur(1.2px) grayscale(.6);opacity:.45;pointer-
 .annscreen input,.annscreen textarea,.annscreen .rform input{color:#0d1b3e!important;background:#fff!important;caret-color:#1d3fae}.annscreen input::placeholder{color:#7a849c}
 .catsel{width:auto;max-width:165px;flex:0 0 auto;border:2px solid var(--cc,#1d3fae);background:var(--cb,#fff);color:var(--cc,#1d3fae);font-weight:800;border-radius:10px;padding:0 10px;cursor:pointer}
 @media (max-width:600px){.anncompose .row{flex-wrap:wrap!important}.anncompose .catsel{flex:1;max-width:none}}
-.stiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:6px 0 12px}
+.stiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:6px 0 12px}
 .stile{display:grid;grid-template-columns:auto 1fr;column-gap:8px;align-items:center;text-align:left;background:#fff;border:1px solid var(--line);border-left:4px solid var(--royal);border-radius:10px;padding:6px 10px;cursor:pointer;font:inherit;color:var(--ink);transition:transform .12s}
 .stile:hover{transform:translateY(-1px)}.stile b{grid-row:span 2;font-size:20px;line-height:1;color:var(--navy);min-width:22px}.stile span{font-weight:800;font-size:12px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.stile small{font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
 .stile.hot{display:flex;align-items:center;gap:10px;padding:6px 8px 6px 7px;border:1.5px solid #c99a2e;border-radius:14px;position:relative;overflow:hidden;
@@ -483,7 +486,7 @@ button.ro,.btn.ro,.sbtn.ro{filter:blur(1.2px) grayscale(.6);opacity:.45;pointer-
 @media (max-width:860px){.stiles:has(.hot){grid-template-columns:repeat(2,minmax(0,1fr))}}
 @keyframes gshine{0%,55%{left:-40%}100%{left:130%}}
 @media (prefers-reduced-motion: reduce){.stile.hot::before,.glive i{animation:none}}
-@media (max-width:860px){.stiles{grid-template-columns:repeat(2,minmax(0,1fr))}.stiles .stile:nth-child(3){grid-column:1/-1}}
+@media (max-width:860px){.stiles{grid-template-columns:repeat(2,minmax(0,1fr))}.stiles .stile.hot{grid-column:1/-1}}
 .fdgrid{display:flex;flex-direction:column}.fdgrid .annscreen{order:-1}
 .actscreen .feed-item{gap:8px;padding:6px 4px}.actscreen .feed-item .ic{width:24px;height:24px;font-size:12px}
 .actscreen .feed-item .t{font-size:13px;line-height:1.35}.actscreen .feed-item .w{font-size:11px}.actscreen .tag{font-size:10px;padding:1px 6px}
@@ -557,10 +560,12 @@ table.t td .acc{margin:0}
   <button data-tab="overview">Overview</button>
   <button data-tab="tasks">Tasks <span class="badge hidden" id="bRoad"></span></button>
   <button data-tab="checkin">Check-in</button>
+  <button data-tab="payments" id="tabPay">Payments <span class="badge gold hidden" id="bPay"></span></button>
   <button data-tab="robes">Robes <span class="badge gold hidden" id="bRobe"></span></button>
   <button data-tab="stage">Stage <span class="badge gold hidden" id="bStage"></span></button>
   <button data-tab="certs">Certificates <span class="badge gold hidden" id="bCert"></span></button>
   <button data-tab="grads">Graduates <span class="badge green hidden" id="bGrad"></span></button>
+  <button data-tab="vip" id="tabVip">⭐ VIP <span class="badge hidden" id="bVip"></span></button>
   <button data-tab="feed">Updates <span class="badge hidden" id="bFeed"></span></button>
   <button data-tab="settings" id="tabSettings">⚙ Settings</button>
 </div></nav></div>
@@ -583,7 +588,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202611061000";
+const BUILD = "202611131500";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -617,9 +622,11 @@ const PERMS = [
   ["tasks_update","Update task status","Completed, roadblock, on hold"],
   ["checkin","Check in learners","Mark present or absent"],
   ["print_tags","Print name tags",""],
+  ["payments","Capture robe payments","Paid or exempt, before robes"],
   ["robes","Issue robes",""],
   ["stage","Run stage order","Call graduates to the stage"],
   ["certs","Issue certificates",""],
+  ["vip","VIP desk","Guest list, arrivals and VIP reports"],
   ["comment","Post comments","On tasks and in Updates"],
   ["announce","Send announcements","Alerts everyone"],
   ["upload","Upload learners","Excel or CSV lists"],
@@ -636,13 +643,15 @@ function permBoxes(id, selected, allowed){
 /* stations: tick the right access for the job someone does on the day */
 const STATIONS = [
   ["checkin","📋 Check-in desk", ["checkin","print_tags","tasks_update","comment"], 5],
+  ["payments","💳 Payments desk", ["payments","print_tags","tasks_update","comment"], 2],
   ["robes","🎓 Robes table", ["robes","print_tags","tasks_update","comment"], 5],
   ["stage","🎤 Stage caller", ["stage","print_tags","tasks_update","comment"], 2],
   ["certs","📜 Certificates table", ["certs","tasks_update","comment"], 5],
+  ["vip","⭐ VIP desk", ["vip","tasks_update","comment"], 2],
   ["floor","⭐ Floor team (every station)", ROLE_DEFAULT.team, 0]];
 const sameSet = (a, b) => a.length === b.length && a.every(x => b.includes(x));
-const STATION_CORE = ["checkin","robes","stage","certs"];
-const stationOf = perms => { const c = STATION_CORE.filter(k => (perms || []).includes(k)); return c.length === 1 ? c[0] : c.length === 4 ? "floor" : ""; };
+const STATION_CORE = ["checkin","payments","robes","stage","certs","vip"];
+const stationOf = perms => { const c = STATION_CORE.filter(k => (perms || []).includes(k)); return c.length === 1 ? c[0] : ["checkin","robes","stage","certs"].every(k => c.includes(k)) ? "floor" : ""; };
 function stationSelect(id, cur){ return `<select id="${id}" class="stsel">${STATIONS.map(([k,l]) => `<option value="${k}" ${k === cur ? "selected" : ""}>${l}</option>`).join("")}<option value="" ${!cur ? "selected" : ""}>✏ Custom (tick below)</option></select>`; }
 function wireStation(sel, boxes){
   const apply = () => { const st = STATIONS.find(x => x[0] === sel.value); if (!st) return; $$("input", boxes).forEach(i => { if (!i.disabled) i.checked = st[2].includes(i.value); }); };
@@ -1148,7 +1157,7 @@ function liveBar(){
   $("#goLive").onclick = () => { CODE = live.code; try { sessionStorage.removeItem("hub_pick"); } catch {} enterApp(); };
 }
 /* view-only: everyone sees every list; buttons they can't use are blurred and switched off */
-const RO_MAP = [["checkin","[data-ci]"],["robes","[data-rb]"],["certs","[data-ct]"],["stage","#callNext,#undoCall,[data-sg]"],["print_tags","[data-tag],#printAllTags,#ciPrintAll"]];
+const RO_MAP = [["checkin","[data-ci]"],["payments","[data-pay]"],["vip","[data-vip],#vipUp,#vipAdd"],["robes","[data-rb]"],["certs","[data-ct]"],["stage","#callNext,#undoCall,[data-sg]"],["print_tags","[data-tag],#printAllTags,#ciPrintAll"]];
 function roLock(){
   let locked = 0;
   RO_MAP.forEach(([p, sel]) => { if (can(p)) return; $$(sel, main).forEach(b => { if (b.classList.contains("ro")) { locked++; return; } b.disabled = true; b.classList.add("ro"); b.title = "View only: ask the administrator for access"; b.setAttribute("aria-disabled", "true"); locked++; }); });
@@ -1172,8 +1181,12 @@ function render(){
   $("#bRoad").textContent = road; $("#bRoad").classList.toggle("hidden", !road);
   $("#bFeed").textContent = S.unseen||""; $("#bFeed").classList.toggle("hidden", !S.unseen || S.tab==="feed");
   $$("nav.tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === S.tab));
-  const views = { overview:viewOverview, tasks:viewTasks, checkin:viewCheckin, robes:viewRobes, stage:viewStage, certs:viewCerts, grads:viewGrads, feed:viewFeed, settings:viewSettings, manage:() => openSettings("event"), users:() => openSettings("users") };
-  const P = d.learners.filter(l => l.status === "present"), rw = P.filter(l => !l.robe_issued).length, cw = P.filter(l => l.stage_status === "done" && !l.cert_issued && !openQ(l).length).length;
+  const views = { overview:viewOverview, tasks:viewTasks, checkin:viewCheckin, payments:viewPayments, vip:viewVip, robes:viewRobes, stage:viewStage, certs:viewCerts, grads:viewGrads, feed:viewFeed, settings:viewSettings, manage:() => openSettings("event"), users:() => openSettings("users") };
+  const P = d.learners.filter(l => l.status === "present"), rw = P.filter(robeReady).length, pw = P.filter(needsPay).length, cw = P.filter(l => l.stage_status === "done" && !l.cert_issued && !openQ(l).length).length;
+  $("#bPay").textContent = pw; $("#bPay").classList.toggle("hidden", !pw); $("#tabPay").classList.toggle("hidden", !payReq());
+  $("#tabVip").classList.toggle("hidden", !vipAccess());
+  if (S.tab === "payments" && !payReq()) S.tab = "robes";
+  if (S.tab === "vip" && !vipAccess()) S.tab = "overview";
   $("#bRobe").textContent = rw; $("#bRobe").classList.toggle("hidden", !rw); $("#bCert").textContent = cw; $("#bCert").classList.toggle("hidden", !cw);
   const sw = P.filter(l => l.robe_issued && l.stage_status !== "done").length, onS = P.some(l => l.stage_status === "called");
   $("#bStage").textContent = sw; $("#bStage").classList.toggle("hidden", !sw); $("#bStage").title = `${sw} in the stage line${onS ? ", 1 on stage now" : ""}`;
@@ -1838,14 +1851,18 @@ function listOut(el, list, rowFn, empty){
 /* ======================================================================
    PROCESS FLOW + PROGRAMME GROUPS (shared by every learner tab)
    ====================================================================== */
-const FLOW = [["checkin","Check-in","not arrived"],["robes","Robes","waiting"],["stage","Stage","in the line"],["certs","Certificates","to hand out"],["grads","Graduates","graduated"]];
+const payReq = () => !S.data || !S.data.event || S.data.event.pay_required !== false;
+const needsPay = l => l.status === "present" && !l.robe_issued && payReq() && !l.paid;      // checked in, robe not paid yet
+const robeReady = l => l.status === "present" && !l.robe_issued && (!payReq() || l.paid);   // paid (or no payment step): at the robes table
+const FLOW_ALL = [["checkin","Check-in","not arrived"],["payments","Payments","to pay"],["robes","Robes","waiting"],["stage","Stage","in the line"],["certs","Certificates","to hand out"],["grads","Graduates","graduated"]];
+const flowSteps = () => FLOW_ALL.filter(f => f[0] !== "payments" || payReq());
 function flowCounts(){
   const L = S.data.learners, P = L.filter(l => l.status === "present");
-  return { checkin:L.filter(l => l.status !== "present").length, robes:P.filter(l => !l.robe_issued).length,
+  return { checkin:L.filter(l => l.status !== "present").length, payments:P.filter(needsPay).length, robes:P.filter(robeReady).length,
     stage:P.filter(l => l.robe_issued && l.stage_status !== "done").length, certs:P.filter(l => l.stage_status === "done" && !l.cert_issued && !openQ(l).length).length, grads:P.filter(isGrad).length };
 }
 function flowBar(cur){
-  const c = flowCounts(), ci = FLOW.findIndex(x => x[0] === cur);
+  const c = flowCounts(), FLOW = flowSteps(), ci = FLOW.findIndex(x => x[0] === cur);
   return `<nav class="flow noprint" aria-label="Graduation process">${FLOW.map(([k,l,s], i) => `${i ? `<span class="farr" aria-hidden="true">›</span>` : ""}<button class="fstep ${k === cur ? "on" : ""} ${i < ci ? "past" : ""}" data-flow="${k}"><span class="fnum">${i+1}</span><span class="ftx"><b>${l}</b><small>${c[k]} ${s}</small></span></button>`).join("")}</nav>`;
 }
 function putFlow(cur){ const f = $("#flow"); if (!f) return; f.innerHTML = flowBar(cur); $$("[data-flow]", f).forEach(b => b.onclick = () => setTab(b.dataset.flow)); const on = $(".fstep.on", f); if (on && f.scrollWidth > f.clientWidth) f.scrollLeft = on.offsetLeft - 20; }
@@ -1934,7 +1951,7 @@ function drawCheckin(){
   const present = S.f.ciFilter === "present";
   groupedOut($("#cilist"), L.filter(l => l.status === S.f.ciFilter), (l, i, prog) => `<div class="lrow ${l.status}">${posTag(i, prog)}${lInfo(l,
       `<div class="meta" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:3px">${/^n/i.test(l.rsvp||"")?`<span class="tag red">RSVP: not attending</span>`:""}${/^y/i.test(l.robe||"")?`<span class="tag gold">Needs robe</span>`:""}${l.status!=="present"&&l.phone?`<a class="tag" href="tel:${esc(String(l.phone).split("/")[0].trim())}">📞 ${esc(l.phone)}</a>`:""}</div>
-       ${l.status==="present"?`<div class="small" style="color:var(--ok)">Arrived ${fmtTime(l.arrived_at)} · by ${esc(l.checked_by||"")} · now ${l.cert_issued?"graduated":l.stage_status==="done"?"collecting certificate":l.robe_issued?"in the stage line":"at robes"}</div>`:""}`)}
+       ${l.status==="present"?`<div class="small" style="color:var(--ok)">Arrived ${fmtTime(l.arrived_at)} · by ${esc(l.checked_by||"")} · now ${l.cert_issued?"graduated":l.stage_status==="done"?"collecting certificate":l.robe_issued?"in the stage line":needsPay(l)?"at payments":"at robes"}</div>`:""}`)}
     <div class="pacts">${l.status==="present" ? `<span class="pill s-Completed">✓ Present</span><span class="tag gold" title="Seat (also their place in the stage line)">${esc(dcode(l))}</span>${tagBtn(l)}${true?`<button class="btn ghost sm" data-ci="${l.id}" data-s="expected">Undo</button>`:""}`
       : l.status==="absent" ? `<span class="tag">Absent</span>${l.seat ? `<span class="tag gold" title="Seat kept open">${esc(l.seat)}</span>` : ""}${tagBtn(l)}${true?`<button class="btn ghost sm" data-ci="${l.id}" data-s="expected">Undo</button><button class="btn green bigbtn" data-ci="${l.id}" data-s="present">Arrived</button>`:""}`
       : `<span class="notarr">Not arrived</span>${l.seat ? `<span class="tag gold" title="Seat">${esc(l.seat)}</span>` : ""}${tagBtn(l)}${true?`<button class="btn ghost sm" data-ci="${l.id}" data-s="absent">Absent</button><button class="btn green bigbtn" data-ci="${l.id}" data-s="present">✓ Mark present</button>`:""}`}</div></div>`,
@@ -1945,7 +1962,7 @@ function drawCheckin(){
     const l = S.data.learners.find(x=>x.id===b.dataset.ci), isPresent = b.dataset.s === "present";
     if (await act("grad_checkin", {p_learner:l.id, p_status:b.dataset.s}, isPresent ? `${fullName(l)} checked in${l.seat ? " · seat " + l.seat : ""}. Now at Robes.` : null)){
       if (isPresent && tagPrefs().auto && can("print_tags")){ stageList(); const fresh = S.data.learners.find(x=>x.id===l.id); if (fresh) printTags([fresh]); }
-      if (isPresent){ bounceTab("robes"); if (S.f.L.q){ S.f.L.q = ""; const q = $(".fbar [data-fk=q]"); if (q){ q.value = ""; q.focus(); } drawCheckin(); } }
+      if (isPresent){ bounceTab(payReq() ? "payments" : "robes"); if (S.f.L.q){ S.f.L.q = ""; const q = $(".fbar [data-fk=q]"); if (q){ q.value = ""; q.focus(); } drawCheckin(); } }
     }
   });
 }
@@ -1956,22 +1973,22 @@ function drawCheckin(){
 function viewRobes(){
   if (!$("#rbView")){
     main.innerHTML = `<div id="bn"></div><div class="card" id="rbView"><div id="flow" class="flowwrap"></div><h2>Robes<span class="spacer"></span><span id="rbSum" class="small muted"></span></h2>
-      <p class="small muted" style="margin-top:-6px">Graduates who have arrived, by programme in the order they arrived. Once their robe is issued they join the line on the <b>Stage</b> tab.</p>
+      <p class="small muted" style="margin-top:-6px">Graduates who have arrived, by programme in the order they arrived. Once their robe is issued they join the line on the <b>Stage</b> tab.<span id="rbPayNote"></span></p>
       ${filterBar()}<div id="rbchips"></div><div id="rblist"></div></div>`;
     wireFilterBar(drawRobes);
   }
   $("#bn").innerHTML = bannerHTML(); wireBanner(); drawRobes();
 }
 function drawRobes(){
-  stageList(); putFlow("robes");
+  stageList(); putFlow("robes"); const pn = $("#rbPayNote"); if (pn) pn.innerHTML = payReq() ? " Only graduates whose robe payment is captured on the <b>Payments</b> tab appear here." : "";
   const L = applyF(S.data.learners.filter(l => l.status === "present"));
-  const wait = L.filter(l => !l.robe_issued), done = L.filter(l => l.robe_issued);
+  const wait = L.filter(robeReady), done = L.filter(l => l.robe_issued), unpaid = L.filter(needsPay).length;
   if (!["wait","done"].includes(S.f.rb)) S.f.rb = "wait";
-  $("#rbSum").textContent = `${done.length} robed · ${wait.length} waiting`;
+  $("#rbSum").textContent = `${done.length} robed · ${wait.length} waiting${unpaid ? ` · ${unpaid} still at payments` : ""}`;
   $("#rbchips").innerHTML = chipsHTML("rbc", [["wait","Waiting for robe",wait.length],["done","Robe issued",done.length]], S.f.rb);
   $$("#rbc .chip").forEach(b => b.onclick = () => { S.f.rb = b.dataset.c; drawRobes(); });
   groupedOut($("#rblist"), S.f.rb === "wait" ? wait : done, (l, i, prog) => `<div class="lrow ${l.robe_issued?"present":"expected"}">${posTag(i, prog)}${lInfo(l,
-      `<div class="small" style="margin-top:2px">${/^y/i.test(l.robe||"")?`<span class="tag gold">Needs robe</span> `:""}${l.belt?`<span class="tag">Belt: ${esc(l.belt)}</span> `:""}<span class="muted">Arrived ${fmtTime(l.arrived_at)}</span>${l.robe_issued?` · <span style="color:var(--ok)">${l.robe_skip?"Own robe":"Robe issued"} ${fmtTime(l.robe_at)}${l.robe_by?" by "+esc(l.robe_by):""}</span>`:""}</div>`)}
+      `<div class="small" style="margin-top:2px">${/^y/i.test(l.robe||"")?`<span class="tag gold">Needs robe</span> `:""}${l.belt?`<span class="tag">Belt: ${esc(l.belt)}</span> `:""}<span class="muted">Arrived ${fmtTime(l.arrived_at)}</span>${l.paid ? ` · <span class="tag green" title="${esc(l.pay_ref || "")}">💳 ${l.pay_method === "Exempt" ? "Exempt" : "Paid " + esc(l.pay_method || "")}</span>` : ""}${l.robe_issued?` · <span style="color:var(--ok)">${l.robe_skip?"Own robe":"Robe issued"} ${fmtTime(l.robe_at)}${l.robe_by?" by "+esc(l.robe_by):""}</span>`:""}</div>`)}
     <div class="pacts"><span class="tag gold" title="Seat (also their place in the stage line)">${esc(dcode(l))}</span>${tagBtn(l)}
       ${true ? (l.robe_issued ? `<span class="pill s-Completed">✓ ${l.robe_skip?"Own robe":"Robed"}</span><button class="btn ghost sm" data-rb="${l.id}" data-v="0">Undo</button>`
         : `<button class="btn ghost sm" data-rb="${l.id}" data-v="1" data-skip="1" title="Has their own robe or does not need one">Own robe</button><button class="btn gold bigbtn" data-rb="${l.id}" data-v="1">🎓 Robe issued</button>`) : ""}</div></div>`,
@@ -1979,6 +1996,192 @@ function drawRobes(){
   wireTags($("#rblist"));
   $$("#rblist [data-rb]").forEach(b => b.onclick = async () => { b.disabled = true; const l = S.data.learners.find(x=>x.id===b.dataset.rb);
     if (await act("grad_robe2", {p_learner:l.id, p_issued:b.dataset.v==="1", p_skip:!!b.dataset.skip}, b.dataset.v==="1" ? `${fullName(l)} robed. Now in the stage line.` : null) && b.dataset.v==="1") bounceTab("stage"); });
+}
+
+/* ======================================================================
+   PAYMENTS  (robe payment after check-in, before the robes table)
+   ====================================================================== */
+const PAY_METHODS = [["Cash","💵 Cash"],["Card","💳 Card"],["EFT","🏦 EFT"]];
+function viewPayments(){
+  if (!$("#pyView")){
+    main.innerHTML = `<div id="bn"></div><div class="card" id="pyView"><div id="flow" class="flowwrap"></div><h2>Robe payments<span class="spacer"></span><span id="pySum" class="small muted"></span><button class="btn ghost sm noprint" id="pyExp" style="margin-left:8px">⬇ Payments (Excel)</button></h2>
+      <p class="small muted" style="margin-top:-6px">Graduates who have checked in, by programme in the order they arrived. Capture the robe payment (or mark it not needed) and they move on to <b>Robes</b>.</p>
+      ${filterBar()}<div id="pychips"></div><div id="pylist"></div></div>`;
+    wireFilterBar(drawPayments);
+    $("#pyExp").onclick = exportPayments;
+  }
+  $("#bn").innerHTML = bannerHTML(); wireBanner(); drawPayments();
+}
+function drawPayments(){
+  stageList(); putFlow("payments");
+  const L = applyF(S.data.learners.filter(l => l.status === "present"));
+  const due = L.filter(needsPay), paid = L.filter(l => l.paid);
+  if (!["due","paid"].includes(S.f.py)) S.f.py = "due";
+  const by = m => paid.filter(l => (l.pay_method || "Cash") === m).length;
+  $("#pySum").textContent = `${due.length} to pay · ${paid.length} done (${PAY_METHODS.map(([k]) => `${k} ${by(k)}`).join(", ")}, exempt ${by("Exempt")})`;
+  $("#pychips").innerHTML = chipsHTML("pyc", [["due","Awaiting payment",due.length],["paid","Paid or exempt",paid.length]], S.f.py);
+  $$("#pyc .chip").forEach(b => b.onclick = () => { S.f.py = b.dataset.c; drawPayments(); });
+  groupedOut($("#pylist"), S.f.py === "due" ? due : paid, (l, i, prog) => `<div class="lrow ${l.paid ? "present" : "expected"}">${posTag(i, prog)}${lInfo(l,
+      `<div class="small" style="margin-top:2px">${/^y/i.test(l.robe||"")?`<span class="tag gold">Needs robe</span> `:""}<span class="muted">Arrived ${fmtTime(l.arrived_at)}</span>${l.paid ? ` · <span style="color:var(--ok)">${l.pay_method === "Exempt" ? "No payment needed" : "Paid " + esc(l.pay_method || "")}${l.pay_ref ? " · ref " + esc(l.pay_ref) : ""} ${fmtTime(l.paid_at)}${l.paid_by ? " by " + esc(l.paid_by) : ""}</span>` : ""}</div>`)}
+    <div class="pacts"><span class="tag gold" title="Seat">${esc(dcode(l))}</span>${tagBtn(l)}
+      ${l.paid ? `<span class="pill s-Completed">✓ ${l.pay_method === "Exempt" ? "Exempt" : "Paid"}</span>${l.robe_issued ? "" : `<button class="btn ghost sm" data-pay="${l.id}" data-m="undo">Undo</button>`}`
+        : `<button class="btn ghost sm" data-pay="${l.id}" data-m="Exempt" title="Own robe, sponsored or already paid">Not needed</button>${PAY_METHODS.map(([k, lab]) => `<button class="btn ${k === "Cash" ? "gold bigbtn" : "sm"}" data-pay="${l.id}" data-m="${k}">${lab}</button>`).join("")}`}</div></div>`,
+    fActive() ? "No graduate matches these filters." : S.f.py === "due" ? "Nobody waiting to pay right now." : "No payments captured yet.", "payments", byArrival, drawPayments);
+  wireTags($("#pylist"));
+  $$("#pylist [data-pay]").forEach(b => b.onclick = async () => { const l = S.data.learners.find(x => x.id === b.dataset.pay); if (!l) return; const m = b.dataset.m;
+    if (m === "undo"){ if (!confirm(`Undo the payment for ${fullName(l)}?`)) return; b.disabled = true; return act("grad_pay", {p_learner:l.id, p_paid:false, p_method:null, p_ref:null}, "Payment undone"); }
+    let ref = null; if (m === "Card" || m === "EFT"){ ref = await ask(`${m} payment for ${fullName(l)}`, "Reference or slip number (optional)", {okText:"Capture payment"}); if (ref === null) return; }
+    b.disabled = true;
+    if (await act("grad_pay", {p_learner:l.id, p_paid:true, p_method:m, p_ref:ref}, m === "Exempt" ? `${fullName(l)} sent to Robes (no payment needed)` : `💳 ${m} payment captured for ${fullName(l)}. Now at Robes.`)) bounceTab("robes"); });
+}
+function exportPayments(){
+  const L = S.data.learners.filter(l => l.status === "present").sort((a, b) => progKey(a).localeCompare(progKey(b)) || new Date(a.paid_at || 0) - new Date(b.paid_at || 0));
+  const head = ["Programme","NQF","First name","Surname","Seat","Client","Arrived","Payment","Method","Reference","Captured by","Time"];
+  const rows = L.map(l => [l.programme, l.nqf, l.first_name, l.surname, l.seat, l.client, fmtTime(l.arrived_at), l.paid ? (l.pay_method === "Exempt" ? "Not needed" : "Paid") : "Outstanding", l.pay_method || "", l.pay_ref || "", l.paid_by || "", fmtTime(l.paid_at)]);
+  const csv = [head, ...rows].map(r => r.map(v => `"${String(v ?? "").replace(/"/g,'""')}"`).join(",")).join("\r\n");
+  saveFile(`Robe payments ${S.data.event.name} ${new Date().toISOString().slice(0,10)}.csv`.replace(/[\\/:*?"<>|]/g, ""), "﻿" + csv);
+}
+
+/* ======================================================================
+   VIP  (clients, facilitators, guests: about 30 people, own arrival list)
+   ====================================================================== */
+const VIP_CATS = ["Client","Facilitator","Sponsor","Official","Speaker","Guest","Staff"];
+const vipAccess = () => !!S.user && (S.user.role === "admin" || S.user.role === "manager" || can("vip"));
+const vipName = v => [v.title, v.first_name, v.surname].filter(Boolean).join(" ");
+async function loadVips(force){
+  if (!vipAccess()) return;
+  if (!force && S.vips && S.vipVer === S.version) return;
+  try { S.vips = await rpc("grad_vips_list", {p_code:CODE, p_pin:S.pin}); S.vipVer = S.version; } catch(e){ S.vips = S.vips || []; toast("Could not load the VIP list: " + e.message, "red"); }
+}
+function viewVip(){
+  if (!$("#vpView")){
+    main.innerHTML = `<div id="bn"></div><div class="card" id="vpView"><h2>⭐ VIP guests<span class="spacer"></span><span id="vpSum" class="small muted"></span></h2>
+      <p class="small muted" style="margin-top:-6px">Clients, facilitators, sponsors and guests. Mark each one as they arrive; everyone with VIP access sees it straight away.</p>
+      <div class="row noprint" style="gap:6px;flex-wrap:wrap;margin:6px 0"><input type="search" id="vpq" placeholder="Search name, organisation or seat" style="flex:2;min-width:180px">
+        <button class="btn sm" id="vipAdd">+ Add VIP</button><button class="btn ghost sm" id="vipUp">⬆ Upload list</button><button class="btn ghost sm" id="vpX">⬇ Excel report</button><button class="btn gold sm" id="vpP">⬇ PDF report</button></div>
+      <input type="file" id="vipImpF" accept=".xlsx,.xls,.csv" class="hidden"><div id="vpchips"></div><div id="vplist"><p class="muted">Loading…</p></div></div>`;
+    $("#vpq").value = S.f.vq || ""; $("#vpq").oninput = e => { S.f.vq = e.target.value; drawVip(); };
+    $("#vipAdd").onclick = () => vipForm(); $("#vipUp").onclick = () => { $("#vipImpF").value = ""; $("#vipImpF").click(); };
+    $("#vipImpF").onchange = e => { const f = e.target.files[0]; if (f) vipImportPreview(f); };
+    $("#vpX").onclick = vipExcel; $("#vpP").onclick = vipPdf;
+  }
+  $("#bn").innerHTML = bannerHTML(); wireBanner();
+  if (S.vips) drawVip();
+  loadVips().then(() => { if (S.tab === "vip") drawVip(); });
+}
+function drawVip(){
+  const V = S.vips || [], q = (S.f.vq || "").toLowerCase().trim(), st = S.f.vs || "expected";
+  const n = k => V.filter(v => v.status === k).length;
+  $("#vpSum").textContent = `${n("arrived")} of ${V.length} arrived${n("absent") ? ` · ${n("absent")} absent` : ""}`;
+  $("#bVip").textContent = V.length ? `${n("arrived")}/${V.length}` : ""; $("#bVip").classList.toggle("hidden", !V.length);
+  $("#vpchips").innerHTML = chipsHTML("vpc", [["expected","Expected",n("expected")],["arrived","Arrived",n("arrived")],["absent","Absent",n("absent")],["all","Everyone",V.length]], st);
+  $$("#vpc .chip").forEach(b => b.onclick = () => { S.f.vs = b.dataset.c; drawVip(); });
+  const L = V.filter(v => (st === "all" || v.status === st) && (!q || [vipName(v), v.organisation, v.position, v.seat, v.category, v.phone, v.email].join(" ").toLowerCase().includes(q)));
+  if (!V.length){ $("#vplist").innerHTML = `<div class="empty">No VIPs yet.${can("vip") || S.user.role !== "team" ? `<br><br>Upload the guest list (Excel or CSV) or add people one by one.` : ""}</div>`; roLock && roLock(); return; }
+  const cats = [...new Set(L.map(v => v.category || "Guest"))].sort((a, b) => (VIP_CATS.indexOf(a) + 1 || 99) - (VIP_CATS.indexOf(b) + 1 || 99) || a.localeCompare(b));
+  $("#vplist").innerHTML = L.length ? cats.map(c => `<div class="vcat"><div class="vcath">${esc(c)}<small>${L.filter(v => (v.category || "Guest") === c).length}</small></div>` + L.filter(v => (v.category || "Guest") === c).map(v => `
+    <div class="lrow vip ${v.status}"><div class="info"><div class="nm">${esc(vipName(v))} ${v.seat ? `<span class="seat">💺 ${esc(v.seat)}</span>` : ""}</div>
+      <div class="small muted">${esc([v.position, v.organisation].filter(Boolean).join(" · "))}</div>
+      <div class="small" style="margin-top:2px">${v.phone ? `<a class="tag" href="tel:${esc(v.phone.split("/")[0].trim())}">📞 ${esc(v.phone)}</a> ` : ""}${v.email ? `<span class="tag">✉ ${esc(v.email)}</span> ` : ""}${v.status === "arrived" ? `<span style="color:var(--ok)">Arrived ${fmtTime(v.arrived_at)}${v.checked_by ? " · by " + esc(v.checked_by) : ""}</span>` : v.status === "absent" ? `<span class="muted">Absent${v.checked_by ? " · " + esc(v.checked_by) : ""}</span>` : ""}${v.notes ? `<div class="muted">📝 ${esc(v.notes)}</div>` : ""}</div></div>
+      <div class="pacts">${v.status === "arrived" ? `<span class="pill s-Completed">✓ Arrived</span><button class="btn ghost sm" data-vip="${v.id}" data-s="expected">Undo</button>`
+        : v.status === "absent" ? `<span class="tag">Absent</span><button class="btn ghost sm" data-vip="${v.id}" data-s="expected">Undo</button>`
+        : `<button class="btn ghost sm" data-vip="${v.id}" data-s="absent">Absent</button><button class="btn green bigbtn" data-vip="${v.id}" data-s="arrived">✓ Arrived</button>`}
+        <button class="btn ghost sm" data-vip="${v.id}" data-s="edit">Edit</button></div></div>`).join("") + `</div>`).join("") : `<div class="empty">Nobody matches.</div>`;
+  $$("#vplist [data-vip]").forEach(b => b.onclick = async () => { const v = V.find(x => x.id === b.dataset.vip); if (!v) return;
+    if (b.dataset.s === "edit") return vipForm(v);
+    b.disabled = true;
+    try { await rpc("grad_vip_status", {p_code:CODE, p_pin:S.pin, p_actor:S.me, p_vip:v.id, p_status:b.dataset.s}); S.lastActAt = Date.now();
+      v.status = b.dataset.s; v.arrived_at = b.dataset.s === "arrived" ? new Date().toISOString() : null; v.checked_by = b.dataset.s === "expected" ? null : S.me;
+      if (b.dataset.s === "arrived") { toast(`⭐ ${vipName(v)} has arrived`, "green"); chime("mine"); }
+      drawVip(); rtPing(); }
+    catch(e){ toast("Could not save: " + e.message, "red"); b.disabled = false; } });
+}
+function vipForm(v){
+  v = v || {}; const isNew = !v.id;
+  modal(`<h3>${isNew ? "Add a VIP" : "Edit " + esc(vipName(v))}</h3>
+    <div class="grid g2" style="gap:8px"><div><label class="lbl">Title</label><input type="text" id="vf_title" value="${esc(v.title || "")}" placeholder="Mr, Ms, Dr, Prof"></div><div><label class="lbl">Category</label><select id="vf_category">${[...new Set([...VIP_CATS, v.category || "Guest"])].map(c => `<option ${c === (v.category || "Guest") ? "selected" : ""}>${esc(c)}</option>`).join("")}</select></div>
+      <div><label class="lbl">First name</label><input type="text" id="vf_first_name" value="${esc(v.first_name || "")}"></div><div><label class="lbl">Surname</label><input type="text" id="vf_surname" value="${esc(v.surname || "")}"></div>
+      <div><label class="lbl">Organisation</label><input type="text" id="vf_organisation" value="${esc(v.organisation || "")}"></div><div><label class="lbl">Position</label><input type="text" id="vf_position" value="${esc(v.position || "")}"></div>
+      <div><label class="lbl">Phone</label><input type="text" id="vf_phone" value="${esc(v.phone || "")}"></div><div><label class="lbl">Email</label><input type="text" id="vf_email" value="${esc(v.email || "")}"></div>
+      <div><label class="lbl">Seat / table</label><input type="text" id="vf_seat" value="${esc(v.seat || "")}" placeholder="e.g. AA-03 or Table 2"></div><div><label class="lbl">Notes</label><input type="text" id="vf_notes" value="${esc(v.notes || "")}" placeholder="Dietary, speaking, parking…"></div></div>
+    <div class="row" style="margin-top:12px">${isNew ? "" : `<button class="btn ghost sm" id="vfRm" style="color:var(--bad)">Remove</button>`}<span class="spacer"></span><button class="btn ghost" id="mc">Cancel</button><button class="btn gold" id="mo">${isNew ? "Add VIP" : "Save"}</button></div>`,
+    (m, close) => { $("#mc", m).onclick = close;
+      const rm = $("#vfRm", m); if (rm) rm.onclick = async () => { if (!confirm(`Remove ${vipName(v)} from the VIP list?`)) return; try { await rpc("grad_vip_remove", {p_code:CODE, p_pin:S.pin, p_actor:S.me, p_vip:v.id}); close(); await loadVips(true); drawVip(); toast("Removed", "green"); } catch(e){ toast(e.message, "red"); } };
+      $("#mo", m).onclick = async () => { const o = {id:v.id || ""}; ["title","category","first_name","surname","organisation","position","phone","email","seat","notes"].forEach(k => o[k] = $("#vf_" + k, m).value.trim());
+        if (!o.first_name && !o.surname) return $("#vf_first_name", m).focus();
+        $("#mo", m).disabled = true;
+        try { await rpc("grad_vip_save", {p_code:CODE, p_pin:S.pin, p_actor:S.me, p_vip:o}); close(); await loadVips(true); drawVip(); toast(isNew ? "VIP added" : "Saved", "green"); }
+        catch(e){ toast("Could not save: " + e.message, "red"); $("#mo", m).disabled = false; } }; });
+}
+const VIP_COLS = [["title", /^(title|salutation|prefix)$/], ["first_name", /^(first ?names?|name|given names?|forename)$/], ["surname", /^(surname|last ?name|family name)$/], ["full_name", /(full ?name|name and surname|name & surname|guest name|delegate)/],
+  ["organisation", /(organi[sz]ation|company|client|institution|employer|department|affiliation)/], ["position", /(position|designation|job|role|title of)/], ["category", /(category|type|group|guest type|invitee type)/],
+  ["phone", /(phone|cell|mobile|contact ?(no|number)?$|tel)/], ["email", /e-?mail/], ["seat", /(seat|table)/], ["notes", /(notes?|comments?|dietary|remarks?)/]];
+async function vipImportPreview(f){
+  try {
+    if (typeof XLSX === "undefined") throw new Error("The spreadsheet reader did not load. Check your internet connection and try again.");
+    const wb = XLSX.read(await f.arrayBuffer(), {type:"array"}), rows = [];
+    wb.SheetNames.forEach(sn => {
+      const aoa = XLSX.utils.sheet_to_json(wb.Sheets[sn], {header:1, defval:"", raw:false});
+      const hi = aoa.findIndex(r => r.filter(c => VIP_COLS.some(([, re]) => re.test(String(c).trim().toLowerCase()))).length >= 2); if (hi < 0) return;
+      const map = {}; aoa[hi].forEach((c, i) => { const h = String(c).trim().toLowerCase(); const m = VIP_COLS.find(([k, re]) => map[k] === undefined && re.test(h)); if (m) map[m[0]] = i; });
+      for (let r = hi + 1; r < aoa.length; r++){ const g = k => map[k] !== undefined ? String(aoa[r][map[k]] ?? "").trim() : "";
+        let first = g("first_name"), sur = g("surname");
+        if (!sur && (g("full_name") || (first && first.includes(" ")))){ const p = (g("full_name") || first).split(/\s+/); sur = p.pop(); first = p.join(" "); }
+        if (!first && !sur) continue;
+        const catRaw = g("category"), cat = VIP_CATS.find(c => catRaw.toLowerCase().startsWith(c.toLowerCase().slice(0, 5))) || (catRaw || "Guest");
+        rows.push({title:g("title"), first_name:first, surname:sur, organisation:g("organisation"), position:g("position"), category:cat, phone:g("phone"), email:g("email"), seat:g("seat"), notes:g("notes")}); } });
+    if (!rows.length) throw new Error("No names found. The sheet needs a header row with at least Name (or First name and Surname) and one more column such as Organisation or Category.");
+    const big = rows.length > 45;
+    modal(`<h3>⬆ Upload VIP list</h3><p class="small muted">${esc(f.name)}: <b>${rows.length} people</b>${big ? ` <span style="color:var(--bad)">· that is more than the usual 30 or so. Check you picked the VIP list and not the learner list.</span>` : ""}</p>
+      <div style="max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:10px"><table class="t small"><thead><tr><th>Name</th><th>Category</th><th>Organisation</th><th>Position</th><th>Phone</th></tr></thead><tbody>
+      ${rows.slice(0, 80).map(r => `<tr><td>${esc(vipName(r))}</td><td>${esc(r.category)}</td><td>${esc(r.organisation)}</td><td>${esc(r.position)}</td><td>${esc(r.phone)}</td></tr>`).join("")}</tbody></table></div>
+      <label class="row small" style="gap:6px;margin-top:10px"><input type="radio" name="vim" value="add" checked> Add to the list (people already on it are skipped)</label>
+      <label class="row small" style="gap:6px"><input type="radio" name="vim" value="rep"> Replace the whole VIP list</label>
+      <div class="row" style="margin-top:12px"><span class="spacer"></span><button class="btn ghost" id="mc">Cancel</button><button class="btn gold" id="mo">Upload ${rows.length}</button></div>`,
+      (m, close) => { $("#mc", m).onclick = close;
+        $("#mo", m).onclick = async () => { const rep = (m.querySelector("[name=vim]:checked") || {}).value === "rep";
+          if (rep && (S.vips || []).length && !confirm(`Replace the ${(S.vips || []).length} people on the VIP list?`)) return;
+          $("#mo", m).disabled = true;
+          try { const r = await rpc("grad_vip_import", {p_code:CODE, p_pin:S.pin, p_actor:S.me, p_rows:rows, p_replace:rep}); close(); await loadVips(true); drawVip();
+            toast(`VIP list uploaded: ${r.added} added${r.skipped ? `, ${r.skipped} already listed` : ""}`, "green"); }
+          catch(e){ toast("Could not upload: " + e.message, "red"); $("#mo", m).disabled = false; } }; });
+  } catch(e){ toast(e.message, "red"); }
+}
+function vipRows(){ const V = (S.vips || []).slice(); return V.sort((a, b) => (VIP_CATS.indexOf(a.category) + 1 || 99) - (VIP_CATS.indexOf(b.category) + 1 || 99) || (a.surname || "").localeCompare(b.surname || "")); }
+async function vipExcel(){
+  await loadVips(true); const V = vipRows(); if (!V.length) return toast("The VIP list is empty.", "gold");
+  const base = `VIP report ${S.data.event.name} ${new Date().toISOString().slice(0,10)}`.replace(/[\\/:*?"<>|]/g, "");
+  const head = ["Category","Title","First name","Surname","Organisation","Position","Phone","Email","Seat / table","Status","Arrived","Marked by","Notes"];
+  const data = V.map(v => [v.category, v.title, v.first_name, v.surname, v.organisation, v.position, v.phone, v.email, v.seat, v.status === "arrived" ? "Arrived" : v.status === "absent" ? "Absent" : "Not arrived", fmtTime(v.arrived_at), v.checked_by, v.notes]);
+  let X; try { X = await loadXlsxStyle(); } catch(e){ X = null; }
+  if (!X || (DESKTOP() && DESKTOP().save_file && !DESKTOP().save_b64)){ const csv = [head, ...data].map(r => r.map(x => `"${String(x ?? "").replace(/"/g,'""')}"`).join(",")).join("\r\n"); return saveFile(base + ".csv", "﻿" + csv); }
+  const thin = {style:"thin", color:{rgb:"BFC7D5"}}, B = {top:thin, bottom:thin, left:thin, right:thin}, st = (fill, font = {}) => ({fill: fill ? {patternType:"solid", fgColor:{rgb:fill}} : undefined, font:{name:"Calibri", sz:11, ...font}, border:B, alignment:{vertical:"center", wrapText:true}});
+  const W = {}, put = (r, c, v, s2) => W[X.utils.encode_cell({r, c})] = {v: v ?? "", t:"s", s:s2}, merges = [], n = head.length;
+  const arrived = V.filter(v => v.status === "arrived").length;
+  put(0, 0, "VIP GUEST REPORT", st("0D1B3E", {bold:true, sz:16, color:{rgb:"FFFFFF"}})); for (let c = 1; c < n; c++) put(0, c, "", st("0D1B3E")); merges.push({s:{r:0, c:0}, e:{r:0, c:n - 1}});
+  put(1, 0, `${S.data.event.name} · ${arrived} of ${V.length} arrived · printed ${new Date().toLocaleString("en-ZA", {day:"numeric", month:"short", hour:"2-digit", minute:"2-digit"})}`, st("D4AF37", {bold:true, color:{rgb:"0D1B3E"}})); for (let c = 1; c < n; c++) put(1, c, "", st("D4AF37")); merges.push({s:{r:1, c:0}, e:{r:1, c:n - 1}});
+  head.forEach((h, c) => put(3, c, h, st("215C98", {bold:true, color:{rgb:"FFFFFF"}})));
+  data.forEach((row, i) => row.forEach((x, c) => put(4 + i, c, x, c === 9 ? st(x === "Arrived" ? "C6EFCE" : x === "Absent" ? "FFC7CE" : "EDEDED", {bold:true, color:{rgb: x === "Arrived" ? "006100" : x === "Absent" ? "9C0006" : "404040"}}) : st(i % 2 ? "F5F7FC" : null))));
+  Object.assign(W, {"!ref": X.utils.encode_range({s:{r:0, c:0}, e:{r:3 + data.length, c:n - 1}}), "!merges": merges, "!cols": [12,7,14,16,26,22,15,26,11,12,9,14,30].map(w => ({wch:w})), "!autofilter": {ref: X.utils.encode_range({s:{r:3, c:0}, e:{r:3 + data.length, c:n - 1}})}});
+  const wb = X.utils.book_new(); X.utils.book_append_sheet(wb, W, "VIP guests"); wb.Props = {Title:"VIP guest report", Author:"Eddie Bila", Company:"Camblish Training Institute"};
+  if (DESKTOP() && DESKTOP().save_b64){ const r = await DESKTOP().save_b64(base + ".xlsx", X.write(wb, {type:"base64", bookType:"xlsx"}), true); return toast(r && r.ok ? "Saved to Downloads and opened: " + base + ".xlsx" : "Could not save: " + (r && r.error), r && r.ok ? "green" : "red"); }
+  X.writeFile(wb, base + ".xlsx"); toast(`VIP report exported (${V.length} people)`, "green");
+}
+async function vipPdf(){
+  await loadVips(true); const V = vipRows(); if (!V.length) return toast("The VIP list is empty.", "gold");
+  const d = S.data.event, crest = document.querySelector('.top img').src, arrived = V.filter(v => v.status === "arrived").length;
+  const cats = [...new Set(V.map(v => v.category || "Guest"))];
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>VIP report · ${esc(d.name)}</title><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=swap" rel="stylesheet"><style>@page{size:A4 landscape;margin:0}*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    body{margin:0;font-family:Montserrat,"Segoe UI",Arial,sans-serif;color:#0d1b3e;font-size:11px}.hd{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#081a45,#1d3fae);color:#fff;padding:7mm 12mm;border-bottom:4px solid #d4af37}
+    .hd img{width:56px;height:56px;border-radius:50%;background:#fff;padding:4px}.hd h1{margin:0;font-size:20px;letter-spacing:1px}.hd p{margin:2px 0 0;color:#c9d3f2}.sp{flex:1}.big{font-size:26px;font-weight:800;color:#f3d27a;text-align:right}
+    .in{padding:5mm 12mm;-webkit-box-decoration-break:clone;box-decoration-break:clone}h2{font-size:13px;margin:10px 0 4px;color:#1d3fae;text-transform:uppercase;letter-spacing:.6px}
+    table{width:100%;border-collapse:collapse}th{background:#1d3fae;color:#fff;font-size:8.5px;text-transform:uppercase;letter-spacing:.4px;padding:5px;text-align:left}td{border-bottom:1px solid #e1e6f2;padding:5px}tr{break-inside:avoid}
+    .ok{color:#006100;font-weight:700}.no{color:#9c0006;font-weight:700}.ft{color:#8a93a8;font-size:9px;margin-top:10px;border-top:1px solid #e1e6f2;padding-top:4px}</style></head><body>
+    <div class="hd"><img src="${crest}" alt=""><div><h1>VIP GUEST REPORT</h1><p>${esc([d.name, d.date ? new Date(d.date).toLocaleDateString("en-ZA", {day:"numeric", month:"long", year:"numeric"}) : "", d.venue].filter(Boolean).join(" · "))}</p></div><span class="sp"></span><div class="big">${arrived} / ${V.length}<div style="font-size:10px;color:#c9d3f2;font-weight:500">arrived</div></div></div>
+    <div class="in">${cats.map(c => `<h2>${esc(c)} (${V.filter(v => (v.category || "Guest") === c).length})</h2><table><thead><tr><th>Name</th><th>Organisation</th><th>Position</th><th>Seat / table</th><th>Phone</th><th>Status</th><th>Time</th><th>Notes</th></tr></thead><tbody>
+      ${V.filter(v => (v.category || "Guest") === c).map(v => `<tr><td><b>${esc(vipName(v))}</b></td><td>${esc(v.organisation || "")}</td><td>${esc(v.position || "")}</td><td>${esc(v.seat || "")}</td><td>${esc(v.phone || "")}</td><td class="${v.status === "arrived" ? "ok" : v.status === "absent" ? "no" : ""}">${v.status === "arrived" ? "Arrived" : v.status === "absent" ? "Absent" : "Not arrived"}</td><td>${fmtTime(v.arrived_at)}</td><td>${esc(v.notes || "")}</td></tr>`).join("")}</tbody></table>`).join("")}
+    <div class="ft">Camblish Training Institute · Taking the Lead, Shaping the Future · printed ${new Date().toLocaleString("en-ZA", {day:"numeric", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit"})} by ${esc(S.me)}</div></div></body></html>`;
+  await reportPdf(`VIP report ${d.name} ${new Date().toISOString().slice(0,10)}.pdf`.replace(/[\\/:*?"<>|]/g, ""), html);
 }
 
 /* ======================================================================
@@ -2403,7 +2606,7 @@ function journey(L){
     crossed:p.filter(l => l.stage_status === "done").length, cert:p.filter(l => l.cert_issued).length,
     line:p.filter(l => l.robe_issued && l.stage_status === "waiting").length, onstage:p.filter(l => l.stage_status === "called").length,
     sent:p.filter(l => l.stage_status === "called" || l.stage_status === "done").length,
-    robing:p.filter(l => !l.robe_issued).length, certDue:p.filter(l => l.stage_status === "done" && !l.cert_issued).length };
+    robing:p.filter(robeReady).length, paying:p.filter(needsPay).length, certDue:p.filter(l => l.stage_status === "done" && !l.cert_issued).length };
 }
 function ring(val, total, label, color, sub){
   const r = 44, c = 2 * Math.PI * r, f = total ? Math.min(1, val / total) : 0;
@@ -2458,7 +2661,8 @@ function stageTiles(J, cls=""){
     ? `<button class="stile hot" data-go="${go}" type="button" title="${esc(nowOn.map(fullName).join(", "))}"><span class="gcoin">${n}</span><span class="gtx"><strong>${esc(nowOn.map(fullName).join(", "))}</strong><small>Currently on stage</small></span><em class="glive"><i></i>LIVE</em></button>`
     : `<button class="stile" data-go="${go}" type="button"><b>${n}</b><span>${lab}</span>${sub ? `<small>${sub}</small>` : ""}</button>`;
   return `<div class="stiles ${cls}">
-    ${tile("robes", J.robing, "Waiting for robes", "present, not robed yet")}
+    ${payReq() ? tile("payments", J.paying, "Waiting to pay", "checked in, robe not paid") : ""}
+    ${tile("robes", J.robing, "Waiting for robes", payReq() ? "paid, not robed yet" : "present, not robed yet")}
     ${tile("stage", J.line, "In the stage line", "robed, waiting to be called")}
     ${tile("stage", J.onstage, "On stage now", nowOn.length ? esc(nowOn.map(fullName).join(", ")) : "nobody called yet", J.onstage > 0)}
     ${tile("stage", J.crossed, "Crossed the stage", J.arrived ? Math.round(100*J.crossed/J.arrived) + "% of those present" : "nobody yet")}
@@ -2855,7 +3059,8 @@ function viewManage(){
       <label class="lbl">Event name</label><input type="text" id="en" value="${esc(d.event.name)}">
       <div class="grid g2" style="gap:10px"><div><label class="lbl">Date</label><input type="date" id="ed" value="${esc(d.event.date||"")}"></div><div><label class="lbl">Venue</label><input type="text" id="ev" value="${esc(d.event.venue||"")}"></div>
 </div>
-      <button class="btn sm" id="esave" style="margin-top:10px">Save settings</button></div>
+      <button class="btn sm" id="esave" style="margin-top:10px">Save settings</button>
+      <label class="row small" style="gap:8px;margin-top:14px"><input type="checkbox" id="payReqT" ${payReq() ? "checked" : ""}> <span><b>Robe payment step</b>: graduates go to the <b>Payments</b> tab after check-in and only reach Robes once their payment is captured</span></label></div>
   </div>
   <div class="card"><h2>Seating plan · ${HALL.name}<span class="spacer"></span><button class="btn ghost sm" id="smOpen">💺 View seating plan</button>${can("seating")?`<button class="btn gold sm" id="smAssign">Assign seats by programme</button>`:""}</h2>
     ${(() => { const st = seatStats(), sp = seatPlan(); return `<p class="small">Each programme gets its own block of seats for everyone expected, in stage order (NQF 1 first, then 2, 3 and up), and each programme starts at the end of a row. <b>Inside a programme it is first come, first seated:</b> the first graduate to arrive takes the first seat and goes on stage first, the next arrival takes the next seat, and so on. Not-yet-arrived graduates hold provisional seats behind them, so print name tags at check-in. Filling starts in the <b>lower right block at EE-01</b>, then the lower centre and lower left blocks, then the upper blocks from right to left; guests use the remaining upper seats. Rows AA, BB and CC on the lower right are for VIPs and row DD across the lower section stays empty as the camera walkway. Absent graduates' seats stay open at the end of their programme's block in case they arrive. Anyone marked "not attending" or from a region with its own ceremony gets no seat.</p>
@@ -2872,6 +3077,7 @@ function viewManage(){
   $("#cp").onclick = async () => { try { await navigator.clipboard.writeText(link); toast("Link copied"); } catch { $("#lnk").select(); } };
   $$("[data-mrm]").forEach(b => b.onclick = () => act("grad_member_save", {p_name:null, p_role_title:null, p_remove_id:b.dataset.mrm}, "Removed"));
   $("#madd").onclick = () => { const n=$("#mn").value.trim(); if(!n) return; act("grad_member_save", {p_name:n, p_role_title:$("#mr").value.trim(), p_remove_id:null}, "Added to the team"); };
+  const prt = $("#payReqT"); if (prt) prt.onchange = async () => { if (!await act("grad_pay_required_set", {p_on:prt.checked}, prt.checked ? "Payment step switched on" : "Payment step switched off")) prt.checked = !prt.checked; };
   $("#esave").onclick = () => act("grad_event_update", {p_name:$("#en").value, p_date:$("#ed").value||null, p_venue:$("#ev").value, p_team_pin:"", p_mgr_pin:""}, "Settings saved");
   $("#imf").onchange = importPreview;
   $("#exp").onclick = exportCsv;
@@ -2947,8 +3153,8 @@ async function importPreview(e){
 }
 function exportCsv(){
   const P = stageList(); const seq = new Map(P.map(l=>[l.id,l._seq]));
-  const head = ["Stage order","Seat","First name","Middle name","Surname","Programme","NQF","Client","Project manager","Region","SETA","Attendance","Arrived","Checked in by","Robe issued","Robe time","Stage status","Stage time","Certificate issued","Certificate time","Open queries","Notes"];
-  const rows = S.data.learners.slice().sort(orderKey).map(l => [seq.get(l.id)||"", l.seat||"", l.first_name, l.middle_name, l.surname, l.programme, l.nqf, l.client, l.pm, l.region, l.seta, l.status, fmtTime(l.arrived_at), l.checked_by, l.robe_issued?(l.robe_skip?"Own robe":"Yes"):"", fmtTime(l.robe_at), l.stage_status, fmtTime(l.stage_at), l.cert_issued?"Yes":"", fmtTime(l.cert_at), openQ(l).length || "", notesTxt(l)]);
+  const head = ["Stage order","Seat","First name","Middle name","Surname","Programme","NQF","Client","Project manager","Region","SETA","Attendance","Arrived","Checked in by","Robe payment","Payment by","Robe issued","Robe time","Stage status","Stage time","Certificate issued","Certificate time","Open queries","Notes"];
+  const rows = S.data.learners.slice().sort(orderKey).map(l => [seq.get(l.id)||"", l.seat||"", l.first_name, l.middle_name, l.surname, l.programme, l.nqf, l.client, l.pm, l.region, l.seta, l.status, fmtTime(l.arrived_at), l.checked_by, l.paid ? (l.pay_method || "Paid") + (l.pay_ref ? " " + l.pay_ref : "") : "", l.paid_by || "", l.robe_issued?(l.robe_skip?"Own robe":"Yes"):"", fmtTime(l.robe_at), l.stage_status, fmtTime(l.stage_at), l.cert_issued?"Yes":"", fmtTime(l.cert_at), openQ(l).length || "", notesTxt(l)]);
   const csv = [head, ...rows].map(r => r.map(v => `"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\r\n");
   saveFile(`Graduation attendance ${new Date().toISOString().slice(0,10)}.csv`, "\ufeff" + csv);
 }
