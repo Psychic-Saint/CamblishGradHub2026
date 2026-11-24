@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-57AlahrKSFEV2DFiDFGBXDia6PSS3KtCDHFeXdxzEzs=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-HjIYU6VBH/mWPsqDpXxJWDZvgH9fxPAUfAg/tqzVPA4=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="author" content="Eddie Bila">
@@ -588,7 +588,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202611131500";
+const BUILD = "202611251000";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -2416,6 +2416,7 @@ const HALL = { name:"Great Hall, Wits", sections:[
     blocks:[{name:"Left", from:35, to:25}, {name:"Centre", from:24, to:12}, {name:"Right", from:11, to:1}] },
   { name:"Upper", rows:["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","R"],
     blocks:[{name:"Left", from:44, to:33}, {name:"Centre left", from:32, to:23}, {name:"Centre right", from:22, to:12}, {name:"Right", from:11, to:1}] }],
+  gone: new Set(["AA-35","AA-11"]),   // front row AA has 10 seats in the left and right blocks
   reserved: s => s.section === "Lower" && ((["AA","BB","CC"].includes(s.row) && s.block === "Right") || s.row === "DD") };   // VIP rows lower right; DD = camera walkway
 const BLK_ORDER = {"Lower|Right":1, "Lower|Centre":2, "Lower|Left":3, "Upper|Right":4, "Upper|Centre right":5, "Upper|Centre left":6, "Upper|Left":7};
 function seatRank(label){
@@ -2430,7 +2431,7 @@ function hallSeats(){
   const out = [];
   HALL.sections.forEach(sec => sec.rows.forEach(r => sec.blocks.forEach(b => { for (let n = b.from; n >= b.to; n--) out.push({section:sec.name, row:r, block:b.name, n, label:SEAT_LBL(r, n)}); })));
   out.forEach(s => s.reserved = HALL.reserved(s));
-  return out;
+  return out.filter(s => !HALL.gone.has(s.label));
 }
 const seatSort = (a, b) => ((a.nqf ?? 99) - (b.nqf ?? 99)) || (a.programme||"").localeCompare(b.programme||"") || (a.client||"").localeCompare(b.client||"") || (a.surname||"").localeCompare(b.surname||"") || (a.first_name||"").localeCompare(b.first_name||"");
 function seatPlan(){
@@ -2467,7 +2468,7 @@ function planSeats(){
       for (let n = b.from; n >= b.to; n--, i++){ const th = planAngle(sec.name, u0 + i + .5, r); const [x, y] = planXY(r, th);
         out.push({section:sec.name, row, block:b.name, n, label:SEAT_LBL(row, n), x, y, deg:th * 180 / Math.PI + 90, r, u:u0 + i + .5, reserved:HALL.reserved({section:sec.name, row, block:b.name}) }); } });
   }));
-  return out;
+  return out.filter(s => !HALL.gone.has(s.label));
 }
 function planAt(sec, u, ri){ const r = planRowR(sec, ri); return planXY(r, planAngle(sec, u, r)); }
 function usherList(){
