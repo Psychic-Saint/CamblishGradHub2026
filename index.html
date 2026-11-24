@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-ImylE+snq6MwBJKwO5GCy1Zrxqw9QKAAVxhshvprUv0=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-ImOQ1K01enj6EJwuq1AXjKuw1u9uLbX2bt/w27gHq6w=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="author" content="Eddie Bila">
@@ -588,7 +588,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202611251900";
+const BUILD = "202611252100";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -1183,9 +1183,9 @@ function render(){
   $$("nav.tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === S.tab));
   const views = { overview:viewOverview, tasks:viewTasks, checkin:viewCheckin, payments:viewPayments, vip:viewVip, robes:viewRobes, stage:viewStage, certs:viewCerts, grads:viewGrads, feed:viewFeed, settings:viewSettings, manage:() => openSettings("event"), users:() => openSettings("users") };
   const P = d.learners.filter(l => l.status === "present"), rw = P.filter(robeReady).length, pw = P.filter(needsPay).length, cw = P.filter(l => l.stage_status === "done" && !l.cert_issued && !openQ(l).length).length;
-  $("#bPay").textContent = pw; $("#bPay").classList.toggle("hidden", !pw); $("#tabPay").classList.toggle("hidden", !payReq());
+  $("#bPay").textContent = pw; $("#bPay").classList.toggle("hidden", !pw); $("#tabPay").classList.toggle("hidden", !payReq() || !isAdmin());
   $("#tabVip").classList.toggle("hidden", !vipAccess());
-  if (S.tab === "payments" && !payReq()) S.tab = "robes";
+  if (S.tab === "payments" && (!payReq() || !isAdmin())) S.tab = payReq() ? "checkin" : "robes";
   if (S.tab === "vip" && !vipAccess()) S.tab = "overview";
   $("#bRobe").textContent = rw; $("#bRobe").classList.toggle("hidden", !rw); $("#bCert").textContent = cw; $("#bCert").classList.toggle("hidden", !cw);
   const sw = P.filter(l => l.robe_issued && l.stage_status !== "done").length, onS = P.some(l => l.stage_status === "called");
@@ -1861,6 +1861,7 @@ function listOut(el, list, rowFn, empty){
    PROCESS FLOW + PROGRAMME GROUPS (shared by every learner tab)
    ====================================================================== */
 const payReq = () => !S.data || !S.data.event || S.data.event.pay_required !== false;
+const isAdmin = () => !!S.user && S.user.role === "admin";
 const needsPay = l => l.status === "present" && !l.robe_issued && payReq() && !l.paid;      // checked in, robe not paid yet
 const robeReady = l => l.status === "present" && !l.robe_issued && (!payReq() || l.paid);   // paid (or no payment step): at the robes table
 const FLOW_ALL = [["checkin","Check-in","not arrived"],["payments","Payments","to pay"],["robes","Robes","waiting"],["stage","Stage","in the line"],["certs","Certificates","to hand out"],["grads","Graduates","graduated"]];
@@ -1975,7 +1976,7 @@ function drawCheckin(){
     const l = S.data.learners.find(x=>x.id===b.dataset.ci), isPresent = b.dataset.s === "present";
     if (await act("grad_checkin", {p_learner:l.id, p_status:b.dataset.s}, isPresent ? `${fullName(l)} checked in${l.seat ? " · seat " + l.seat : ""}. Now at Robes.` : null)){
       if (isPresent && tagPrefs().auto && can("print_tags")){ stageList(); const fresh = S.data.learners.find(x=>x.id===l.id); if (fresh) printTags([fresh]); }
-      if (isPresent){ bounceTab(payReq() ? "payments" : "robes"); if (S.f.L.q){ S.f.L.q = ""; const q = $(".fbar [data-fk=q]"); if (q){ q.value = ""; q.focus(); } drawCheckin(); } }
+      if (isPresent){ if (!payReq()) bounceTab("robes"); else if (isAdmin()) bounceTab("payments"); if (S.f.L.q){ S.f.L.q = ""; const q = $(".fbar [data-fk=q]"); if (q){ q.value = ""; q.focus(); } drawCheckin(); } }
     }
   });
 }
@@ -1987,7 +1988,7 @@ function viewRobes(){
   if (!$("#rbView")){
     main.innerHTML = `<div id="bn"></div><div class="card" id="rbView"><div id="flow" class="flowwrap"></div><h2>Robes<span class="spacer"></span><span id="rbSum" class="small muted"></span></h2>
       <p class="small muted" style="margin-top:-6px">Graduates who have arrived, by programme in the order they arrived. Once their robe is issued they join the line on the <b>Stage</b> tab.<span id="rbPayNote"></span></p>
-      ${filterBar()}<div id="rbchips"></div><div id="rblist"></div></div>`;
+      <div id="rbSumm"></div>${filterBar()}<div id="rbchips"></div><div id="rblist"></div></div>`;
     wireFilterBar(drawRobes);
   }
   $("#bn").innerHTML = bannerHTML(); wireBanner(); drawRobes();
@@ -1997,6 +1998,7 @@ function drawRobes(){
   const L = applyF(S.data.learners.filter(l => l.status === "present"));
   const wait = L.filter(robeReady), done = L.filter(l => l.robe_issued), unpaid = L.filter(needsPay).length;
   if (!["wait","done","ret","back"].includes(S.f.rb)) S.f.rb = "wait";
+  $("#rbSumm").innerHTML = robePanel(S.data.learners);
   const toRet = L.filter(l => mustReturn(l) && l.robe_return !== "returned"), back = L.filter(l => mustReturn(l) && l.robe_return === "returned");
   $("#rbSum").textContent = `${done.length} robed · ${wait.length} waiting${unpaid ? ` · ${unpaid} still at payments` : ""} · ${back.length} returned`;
   $("#rbchips").innerHTML = chipsHTML("rbc", [["wait","Waiting for robe",wait.length],["done","Robe issued",done.length],["ret","To return",toRet.length],["back","Returned",back.length]], S.f.rb);
@@ -2013,6 +2015,13 @@ function drawRobes(){
     if (await act("grad_robe2", {p_learner:l.id, p_issued:b.dataset.v==="1", p_skip:!!b.dataset.skip}, b.dataset.v==="1" ? `${fullName(l)} robed. Now in the stage line.` : null) && b.dataset.v==="1") bounceTab("stage"); });
 }
 
+function robePanel(L){
+  const iss = L.filter(l => l.robe_issued && !l.robe_skip), own = L.filter(l => l.robe_issued && l.robe_skip).length, h = hireSummary(L);
+  const per = k => iss.filter(l => pkgOf(l) === k);
+  return `<div class="hirebox"><div class="hb-tot"><span class="small muted">Robes issued</span><b>${iss.length}</b><span class="small" style="color:#c9d3f2">${own} own robe</span></div>
+    ${HIRE.map(([k]) => { const g = per(k), back = g.filter(l => l.robe_return === "returned").length; return `<div class="hb-i"><span class="small muted">${HIRE_SHORT[k]}</span><b>${g.length}</b><span class="small">${back} back · ${g.length - back} out</span></div>`; }).join("")}
+    <div class="hb-i"><span class="small muted">Returned</span><b>${h.back}/${h.iss}</b><span class="small">${h.part ? h.part + " partly · " : ""}${h.out} still out</span></div></div>`;
+}
 function drawReturns(list){
   groupedOut($("#rblist"), list, (l, i, prog) => `<div class="lrow ${l.robe_return === "returned" ? "present" : "expected"}">${posTag(i, prog)}${lInfo(l,
       `<div class="small" style="margin-top:2px"><span class="tag">${HIRE_SHORT[pkgOf(l)]}</span> <span class="muted">Robe issued ${fmtTime(l.robe_at)}${l.robe_by ? " by " + esc(l.robe_by) : ""}</span>${l.robe_return ? ` · <span style="color:${l.robe_return === "returned" ? "var(--ok)" : "#b45309"}">${l.robe_return === "returned" ? "Returned" : "Partly returned"} ${fmtTime(l.robe_return_at)}${l.robe_return_by ? " to " + esc(l.robe_return_by) : ""}${l.robe_return_note ? " · " + esc(l.robe_return_note) : ""}</span>` : ""}${l.phone ? ` · <a class="tag" href="tel:${esc(String(l.phone).split("/")[0].trim())}">📞 ${esc(l.phone)}</a>` : ""}</div>`)}
@@ -2071,11 +2080,11 @@ function payDialog(l, method){
 }
 function viewPayments(){
   if (!$("#pyView")){
-    main.innerHTML = `<div id="bn"></div><div class="card" id="pyView"><div id="flow" class="flowwrap"></div><h2>Robe payments<span class="spacer"></span><span id="pySum" class="small muted"></span><button class="btn ghost sm noprint" id="pyExp" style="margin-left:8px">⬇ Hire and returns (Excel)</button></h2>
+    main.innerHTML = `<div id="bn"></div><div class="card" id="pyView"><div id="flow" class="flowwrap"></div><h2>Robe payments<span class="spacer"></span><span id="pySum" class="small muted"></span><button class="btn gold sm noprint" id="pySales" style="margin-left:8px">🧾 Sales report</button><button class="btn ghost sm noprint" id="pyExp" style="margin-left:8px">⬇ Hire and returns (Excel)</button></h2>
       <p class="small muted" style="margin-top:-6px">Graduates who have checked in, by programme in the order they arrived. Choose the payment method, pick what they are hiring, and they move on to <b>Robes</b>.</p>
       <div id="pyRev"></div>${filterBar()}<div id="pychips"></div><div id="pylist"></div></div>`;
     wireFilterBar(drawPayments);
-    $("#pyExp").onclick = exportPayments;
+    $("#pyExp").onclick = exportPayments; $("#pySales").onclick = salesDialog;
   }
   $("#bn").innerHTML = bannerHTML(); wireBanner(); drawPayments();
 }
@@ -2102,6 +2111,51 @@ function drawPayments(){
     if (m !== "Exempt"){ const r = await payDialog(l, m); if (!r) return; pkg = r.pkg; ref = r.ref; }
     b.disabled = true;
     if (await act("grad_pay3", {p_learner:l.id, p_paid:true, p_method:m, p_ref:ref, p_package:pkg}, m === "Exempt" ? `${fullName(l)} sent to Robes (no hire needed)` : `💳 ${rands(robePrices()[pkg])} ${m} (${HIRE_SHORT[pkg]}) captured for ${fullName(l)}. Now at Robes.`)) bounceTab("robes"); });
+}
+const ymd = d => { const x = new Date(d); return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`; };
+function salesOn(day){ return S.data.learners.filter(l => l.paid && l.paid_at && (day === "all" || ymd(l.paid_at) === day)).sort((a, b) => new Date(a.paid_at) - new Date(b.paid_at)); }
+function salesDialog(){
+  const days = [...new Set(S.data.learners.filter(l => l.paid && l.paid_at).map(l => ymd(l.paid_at)))].sort().reverse(), today = ymd(new Date());
+  if (!days.includes(today)) days.unshift(today);
+  const fmtD = d => new Date(d + "T12:00:00").toLocaleDateString("en-ZA", {weekday:"short", day:"numeric", month:"long", year:"numeric"});
+  modal(`<h3>🧾 Robe hire sales report</h3><p class="small muted">Every payment captured on the day you choose, with totals by hire option and payment method.</p>
+    <label class="lbl">Day</label><select id="sdDay">${days.map(d => `<option value="${d}">${fmtD(d)}${d === today ? " (today)" : ""} · ${salesOn(d).length} sales</option>`).join("")}<option value="all">All days · ${salesOn("all").length} sales</option></select>
+    <div id="sdPrev" style="margin-top:10px"></div>
+    <div class="row" style="margin-top:14px;gap:8px"><span class="spacer"></span><button class="btn ghost" id="sdX">Close</button><button class="btn" id="sdCsv">⬇ Excel</button><button class="btn gold" id="sdPdf">⬇ PDF report</button></div>`,
+    (m, close) => {
+      const prev = () => { const L = salesOn($("#sdDay", m).value); $("#sdPrev", m).innerHTML = L.length ? hirePanel(L).replace(/<div class="hb-i"><span class="small muted">Returns<\/span>.*?<\/div><\/div>$/, "</div>") : `<div class="empty small">No sales captured on this day.</div>`; };
+      $("#sdDay", m).onchange = prev; prev();
+      $("#sdX", m).onclick = close;
+      $("#sdCsv", m).onclick = () => salesCsv($("#sdDay", m).value);
+      $("#sdPdf", m).onclick = () => salesPdf($("#sdDay", m).value);
+    });
+}
+function salesCsv(day){
+  const L = salesOn(day), h = hireSummary(L);
+  const head = ["Time","First name","Surname","Programme","Client","Seat","Hire","Amount (R)","Method","Reference","Captured by"];
+  const rows = L.map(l => [new Date(l.paid_at).toLocaleString("en-ZA"), l.first_name, l.surname, l.programme, l.client, l.seat, HIRE_SHORT[pkgOf(l)], amtOf(l), l.pay_method === "Exempt" ? "Not needed" : l.pay_method, l.pay_ref || "", l.paid_by || ""]);
+  rows.push([], ["Total sales", "", "", "", "", "", L.filter(l => pkgOf(l) !== "none").length, h.tot]);
+  h.byPkg.forEach(x => rows.push([HIRE_SHORT[x.k], "", "", "", "", "", x.n, x.r])); h.byM.forEach(x => rows.push([x.k, "", "", "", "", "", "", x.r]));
+  const csv = [head, ...rows].map(r => r.map(v => `"${String(v ?? "").replace(/"/g,'""')}"`).join(",")).join("\r\n");
+  saveFile(`Robe hire sales ${day === "all" ? "all days" : day} ${S.data.event.name}.csv`.replace(/[\\/:*?"<>|]/g, ""), "\ufeff" + csv);
+}
+async function salesPdf(day){
+  const L = salesOn(day); if (!L.length) return toast("No sales captured on this day.", "gold");
+  const d = S.data.event, crest = document.querySelector('.top img').src, h = hireSummary(L), sold = L.filter(l => pkgOf(l) !== "none");
+  const dayTxt = day === "all" ? "All days" : new Date(day + "T12:00:00").toLocaleDateString("en-ZA", {weekday:"long", day:"numeric", month:"long", year:"numeric"});
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>Robe hire sales · ${esc(dayTxt)}</title><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=swap" rel="stylesheet"><style>@page{size:A4 landscape;margin:0}*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    body{margin:0;font-family:Montserrat,"Segoe UI",Arial,sans-serif;color:#0d1b3e;font-size:10.5px}.hd{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#081a45,#1d3fae);color:#fff;padding:7mm 12mm;border-bottom:4px solid #d4af37}
+    .hd img{width:56px;height:56px;border-radius:50%;background:#fff;padding:4px}.hd h1{margin:0;font-size:20px;letter-spacing:1px}.hd p{margin:2px 0 0;color:#c9d3f2}.sp{flex:1}.big{font-size:28px;font-weight:800;color:#f3d27a;text-align:right}
+    .in{padding:5mm 12mm}.tiles{display:flex;gap:8px;margin:2mm 0 4mm}.tl{flex:1;border:1px solid #e1e6f2;border-radius:8px;padding:6px 9px;background:#f5f7fc}.tl b{display:block;font-size:15px}.tl span{color:#5b6785;font-size:9px;text-transform:uppercase;letter-spacing:.4px}
+    table{width:100%;border-collapse:collapse}th{background:#1d3fae;color:#fff;font-size:8.5px;text-transform:uppercase;letter-spacing:.4px;padding:5px;text-align:left}td{border-bottom:1px solid #e1e6f2;padding:5px}tr{break-inside:avoid}td.r,th.r{text-align:right}
+    tfoot td{font-weight:800;border-top:2px solid #0d1b3e;background:#fff8e1}.ft{color:#8a93a8;font-size:9px;margin-top:10px;border-top:1px solid #e1e6f2;padding-top:4px}</style></head><body>
+    <div class="hd"><img src="${crest}" alt=""><div><h1>ROBE HIRE SALES REPORT</h1><p>${esc(dayTxt)} · ${esc([d.name, d.venue].filter(Boolean).join(" · "))}</p></div><span class="sp"></span><div class="big">${rands(h.tot)}<div style="font-size:10px;color:#c9d3f2;font-weight:500">${sold.length} sales</div></div></div>
+    <div class="in"><div class="tiles">${h.byPkg.map(x => `<div class="tl"><span>${HIRE_SHORT[x.k]}${h.pr[x.k] != null ? " · " + rands(h.pr[x.k]) : ""}</span><b>${x.n} · ${rands(x.r)}</b></div>`).join("")}${h.byM.map(x => `<div class="tl"><span>${x.k}</span><b>${rands(x.r)}</b></div>`).join("")}</div>
+    <table><thead><tr><th>#</th><th>Time</th><th>Graduate</th><th>Programme</th><th>Client</th><th>Hire</th><th>Method</th><th>Reference</th><th>Captured by</th><th class="r">Amount</th></tr></thead><tbody>
+    ${L.map((l, i) => `<tr><td>${i + 1}</td><td>${new Date(l.paid_at).toLocaleString("en-ZA", day === "all" ? {day:"numeric", month:"short", hour:"2-digit", minute:"2-digit"} : {hour:"2-digit", minute:"2-digit"})}</td><td><b>${esc(fullName(l))}</b></td><td>${esc(l.programme || "")}</td><td>${esc(l.client || "")}</td><td>${HIRE_SHORT[pkgOf(l)]}</td><td>${l.pay_method === "Exempt" ? "Not needed" : esc(l.pay_method || "")}</td><td>${esc(l.pay_ref || "")}</td><td>${esc(l.paid_by || "")}</td><td class="r">${rands(amtOf(l))}</td></tr>`).join("")}</tbody>
+    <tfoot><tr><td colspan="9">Total</td><td class="r">${rands(h.tot)}</td></tr></tfoot></table>
+    <div class="ft">Prepared by Eddie Bila · Camblish Training Institute · Taking the Lead, Shaping the Future · printed ${new Date().toLocaleString("en-ZA", {day:"numeric", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit"})} by ${esc(S.me)}</div></div></body></html>`;
+  await reportPdf(`Robe hire sales ${day === "all" ? "all days" : day} ${d.name}.pdf`.replace(/[\\/:*?"<>|]/g, ""), html);
 }
 function exportPayments(){
   const L = S.data.learners.filter(l => l.status === "present").sort((a, b) => progKey(a).localeCompare(progKey(b)) || new Date(a.paid_at || 0) - new Date(b.paid_at || 0));
@@ -2497,7 +2551,7 @@ const BLK_ORDER = {"Lower|Right":1, "Lower|Centre":2, "Lower|Left":3, "Upper|Rig
 function seatRank(label){
   if (!label) return 1e9; const [r, n0] = label.split("-"), n = +n0, low = r.length === 2;
   const blk = low ? (n <= 11 ? 1 : n <= 24 ? 2 : 3) : (n <= 11 ? 4 : n <= 22 ? 5 : n <= 32 ? 6 : 7);
-  const rows = HALL.sections[low ? 0 : 1].rows; return blk * 1e5 + rows.indexOf(r) * 100 + n;
+  const rows = HALL.sections[low ? 0 : 1].rows; return blk * 1e5 + rows.indexOf(r) * 100 + (blk === 1 || blk === 4 ? 50 - n : n);   // right blocks fill from the centre side
 }
 const skipRegions = () => ((S.data && S.data.event && S.data.event.skip_regions) || []).map(x => String(x).toUpperCase());
 const otherCeremony = l => !!l.region && skipRegions().includes(String(l.region).trim().toUpperCase());
