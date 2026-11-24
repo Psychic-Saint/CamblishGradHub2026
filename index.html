@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-rT02ocIy4XKLAiXDjWzz0QLzfooLyNzgHQpZ+PEd8mc=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-1D/WNY4niBXT99AAIoQWNkpeMxovZMDTPuORU81SIxU=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="author" content="Eddie Bila">
@@ -588,7 +588,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202611252200";
+const BUILD = "202611252230";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -2015,12 +2015,11 @@ function drawRobes(){
     if (await act("grad_robe2", {p_learner:l.id, p_issued:b.dataset.v==="1", p_skip:!!b.dataset.skip}, b.dataset.v==="1" ? `${fullName(l)} robed. Now in the stage line.` : null) && b.dataset.v==="1") bounceTab("stage"); });
 }
 
-function robePanel(L){
+function robePanel(L){   // one slim strip so the robe list keeps the screen (scrolls sideways on phones)
   const iss = L.filter(l => l.robe_issued && !l.robe_skip), own = L.filter(l => l.robe_issued && l.robe_skip).length, h = hireSummary(L);
   const per = k => iss.filter(l => pkgOf(l) === k);
-  return `<div class="hirebox"><div class="hb-tot"><span class="small muted">Robes issued</span><b>${iss.length}</b><span class="small" style="color:#c9d3f2">${own} own robe</span></div>
-    ${HIRE.map(([k]) => { const g = per(k), back = g.filter(l => l.robe_return === "returned").length; return `<div class="hb-i"><span class="small muted">${HIRE_SHORT[k]}</span><b>${g.length}</b><span class="small">${back} back · ${g.length - back} out</span></div>`; }).join("")}
-    <div class="hb-i"><span class="small muted">Returned</span><b>${h.back}/${h.iss}</b><span class="small">${h.part ? h.part + " partly · " : ""}${h.out} still out</span></div></div>`;
+  const pill = (lab, val, sub, cls) => `<span class="rbp${cls ? " " + cls : ""}"><span class="rbp-l">${lab}</span><b>${val}</b>${sub ? `<span class="rbp-s">${sub}</span>` : ""}</span>`;
+  return `<div class="rbstrip">${pill("Issued", iss.length, own ? own + " own" : "", "main")}${HIRE.map(([k]) => { const g = per(k); if (!g.length) return ""; const out = g.filter(l => l.robe_return !== "returned").length; return pill(HIRE_SHORT[k], g.length, out ? out + " out" : "all back"); }).join("")}${pill("Returned", h.back + "/" + h.iss, h.out ? h.out + " out" + (h.part ? " · " + h.part + " partly" : "") : "", h.out ? "warn" : "ok")}</div>`;
 }
 function drawReturns(list){
   groupedOut($("#rblist"), list, (l, i, prog) => `<div class="lrow ${l.robe_return === "returned" ? "present" : "expected"}">${posTag(i, prog)}${lInfo(l,
@@ -2731,6 +2730,7 @@ function progLegend(){
   return `<div class="plegend"><div class="plegend-h">Programmes in stage order · <b>bold seat = first seat of the programme</b></div>${gs.map((g, i) => `<span class="plg"><i style="background:${g.col}"></i><b>${i + 1}.</b> ${g.nqf != null ? "NQF " + g.nqf + " · " : ""}${esc(g.name)} <em>(${g.seated})</em></span>`).join("")}</div>`;
 }
 document.head.insertAdjacentHTML("beforeend", `<style>.hirebox{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:6px 0 12px}.hirebox>div{background:var(--card2,#f5f7fc);border:1px solid var(--line,#e3e8f3);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;gap:2px}.hirebox .hb-tot{background:#0f2462;color:#fff;border-color:#0f2462}.hirebox .hb-tot .muted{color:#c9d3f2!important}.hirebox .hb-tot b{font-size:22px;color:#f3d27a}.hirebox b{font-size:17px}
+@media (max-width:640px){#rbView>p.small{display:none}}.rbstrip{display:flex;gap:6px;margin:4px 0 8px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}.rbstrip::-webkit-scrollbar{display:none}.rbp{flex:0 0 auto;display:inline-flex;align-items:baseline;gap:5px;padding:4px 10px;border:1px solid var(--line,#e3e8f3);border-radius:999px;background:var(--card2,#f5f7fc);font-size:12.5px;white-space:nowrap}.rbp b{font-size:14px}.rbp-l{color:#5b6785}.rbp-s{color:#7a849c;font-size:11.5px}.rbp.main{background:#0f2462;border-color:#0f2462}.rbp.main .rbp-l,.rbp.main .rbp-s{color:#c9d3f2}.rbp.main b{color:#f3d27a}.rbp.ok{border-color:#9fd4ae;background:#eef8f1}.rbp.warn{border-color:#f0c36d;background:#fff8e1}
 .revtog{display:flex;align-items:center;justify-content:space-between;width:100%;margin:4px 0 8px;padding:9px 14px;border:1px solid var(--line,#e3e8f3);border-radius:10px;background:var(--card2,#f5f7fc);font:700 14px Montserrat,Arial,sans-serif;color:#0d1b3e;cursor:pointer}.revtog.on{border-color:#d4af37;background:#fff8e1}.revtog:hover{border-color:#d4af37}
 .hirepick{display:flex;flex-direction:column;gap:6px}.hirepick .hp{display:flex;align-items:center;gap:10px;border:1px solid var(--line,#e3e8f3);border-radius:10px;padding:10px 12px;cursor:pointer}.hirepick .hp b{margin-left:auto}.hirepick .hp.off{opacity:.5;cursor:not-allowed}.hirepick .hp:has(input:checked){border-color:#d4af37;background:#fff8e1}</style>`);
 const PLAN_CSS = `.hallsvg{width:100%;height:auto;display:block}.pseat{cursor:pointer;stroke:#fff;stroke-width:.8}.pseat.lead{stroke:#0d1b3e;stroke-width:2.2}
