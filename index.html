@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-SgbvitKwUgkVMDy8SQiJpe2cE2H6zCkYrX3N6ScRSc0=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-MxGF7uKPkzxkTFf2SBBHkGqlEIpSF1Cd5rbJl+I9mUk=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="author" content="Eddie Bila">
@@ -588,7 +588,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202611251400";
+const BUILD = "202611251600";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -1800,7 +1800,16 @@ function matchScore(l){
 }
 function chipsHTML(id, opts, cur){ return `<div class="chips" id="${id}" style="margin:10px 0">${opts.map(([k,label,n]) => `<button class="chip ${cur===k?"on":""}" data-c="${k}">${label} (${n})</button>`).join("")}</div>`; }
 const PROG_COLS = ["#e11d48","#f59e0b","#10b981","#3b82f6","#8b5cf6","#ec4899","#14b8a6","#f97316","#65a30d","#0891b2","#a855f7","#dc2626","#ca8a04","#2563eb","#db2777","#059669"];
-function progColor(l){ const keys = S._progKeys && S._progKeysAt === S.data.learners.length ? S._progKeys : (S._progKeysAt = S.data.learners.length, S._progKeys = [...new Set(S.data.learners.map(progKey))].sort()); const i = keys.indexOf(progKey(l)); return PROG_COLS[(i < 0 ? 0 : i) % PROG_COLS.length]; }
+const colKey = l => l.nqf == null ? "099|" + (l.client || "Other") : progKey(l);   // seating groups (no-NQF learners sit together by client)
+function progGroups(){
+  const L = S.data.learners, sig = L.length + "|" + L.reduce((a, l) => a + (l.seat ? 1 : 0), 0) + "|" + (S.version || 0);
+  if (S._pg && S._pgSig === sig) return S._pg;
+  const m = new Map(); L.forEach(l => { const k = colKey(l), r = l.seat ? seatRank(l.seat) : 1e12; const g = m.get(k) || {k, first:r, n:0, seated:0, name:l.nqf == null ? (l.client || "Other") : (l.programme || "No programme"), nqf:l.nqf}; g.first = Math.min(g.first, r); g.n++; if (l.seat) g.seated++; m.set(k, g); });
+  const list = [...m.values()].sort((a, b) => a.first - b.first || a.k.localeCompare(b.k));
+  list.forEach((g, i) => g.col = PROG_COLS[i % PROG_COLS.length]);
+  S._pgSig = sig; S._pg = {list, by:new Map(list.map(g => [g.k, g]))}; return S._pg;
+}
+function progColor(l){ const g = progGroups().by.get(colKey(l)); return g ? g.col : PROG_COLS[0]; }
 const isLead = l => l.status === "present" && !l._late && /-01$/.test(codeOf(l));
 function tagLead(l){   // name tags: the programme's first seat (seats are fixed in advance), else the first to arrive
   if (!l.seat) return isLead(l);
@@ -2503,15 +2512,18 @@ function planRoute(s){
   for (let i = 1; i <= 12; i++) pts.push(planXY(s.r, thA + (thS - thA) * i / 12));
   return {pts, door};
 }
-function planSVG(sel){
+function planSVG(sel, mode){
   const seats = planSeats(), by = new Map(S.data.learners.filter(l => l.seat).map(l => [l.seat, l]));
-  const fill = (s, l) => s.reserved ? (s.row === "DD" ? "url(#cam)" : "url(#resv)") : !l ? "#eef1f7" : l.cert_issued ? "#0f2462" : l.stage_status === "done" ? "#2a47a8" : l.robe_issued ? "#5577d8" : l.status === "present" ? "#9db3ec" : "#cfd8ef";
+  const byProg = mode !== "progress", PG = progGroups();
+  const firstOf = new Set(PG.list.map(g => { let best = null; S.data.learners.forEach(l => { if (l.seat && colKey(l) === g.k && (!best || seatRank(l.seat) < seatRank(best.seat))) best = l; }); return best && best.seat; }).filter(Boolean));
+  const fill = (s, l) => byProg && l && !s.reserved ? progColor(l) : s.reserved ? (s.row === "DD" ? "url(#cam)" : "url(#resv)") : !l ? "#eef1f7" : l.cert_issued ? "#0f2462" : l.stage_status === "done" ? "#2a47a8" : l.robe_issued ? "#5577d8" : l.status === "present" ? "#9db3ec" : "#cfd8ef";
   const hit = sel && sel.seat ? seats.find(s => s.label === sel.seat) : null;
   const rows = [];
   HALL.sections.forEach(sec => sec.rows.forEach((row, ri) => { const r = planRowR(sec.name, ri);
     [[-1.4, "end"], [planUnits(sec.name) + 1.4, "start"]].forEach(([u]) => { const [x, y] = planXY(r, planAngle(sec.name, u, r)); rows.push(`<text x="${x.toFixed(1)}" y="${(y + 4).toFixed(1)}" class="prow" text-anchor="middle">${row}</text>`); }); }));
   const seatEls = seats.map(s => { const l = by.get(s.label); const on = hit && hit.label === s.label;
-    return `<rect class="pseat${on ? " on" : ""}" data-seat="${s.label}" x="${(s.x - 7).toFixed(1)}" y="${(s.y - 6.5).toFixed(1)}" width="14" height="13" rx="3" transform="rotate(${s.deg.toFixed(1)} ${s.x.toFixed(1)} ${s.y.toFixed(1)})" fill="${fill(s, l)}"><title>${s.label}${s.reserved ? " · reserved for clients" : l ? " · " + esc(fullName(l)) + " · " + esc(l.programme || "") : " · empty"}</title></rect>`; }).join("");
+    const lead = byProg && l && firstOf.has(s.label);
+    return `<rect class="pseat${on ? " on" : ""}${lead ? " lead" : ""}" data-seat="${s.label}" x="${(s.x - 7).toFixed(1)}" y="${(s.y - 6.5).toFixed(1)}" width="14" height="13" rx="3" transform="rotate(${s.deg.toFixed(1)} ${s.x.toFixed(1)} ${s.y.toFixed(1)})" fill="${fill(s, l)}"${byProg && l && !lead ? ' fill-opacity=".42"' : ""}><title>${s.label}${s.reserved ? " · reserved for clients" : l ? " · " + esc(fullName(l)) + " · " + esc(l.programme || "") : " · empty"}</title></rect>`; }).join("");
   const route = hit ? planRoute(hit) : null;
   const ush = usherList().map(([id, label, c, x, y]) => { const mine = hit && usherFor(hit) === id; return `<g class="push${mine ? " mine" : ""}"><circle cx="${x}" cy="${y}" r="${mine ? 17 : 13}" fill="${USH_COL[c]}" stroke="#fff" stroke-width="2.5"/><text x="${x}" y="${y + 4}" text-anchor="middle" class="push-t">${id}</text><title>${id} · ${label}</title></g>`; }).join("");
   const blockLabel = (sec, block, ri, txt) => { const u0 = planBlockStart(sec, block), n = PLAN.layout[sec].find(b => b[0] === block)[1], r = planRowR(sec, ri), [x, y] = planXY(r, planAngle(sec, u0 + n / 2, r)); return `<text x="${x.toFixed(0)}" y="${y.toFixed(0)}" class="pblk" text-anchor="middle">${txt}</text>`; };
@@ -2566,11 +2578,15 @@ function seatMap(preselect){
     <div class="row" style="gap:8px;flex-wrap:wrap"><input type="search" id="smq" placeholder="Find a graduate and show them the way to their seat" style="flex:1;min-width:220px" autocomplete="off"><button class="btn ghost sm" id="smPrint">🖨 Print plan</button></div>
     <div id="smres" class="smres"></div>
     <div class="pwrap"><div id="pplan" class="pplan"></div><div id="pside" class="pside"></div></div>
-    <div class="pkeys small"><span><i style="background:#cfd8ef"></i>Seat assigned</span><span><i style="background:#9db3ec"></i>Arrived</span><span><i style="background:#5577d8"></i>Robed</span><span><i style="background:#2a47a8"></i>Crossed</span><span><i style="background:#0f2462"></i>Certificate</span><span><i class="hatch"></i>Clients</span><span><i style="background:#eef1f7;border:1px solid #d6dcea"></i>Empty</span>
+    <div class="row" style="gap:8px;margin-top:8px;flex-wrap:wrap"><span class="small muted">Colour seats by</span><div class="chips" id="smMode" style="margin:0"><button class="chip on" data-m="prog">Programme</button><button class="chip" data-m="progress">Progress on the day</button></div></div>
+    <div id="smLegend"></div>
+    <div class="pkeys small" id="smProgKeys" style="display:none"><span><i style="background:#cfd8ef"></i>Seat assigned</span><span><i style="background:#9db3ec"></i>Arrived</span><span><i style="background:#5577d8"></i>Robed</span><span><i style="background:#2a47a8"></i>Crossed</span><span><i style="background:#0f2462"></i>Certificate</span><span><i class="hatch"></i>Clients</span><span><i style="background:#eef1f7;border:1px solid #d6dcea"></i>Empty</span>
       <span class="sep"></span><span><b style="color:${USH_COL.red}">●</b> Entrance/rear ushers U1–U3</span><span><b style="color:${USH_COL.green}">●</b> Upper ushers U4–U7</span><span><b style="color:${USH_COL.blue}">●</b> Lower ushers U8–U10</span><span><b style="color:${USH_COL.purple}">●</b> Stage ushers U11–U12</span></div>
     <div class="row" style="margin-top:10px"><span class="small muted">Tap any seat to see who sits there. Gold arrows show the learner route; red the guest route; blue the VIP route.</span><span class="spacer"></span><button class="btn ghost" id="mc">Close</button></div>`,
     (m, close) => { m.classList.add("wide");
-      const draw = () => { $("#pplan", m).innerHTML = planSVG(sel); $("#pside", m).innerHTML = sel ? planGuide(sel) : `<div class="pguide muted small">Search for a graduate, or tap a seat, to see their route from the learner entrance, the usher to look for, and their row and seat.</div>`;
+      let mode = "prog";
+      $$("#smMode .chip", m).forEach(b => b.onclick = () => { mode = b.dataset.m; $$("#smMode .chip", m).forEach(x => x.classList.toggle("on", x === b)); draw(); });
+      const draw = () => { $("#pplan", m).innerHTML = planSVG(sel, mode); $("#smLegend", m).innerHTML = mode === "prog" ? progLegend() : ""; $("#smProgKeys", m).style.display = mode === "prog" ? "none" : ""; $("#pside", m).innerHTML = sel ? planGuide(sel) : `<div class="pguide muted small">Search for a graduate, or tap a seat, to see their route from the learner entrance, the usher to look for, and their row and seat.</div>`;
         $$(".pseat", m).forEach(r => r.onclick = () => { const l = S.data.learners.find(x => x.seat === r.dataset.seat); if (l){ sel = l; draw(); } else toast(r.dataset.seat + (r.getAttribute("fill") === "url(#resv)" ? " is reserved for VIPs" : r.getAttribute("fill") === "url(#cam)" ? " is kept empty: camera walkway" : " is empty")); });
         const on = $(".pseat.on", m); if (on && on.scrollIntoView) on.scrollIntoView({block:"center", inline:"center", behavior:"smooth"}); };
       $("#mc", m).onclick = close;
@@ -2579,7 +2595,7 @@ function seatMap(preselect){
           body{margin:0;font-family:Arial,sans-serif;color:#0d1b3e}.hd{display:flex;align-items:center;gap:12px;background:#0d1b3e;color:#fff;padding:8mm 10mm;border-bottom:3px solid #d4af37}.hd img{width:44px;height:44px;border-radius:50%;background:#fff;padding:3px}
           .hd h1{margin:0;font-size:18px;letter-spacing:.6px}.hd p{margin:2px 0 0;font-size:11px;color:#c9d3f2}.bd{padding:5mm 8mm}svg{width:100%;height:auto;max-height:235mm}${PLAN_CSS}</style></head><body>
           <div class="hd"><img src="${crest}" alt=""><div><h1>GREAT HALL SEATING PLAN</h1><p>${esc([d.name, d.date ? new Date(d.date).toLocaleDateString("en-ZA", {day:"numeric", month:"long", year:"numeric"}) : "", d.venue].filter(Boolean).join(" · "))}</p></div></div>
-          <div class="bd">${planSVG(sel)}${sel ? planGuide(sel) : ""}</div></body></html>`;
+          <div class="bd">${planSVG(sel, mode)}${mode === "prog" ? progLegend() : ""}${sel ? planGuide(sel) : ""}</div></body></html>`;
         await reportPdf(`Seating plan ${d.name} ${new Date().toISOString().slice(0,10)}.pdf`.replace(/[\\/:*?"<>|]/g, ""), html); };
       $("#smq", m).oninput = e => { const q = e.target.value.toLowerCase().trim(); if (!q){ $("#smres", m).innerHTML = ""; return; }
         const hits = S.data.learners.filter(l => l.seat && (fullName(l).toLowerCase().includes(q) || (l.seat || "").toLowerCase() === q)).slice(0, 8);
@@ -2588,7 +2604,13 @@ function seatMap(preselect){
       draw();
     });
 }
-const PLAN_CSS = `.hallsvg{width:100%;height:auto;display:block}.pseat{cursor:pointer;stroke:#fff;stroke-width:.8}.pseat:hover{stroke:#0d1b3e;stroke-width:1.5}.pseat.on{stroke:#d93025;stroke-width:2.5}
+function progLegend(){
+  const gs = progGroups().list.filter(g => g.seated);
+  if (!gs.length) return "";
+  return `<div class="plegend"><div class="plegend-h">Programmes in stage order · <b>bold seat = first seat of the programme</b></div>${gs.map((g, i) => `<span class="plg"><i style="background:${g.col}"></i><b>${i + 1}.</b> ${g.nqf != null ? "NQF " + g.nqf + " · " : ""}${esc(g.name)} <em>(${g.seated})</em></span>`).join("")}</div>`;
+}
+const PLAN_CSS = `.hallsvg{width:100%;height:auto;display:block}.pseat{cursor:pointer;stroke:#fff;stroke-width:.8}.pseat.lead{stroke:#0d1b3e;stroke-width:2.2}
+  .plegend{display:flex;flex-wrap:wrap;gap:4px 14px;margin:8px 0 4px;font:600 11px Montserrat,Arial,sans-serif;color:#0d1b3e}.plegend-h{flex-basis:100%;font-size:11px;color:#5b6785;font-weight:600}.plg{display:inline-flex;align-items:center;gap:5px}.plg i{width:13px;height:11px;border-radius:2px;display:inline-block;border:1.5px solid #0d1b3e}.plg em{color:#7a849c;font-style:normal}.pseat:hover{stroke:#0d1b3e;stroke-width:1.5}.pseat.on{stroke:#d93025;stroke-width:2.5}
   .prow{font:700 9px Montserrat,Arial,sans-serif;fill:#5b6785}.pblk{font:800 12px Montserrat,Arial;fill:#8a93a8}.plbl{font:800 11px Montserrat,Arial,sans-serif;fill:#0d1b3e}.plbl.s{font-size:9px;font-weight:700}.plbl.w{fill:#fff}.plbl.rd{fill:#b3261e}.plbl.bl{fill:#1d4fb8}.plbl.gd{fill:#7a5a00;font-size:9.5px}.plbl.stg{font-size:22px;letter-spacing:4px}
   .pflow{fill:none;stroke-width:4;stroke-linecap:round}.pflow.r{stroke:#c62828}.pflow.b{stroke:#1d4fb8}.pflow.g{stroke:#d4af37}
   .push-t{font:800 10px Montserrat,Arial;fill:#fff}.push.mine circle{stroke:#f3d27a;stroke-width:4}
