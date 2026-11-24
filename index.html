@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-ImOQ1K01enj6EJwuq1AXjKuw1u9uLbX2bt/w27gHq6w=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-rT02ocIy4XKLAiXDjWzz0QLzfooLyNzgHQpZ+PEd8mc=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="author" content="Eddie Bila">
@@ -588,7 +588,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202611252100";
+const BUILD = "202611252200";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -1089,7 +1089,7 @@ function afterAuth(tok, r){
 async function logout(expired){
   clearInterval(timer); clearInterval(PRES.ping); clearInterval(PRES.timer); PRES.list = null;
   try { if (S.pin && !expired) await rpc("hub_logout", {p_token:S.pin}); } catch {}
-  store.del(TOKEN_KEY); S.pin = null; S.user = null; S.data = null;
+  store.del(TOKEN_KEY); S.pin = null; S.user = null; S.data = null; S.payOpen = false;
   $("#who").innerHTML = "";
   authView(expired ? "Your session has ended. Please sign in again." : "");
 }
@@ -2095,7 +2095,9 @@ function drawPayments(){
   if (!["due","paid"].includes(S.f.py)) S.f.py = "due";
   const by = m => paid.filter(l => (l.pay_method || "Cash") === m).length;
   $("#pySum").textContent = `${due.length} to pay · ${paid.length} done (${PAY_METHODS.map(([k]) => `${k} ${by(k)}`).join(", ")}, not needed ${by("Exempt")})`;
-  $("#pyRev").innerHTML = hirePanel(S.data.learners);
+  // income summary starts collapsed every session (S is rebuilt on each sign-in); expands only on request
+  $("#pyRev").innerHTML = `<button class="revtog${S.payOpen ? " on" : ""}" id="pyRevT" type="button"><span>💰 Income summary</span><span class="small muted">${S.payOpen ? "Hide ▴" : "Show ▾"}</span></button>${S.payOpen ? hirePanel(S.data.learners) : ""}`;
+  $("#pyRevT").onclick = () => { S.payOpen = !S.payOpen; drawPayments(); };
   $("#pychips").innerHTML = chipsHTML("pyc", [["due","Awaiting payment",due.length],["paid","Paid or exempt",paid.length]], S.f.py);
   $$("#pyc .chip").forEach(b => b.onclick = () => { S.f.py = b.dataset.c; drawPayments(); });
   groupedOut($("#pylist"), S.f.py === "due" ? due : paid, (l, i, prog) => `<div class="lrow ${l.paid ? "present" : "expected"}">${posTag(i, prog)}${lInfo(l,
@@ -2729,6 +2731,7 @@ function progLegend(){
   return `<div class="plegend"><div class="plegend-h">Programmes in stage order · <b>bold seat = first seat of the programme</b></div>${gs.map((g, i) => `<span class="plg"><i style="background:${g.col}"></i><b>${i + 1}.</b> ${g.nqf != null ? "NQF " + g.nqf + " · " : ""}${esc(g.name)} <em>(${g.seated})</em></span>`).join("")}</div>`;
 }
 document.head.insertAdjacentHTML("beforeend", `<style>.hirebox{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:6px 0 12px}.hirebox>div{background:var(--card2,#f5f7fc);border:1px solid var(--line,#e3e8f3);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;gap:2px}.hirebox .hb-tot{background:#0f2462;color:#fff;border-color:#0f2462}.hirebox .hb-tot .muted{color:#c9d3f2!important}.hirebox .hb-tot b{font-size:22px;color:#f3d27a}.hirebox b{font-size:17px}
+.revtog{display:flex;align-items:center;justify-content:space-between;width:100%;margin:4px 0 8px;padding:9px 14px;border:1px solid var(--line,#e3e8f3);border-radius:10px;background:var(--card2,#f5f7fc);font:700 14px Montserrat,Arial,sans-serif;color:#0d1b3e;cursor:pointer}.revtog.on{border-color:#d4af37;background:#fff8e1}.revtog:hover{border-color:#d4af37}
 .hirepick{display:flex;flex-direction:column;gap:6px}.hirepick .hp{display:flex;align-items:center;gap:10px;border:1px solid var(--line,#e3e8f3);border-radius:10px;padding:10px 12px;cursor:pointer}.hirepick .hp b{margin-left:auto}.hirepick .hp.off{opacity:.5;cursor:not-allowed}.hirepick .hp:has(input:checked){border-color:#d4af37;background:#fff8e1}</style>`);
 const PLAN_CSS = `.hallsvg{width:100%;height:auto;display:block}.pseat{cursor:pointer;stroke:#fff;stroke-width:.8}.pseat.lead{stroke:#0d1b3e;stroke-width:2.2}
   .plegend{display:flex;flex-wrap:wrap;gap:4px 14px;margin:8px 0 4px;font:600 11px Montserrat,Arial,sans-serif;color:#0d1b3e}.plegend-h{flex-basis:100%;font-size:11px;color:#5b6785;font-weight:600}.plg{display:inline-flex;align-items:center;gap:5px}.plg i{width:13px;height:11px;border-radius:2px;display:inline-block;border:1.5px solid #0d1b3e}.plg em{color:#7a849c;font-style:normal}.pseat:hover{stroke:#0d1b3e;stroke-width:1.5}.pseat.on{stroke:#d93025;stroke-width:2.5}
