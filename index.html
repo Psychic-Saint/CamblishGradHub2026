@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-HjIYU6VBH/mWPsqDpXxJWDZvgH9fxPAUfAg/tqzVPA4=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-SgbvitKwUgkVMDy8SQiJpe2cE2H6zCkYrX3N6ScRSc0=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="author" content="Eddie Bila">
@@ -588,7 +588,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202611251000";
+const BUILD = "202611251400";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -1907,7 +1907,8 @@ async function markPrinted(list){
 /* ======================================================================
    CHECK-IN  (present learners move on to Robes)
    ====================================================================== */
-const dcode = l => l.seat || (otherCeremony(l) ? "Own ceremony" : codeOf(l));   // one code everywhere: the seat (seat order = stage order)
+const yesOnly = () => !!(S.data && S.data.event && S.data.event.seat_yes_only);
+const dcode = l => l.seat || (otherCeremony(l) ? "Own ceremony" : yesOnly() && !/^y/i.test(l.rsvp||"") ? "Not confirmed" : codeOf(l));   // one code everywhere: the seat (seat order = stage order)
 function codeOf(l){ if (!l._code) stageList(); return l._code || ""; }
 function viewCheckin(){
   if (!$("#ciView")){
@@ -2435,7 +2436,7 @@ function hallSeats(){
 }
 const seatSort = (a, b) => ((a.nqf ?? 99) - (b.nqf ?? 99)) || (a.programme||"").localeCompare(b.programme||"") || (a.client||"").localeCompare(b.client||"") || (a.surname||"").localeCompare(b.surname||"") || (a.first_name||"").localeCompare(b.first_name||"");
 function seatPlan(){
-  const L = S.data.learners, want = L.filter(l => !/^n/i.test(l.rsvp||"") && !otherCeremony(l));
+  const L = S.data.learners, want = L.filter(l => !/^n/i.test(l.rsvp||"") && (!yesOnly() || /^y/i.test(l.rsvp||"")) && !otherCeremony(l));
   return { unseated: want.filter(l => !l.seat).length, lower: hallSeats().filter(s => s.section === "Lower" && !s.reserved).length, other: L.filter(otherCeremony).length };
 }
 async function assignSeats(){
@@ -3064,7 +3065,7 @@ function viewManage(){
       <label class="row small" style="gap:8px;margin-top:14px"><input type="checkbox" id="payReqT" ${payReq() ? "checked" : ""}> <span><b>Robe payment step</b>: graduates go to the <b>Payments</b> tab after check-in and only reach Robes once their payment is captured</span></label></div>
   </div>
   <div class="card"><h2>Seating plan · ${HALL.name}<span class="spacer"></span><button class="btn ghost sm" id="smOpen">💺 View seating plan</button>${can("seating")?`<button class="btn gold sm" id="smAssign">Assign seats by programme</button>`:""}</h2>
-    ${(() => { const st = seatStats(), sp = seatPlan(); return `<p class="small">Each programme gets its own block of seats for everyone expected, in stage order (NQF 1 first, then 2, 3 and up), and each programme starts at the end of a row. <b>Inside a programme it is first come, first seated:</b> the first graduate to arrive takes the first seat and goes on stage first, the next arrival takes the next seat, and so on. Not-yet-arrived graduates hold provisional seats behind them, so print name tags at check-in. Filling starts in the <b>lower right block at EE-01</b>, then the lower centre and lower left blocks, then the upper blocks from right to left; guests use the remaining upper seats. Rows AA, BB and CC on the lower right are for VIPs and row DD across the lower section stays empty as the camera walkway. Absent graduates' seats stay open at the end of their programme's block in case they arrive. Anyone marked "not attending" or from a region with its own ceremony gets no seat.</p>
+    ${(() => { const st = seatStats(), sp = seatPlan(); return `<p class="small">Each programme gets its own block of seats for everyone expected, in stage order (NQF 1 first, then 2, 3 and up). <b>Inside a programme, learners sit together by client</b> (PWD learners at the front of their client's seats), then by surname. Seats are fixed in advance, so name tags can be printed before the day. A programme starts on a new row when there is room; when space is tight it follows on in the same row. ${yesOnly() ? "<b>Only learners who answered Yes are seated.</b> " : ""}Filling starts in the <b>lower right block at EE-01</b>, then the lower centre and lower left blocks, then the upper blocks from right to left; guests use the remaining upper seats. Rows AA, BB and CC on the lower right are for VIPs and row DD across the lower section stays empty as the camera walkway. Absent graduates keep their seat, so it stays open in case they arrive. Anyone marked "not attending" or from a region with its own ceremony gets no seat.</p>
     ${can("seating") ? `<div class="row" style="gap:8px;flex-wrap:wrap;margin:8px 0"><label class="lbl" style="margin:0">Regions with their own ceremony (no seat here)</label><input type="text" id="skr" style="flex:1;min-width:220px" value="${esc(skipRegions().join(", "))}" placeholder="e.g. DBN, KZN, WC, CPT"><button class="btn sm" id="skrSave">Save and reseat</button></div>` : skipRegions().length ? `<p class="small muted">Own ceremony (no seat here): ${esc(skipRegions().join(", "))}</p>` : ""}
     <div class="row" style="gap:18px"><div><div class="big2">${st.seated}</div><div class="small muted">seated</div></div><div><div class="big2">${st.lower}</div><div class="small muted">lower section (of ${sp.lower})</div></div><div><div class="big2">${st.upper}</div><div class="small muted">upper section</div></div><div><div class="big2" style="color:${st.none?"var(--bad)":"inherit"}">${st.none}</div><div class="small muted">without a seat</div></div><div><div class="big2">${sp.other}</div><div class="small muted">own regional ceremony</div></div></div>`; })()}
   </div>
