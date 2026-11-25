@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-1D/WNY4niBXT99AAIoQWNkpeMxovZMDTPuORU81SIxU=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-qtk5rpiR4BB1lu0gaAvs3qUglWaqj9P8CdsdRUilnw8=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="author" content="Eddie Bila">
@@ -588,7 +588,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202611252230";
+const BUILD = "202611252330";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -1251,8 +1251,8 @@ const saveTagPrefs = o => store.set("tagprefs", Object.assign(tagPrefs(), o));
 let _tagImg = null;
 function tagBg(){ return _tagImg || (_tagImg = new Promise(res => { const i = new Image(); i.onload = () => res(i); i.src = TAG_BG; })); }
 function fitText(ctx, text, maxW, size, font){ let s = size; do { ctx.font = font.replace("{s}", s); if (ctx.measureText(text).width <= maxW) break; s -= 1; } while (s > 8); return s; }
-async function renderTag(l){
-  const sz = TAG_SIZES[tagPrefs().size];
+async function renderTag(l, sizeKey){
+  const sz = TAG_SIZES[sizeKey || tagPrefs().size];
   const dpi = 300, W = Math.round(sz.w / 25.4 * dpi), H = Math.round(sz.h / 25.4 * dpi);
   const c = document.createElement("canvas"); c.width = W; c.height = H;
   const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, W, H);
@@ -1319,15 +1319,23 @@ function bulkTagDialog(){
     <label class="row small" style="gap:6px;margin-top:8px"><input type="radio" name="bt" value="todo" checked> Not printed yet <b>(${sets.todo.length})</b></label>
     <label class="row small" style="gap:6px"><input type="radio" name="bt" value="present"> Arrived, not printed yet <b>(${sets.present.length})</b></label>
     <label class="row small" style="gap:6px"><input type="radio" name="bt" value="all"> Everyone shown, including reprints <b>(${sets.all.length})</b></label>
+    <p class="small" style="margin:12px 0 4px"><b>Paper</b></p>
+    <label class="row small" style="gap:6px"><input type="radio" name="bl" value="sheet" checked> A4 sheets: 9 tags per page (86 x 54 mm), a heading for each programme, dotted cut lines</label>
+    <label class="row small" style="gap:6px"><input type="radio" name="bl" value="single"> One tag per page (card or label printer)</label>
     <div class="row" style="margin-top:14px"><span class="spacer"></span><button class="btn ghost" id="mc">Cancel</button><button class="btn gold" id="mo">🖨 Print</button></div>`,
     (m, close) => { $("#mc", m).onclick = close;
       $("#mo", m).onclick = () => { const k = (m.querySelector("[name=bt]:checked") || {}).value, list = (sets[k] || []).slice().sort(byProg);
-        if (!list.length) return toast("No tags in that group.", "gold"); close(); printTags(list); }; });
+        if (!list.length) return toast("No tags in that group.", "gold"); close(); printTags(list, {sheet:(m.querySelector("[name=bl]:checked") || {}).value === "sheet"}); }; });
 }
-async function printTags(list){
+async function printTags(list, opts){
   list = list.filter(Boolean); if (!list.length) return;
   let canvases;
-  try { canvases = await Promise.all(list.map(renderTag)); } catch(e){ return toast("Could not build the tag: " + e.message, "red"); }
+  if (opts && opts.sheet){
+    toast(`Preparing ${list.length} tags on ${sheetPages(list).length} A4 pages…`);
+    try { canvases = await Promise.all(list.map(l => renderTag(l, "86x54"))); } catch(e){ return toast("Could not build the tags: " + e.message, "red"); }
+    return sendSheets(list, canvases);
+  }
+  try { canvases = await Promise.all(list.map(l => renderTag(l))); } catch(e){ return toast("Could not build the tag: " + e.message, "red"); }
   const p = tagPrefs();
   if (p.direct && p.printer && DESKTOP() && DESKTOP().print_png){
     const label = list.length > 1 ? list.length + " tags" : "Tag for " + fullName(list[0]);
@@ -1364,6 +1372,38 @@ function sendToPrinter(canvases, orient){
   const done = () => { document.body.classList.remove("printing-tag"); window.removeEventListener("afterprint", done); };
   window.addEventListener("afterprint", done);
   setTimeout(() => { window.print(); setTimeout(done, 1500); }, 250);
+}
+/* A4 sheets: 3 x 3 business-card tags (86 x 54 mm) per landscape page; each programme starts on a new row under its own heading */
+function sheetPages(list){
+  const pages = []; let page = null, prev = null, row = null;
+  list.forEach((l, i) => {
+    const k = colKey(l), newProg = k !== prev;
+    if (newProg || !row || row.items.length === 3){
+      if (!page || page.rows.length === 3){ page = {rows:[]}; pages.push(page); }
+      row = {items:[], head:(newProg || !page.rows.length) ? {l, cont:!newProg} : null}; page.rows.push(row);
+    }
+    row.items.push(i); prev = k;
+  });
+  return pages;
+}
+function sendSheets(list, canvases){
+  const pages = sheetPages(list), G = progGroups(), d = S.data.event;
+  const cnt = {}; list.forEach(l => { const k = colKey(l); cnt[k] = (cnt[k] || 0) + 1; });
+  const head = (h) => { const l = h.l, g = G.by.get(colKey(l)), name = l.nqf == null ? (l.client || "Other") : (l.programme || "No programme");
+    return `<div class="sh-h" style="--pc:${g ? g.col : "#1d3fae"}"><i></i><b>${l.nqf != null ? "NQF " + l.nqf + " · " : ""}${esc(name)}</b>${h.cont ? `<span>(continued)</span>` : `<span>${cnt[colKey(l)]} tag${cnt[colKey(l)] === 1 ? "" : "s"}</span>`}</div>`; };
+  let area = $("#tagArea"); if (!area){ area = document.createElement("div"); area.id = "tagArea"; document.body.appendChild(area); }
+  area.innerHTML = `<style>@page{size:A4 landscape;margin:0}@media print{html,body{margin:0!important;padding:0!important;background:#fff!important}}
+    .shp{width:297mm;height:209mm;padding:6mm 10mm 4mm;box-sizing:border-box;page-break-after:always;break-after:page;font-family:Montserrat,Arial,sans-serif;color:#0d1b3e;overflow:hidden}
+    .shp-t{display:flex;justify-content:space-between;font-size:8.5pt;color:#5b6785;border-bottom:1px solid #d6dcea;padding-bottom:1mm;margin-bottom:1mm}.shp-t b{color:#0d1b3e}
+    .sh-h{display:flex;align-items:center;gap:2.5mm;font-size:9pt;margin:1.2mm 0 1mm;line-height:1.2}.sh-h i{width:4mm;height:4mm;border-radius:1mm;background:var(--pc);display:inline-block}.sh-h span{color:#7a849c;font-size:8.5pt}
+    .sh-r{display:flex;gap:4mm;margin-bottom:2.5mm}.sh-r img{width:86mm;height:54mm;display:block;outline:0.2mm dashed #9aa3b8;outline-offset:1mm}</style>` +
+    pages.map((p, pi) => `<div class="shp"><div class="shp-t"><span><b>Name tags</b> · ${esc(d.name)}</span><span>Cut along the dotted lines · page ${pi + 1} of ${pages.length}</span></div>
+      ${p.rows.map(r => `${r.head ? head(r.head) : ""}<div class="sh-r">${r.items.map(i => `<img src="${canvases[i].toDataURL("image/jpeg", 0.92)}" alt="">`).join("")}</div>`).join("")}</div>`).join("");
+  document.body.classList.add("printing-tag");
+  const done = () => { document.body.classList.remove("printing-tag"); window.removeEventListener("afterprint", done); };
+  window.addEventListener("afterprint", done);
+  markPrinted(list);
+  setTimeout(() => { window.print(); setTimeout(done, 1500); }, 400);
 }
 async function previewTag(l){ printTags([l]); }
 /* ---------- OVERVIEW ---------- */
