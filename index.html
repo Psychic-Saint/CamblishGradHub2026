@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-MVVjcPWz9l2bECu+wT5NPsB0MfcHTdOhFw3oBeq2wag=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-1uxF7dDoo8DdVnULppOlle93WOGar6Z3i/d+14LkwfQ=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="author" content="Eddie Bila">
@@ -588,7 +588,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202611261000";
+const BUILD = "202611261730";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -1183,9 +1183,9 @@ function render(){
   $$("nav.tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === S.tab));
   const views = { overview:viewOverview, tasks:viewTasks, checkin:viewCheckin, payments:viewPayments, vip:viewVip, robes:viewRobes, stage:viewStage, certs:viewCerts, grads:viewGrads, feed:viewFeed, settings:viewSettings, manage:() => openSettings("event"), users:() => openSettings("users") };
   const P = d.learners.filter(l => l.status === "present"), rw = P.filter(robeReady).length, pw = P.filter(needsPay).length, cw = P.filter(l => l.stage_status === "done" && !l.cert_issued && !openQ(l).length).length;
-  $("#bPay").textContent = pw; $("#bPay").classList.toggle("hidden", !pw); $("#tabPay").classList.toggle("hidden", !payReq() || !isAdmin());
+  $("#bPay").textContent = pw; $("#bPay").classList.toggle("hidden", !pw); $("#tabPay").classList.toggle("hidden", !payReq() || !canPay());
   $("#tabVip").classList.toggle("hidden", !vipAccess());
-  if (S.tab === "payments" && (!payReq() || !isAdmin())) S.tab = payReq() ? "checkin" : "robes";
+  if (S.tab === "payments" && (!payReq() || !canPay())) S.tab = payReq() ? "checkin" : "robes";
   if (S.tab === "vip" && !vipAccess()) S.tab = "overview";
   $("#bRobe").textContent = rw; $("#bRobe").classList.toggle("hidden", !rw); $("#bCert").textContent = cw; $("#bCert").classList.toggle("hidden", !cw);
   const sw = P.filter(l => l.robe_issued && l.stage_status !== "done").length, onS = P.some(l => l.stage_status === "called");
@@ -1902,6 +1902,8 @@ function listOut(el, list, rowFn, empty){
    ====================================================================== */
 const payReq = () => !S.data || !S.data.event || S.data.event.pay_required !== false;
 const isAdmin = () => !!S.user && S.user.role === "admin";
+// Payments desk: admins, plus anyone the admin has ticked "payments" for under Users (role defaults do not count)
+const canPay = () => isAdmin() || (!!S.user && Array.isArray(S.user.perms) && S.user.perms.includes("payments"));
 const needsPay = l => l.status === "present" && !l.robe_issued && payReq() && !l.paid;      // checked in, robe not paid yet
 const robeReady = l => l.status === "present" && !l.robe_issued && (!payReq() || l.paid);   // paid (or no payment step): at the robes table
 const FLOW_ALL = [["checkin","Check-in","not arrived"],["payments","Payments","to pay"],["robes","Robes","waiting"],["stage","Stage","in the line"],["certs","Certificates","to hand out"],["grads","Graduates","graduated"]];
@@ -2022,7 +2024,7 @@ function drawCheckin(){
     const l = S.data.learners.find(x=>x.id===b.dataset.ci), isPresent = b.dataset.s === "present";
     if (await act("grad_checkin", {p_learner:l.id, p_status:b.dataset.s}, isPresent ? `${fullName(l)} checked in${l.seat ? " · seat " + l.seat : ""}. Now at Robes.` : null)){
       if (isPresent && tagPrefs().auto && can("print_tags")){ stageList(); const fresh = S.data.learners.find(x=>x.id===l.id); if (fresh) printTags([fresh]); }
-      if (isPresent){ if (!payReq()) bounceTab("robes"); else if (isAdmin()) bounceTab("payments"); if (S.f.L.q){ S.f.L.q = ""; const q = $(".fbar [data-fk=q]"); if (q){ q.value = ""; q.focus(); } drawCheckin(); } }
+      if (isPresent){ if (!payReq()) bounceTab("robes"); else if (canPay()) bounceTab("payments"); if (S.f.L.q){ S.f.L.q = ""; const q = $(".fbar [data-fk=q]"); if (q){ q.value = ""; q.focus(); } drawCheckin(); } }
     }
   });
 }
@@ -2142,7 +2144,7 @@ function drawPayments(){
   $("#pySum").textContent = `${due.length} to pay · ${paid.length} done (${PAY_METHODS.map(([k]) => `${k} ${by(k)}`).join(", ")}, not needed ${by("Exempt")})`;
   // income summary starts collapsed every session (S is rebuilt on each sign-in); expands only on request
   $("#pyRev").innerHTML = `<button class="revtog${S.payOpen ? " on" : ""}" id="pyRevT" type="button"><span>💰 Income summary</span><span class="small muted">${S.payOpen ? "Hide ▴" : "Show ▾"}</span></button>${S.payOpen ? hirePanel(S.data.learners) : ""}`;
-  $("#pyRevT").onclick = () => { S.payOpen = !S.payOpen; drawPayments(); };
+  if ($("#pyRevT")) $("#pyRevT").onclick = () => { S.payOpen = !S.payOpen; drawPayments(); };
   $("#pychips").innerHTML = chipsHTML("pyc", [["due","Awaiting payment",due.length],["paid","Paid or exempt",paid.length]], S.f.py);
   $$("#pyc .chip").forEach(b => b.onclick = () => { S.f.py = b.dataset.c; drawPayments(); });
   groupedOut($("#pylist"), S.f.py === "due" ? due : paid, (l, i, prog) => `<div class="lrow ${l.paid ? "present" : "expected"}">${posTag(i, prog)}${lInfo(l,
