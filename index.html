@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-SshgywBjvQaSyCV9uN/zn85I7QEDG3fNUfWGrUJYsLU=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-MVVjcPWz9l2bECu+wT5NPsB0MfcHTdOhFw3oBeq2wag=' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://jrbihuegqydoqnsxxvma.supabase.co wss://jrbihuegqydoqnsxxvma.supabase.co https://psychic-saint.github.io; frame-src 'self' blob: data: about:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="author" content="Eddie Bila">
@@ -588,7 +588,7 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s||"").replace(/\s+/g,"-");
 const params = new URLSearchParams(location.search);
-const BUILD = "202611260900";
+const BUILD = "202611261000";
 /* Self-update: if a newer version is published, reload it (stops the desktop app or a browser showing a cached copy). */
 (function checkLatest(){
   if (location.protocol !== "https:") return;
@@ -3371,7 +3371,7 @@ async function viewUsers(){
   if (!can("users")) return;
   if (!$("#usView")){
     ($("#setBody") || main).innerHTML = `<div id="bn"></div><div class="grid g2" id="usView">
-      <div class="card"><h2>Add a team member</h2><p class="small muted" style="margin-top:-4px">Only @camblish.co.za addresses. A temporary password is created and the person must choose their own password when they first sign in.</p>
+      <div class="card"><h2>Add a team member</h2><p class="small muted" style="margin-top:-4px">Only @camblish.co.za and @camblishcollege.co.za addresses. A temporary password is created and the person must choose their own password when they first sign in.</p>
         <label class="lbl">Full name</label><input type="text" id="un">
         <label class="lbl">Camblish email</label><input type="text" id="ue" placeholder="name@camblish.co.za">
         <label class="lbl">Role</label><select id="ur"><option value="team">Team member</option><option value="spectator">Spectator (view only)</option><option value="manager">Manager</option>${S.user.role==="admin"?`<option value="admin">Administrator (full access)</option>`:""}</select>
@@ -3386,7 +3386,7 @@ async function viewUsers(){
     $("#ur").onchange = drawPw; drawPw();
     $("#uadd").onclick = async () => {
       const em = $("#ue").value.trim();
-      if (!/@camblish\.co\.za$/i.test(em)) return $("#uout").innerHTML = `<div class="err">Only @camblish.co.za email addresses can be added.</div>`;
+      if (!/@(camblish|camblishcollege)\.co\.za$/i.test(em)) return $("#uout").innerHTML = `<div class="err">Only @camblish.co.za or @camblishcollege.co.za email addresses can be added.</div>`;
       $("#uadd").disabled = true;
       try { const r = await rpc("hub_user_create", {p_token:S.pin, p_email:em, p_name:$("#un").value.trim(), p_role:$("#ur").value, p_perms: $("#upg") ? pickedPerms($("#upg")) : []});
         $("#un").value = ""; $("#ue").value = ""; $("#un").focus(); credCard($("#uout"), r, true); drawUsers(); autoMail(r, true); }
